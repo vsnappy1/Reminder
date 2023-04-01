@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Reminder</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="new_reminder">New Reminder</string>
+    <string name="details">Details</string>
+    <string name="all_tasks">All Tasks</string>
+    <string name="search">Search</string>
+    <string name="time_format">hh:mm a</string>
+    <string name="title">Title</string>
+    <string name="notes">Notes</string>
+    <string name="calender">Calender</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="repeat">Repeat</string>
+    <string name="hourly">Hourly</string>
+    <string name="daily">Daily</string>
+    <string name="weekly">Weekly</string>
+    <string name="monthly">Monthly</string>
+    <string name="yearly">Yearly</string>
+
+</resources>
