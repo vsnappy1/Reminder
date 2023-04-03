@@ -14,14 +14,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.randos.reminder.model.Task
+import com.randos.reminder.data.entity.Task
 import com.randos.reminder.ui.theme.*
 import com.randos.reminder.R
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+private const val TAG = "ReminderListScreen"
+
 @Composable
-fun ToDoListScreen(tasks: List<Task>) {
+fun ReminderListScreen(
+    tasks: List<Task> = listOf(),
+    onAddTaskClick: () -> Unit = {}
+) {
     Box {
         Column(
             modifier = Modifier
@@ -47,7 +52,7 @@ fun ToDoListScreen(tasks: List<Task>) {
             }
         }
         FloatingActionButton(
-            onClick = { /*TODO*/ },
+            onClick = onAddTaskClick,
             modifier = Modifier
                 .padding(large)
                 .size(50.dp)
@@ -146,12 +151,12 @@ fun TaskCard(task: Task) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
-    ToDoListScreen(
+    ReminderListScreen(
         listOf(
-            Task("Title", "Description", time = LocalTime.now()),
-            Task("Title", "Description"),
-            Task("Title", "Description", time = LocalTime.now()),
-            Task("Title", "Description", time = LocalTime.now())
+            Task(title = "Title", notes = "Notes", time = LocalTime.now()),
+            Task(title = "Title", notes = "Notes", time = LocalTime.now()),
+            Task(title = "Title", notes = "Notes"),
+            Task(title = "Title", notes = "Notes", time = LocalTime.now()),
         )
     )
 }
