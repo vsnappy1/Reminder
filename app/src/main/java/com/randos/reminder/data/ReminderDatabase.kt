@@ -4,10 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.randos.reminder.data.dao.TaskDao
+import com.randos.reminder.data.entity.Converters
 import com.randos.reminder.data.entity.Task
 
 @Database(entities = [Task::class], version = 1, exportSchema = false)
+@TypeConverters(Converters::class)
 abstract class ReminderDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
 
@@ -15,12 +18,16 @@ abstract class ReminderDatabase : RoomDatabase() {
         @Volatile
         private var instance: ReminderDatabase? = null
         fun getDatabase(context: Context): ReminderDatabase {
-            return instance ?: synchronized(this) {
-                Room.databaseBuilder(
-                    context,
-                    ReminderDatabase::class.java, "task_database"
-                ).build().also { instance = it }
-            }
+            return Room.databaseBuilder(
+                context,
+                ReminderDatabase::class.java, "task_database"
+            ).build()
+//            return instance ?: synchronized(this) {
+//                Room.databaseBuilder(
+//                    context,
+//                    ReminderDatabase::class.java, "task_database"
+//                ).build().also { instance = it }
+//            }
         }
     }
 }

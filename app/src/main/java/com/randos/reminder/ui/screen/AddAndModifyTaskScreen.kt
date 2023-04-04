@@ -2,7 +2,7 @@ package com.randos.reminder.ui.screen
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.util.Log
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,8 +24,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.randos.reminder.R
 import com.randos.reminder.data.entity.TaskUiState
 import com.randos.reminder.enums.Priority
+import com.randos.reminder.enums.RepeatCycle
 import com.randos.reminder.ui.theme.*
 import com.randos.reminder.ui.viewmodel.AddAndModifyTaskViewModel
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 private const val TAG = "AddAndModifyTaskScreen"
@@ -41,12 +45,13 @@ fun AddAndModifyTaskScreen(
         modifier = Modifier
             .background(white)
             .padding(medium)
+            .fillMaxSize()
     ) {
         Column {
             val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
             Header(onAdd, onSave, onCancel, uiState)
             InputTitleAndNotesCard(uiState) { viewModel.updateUiState(it) }
-            DetailsCard(uiState, {  })
+            DetailsCard(uiState) { viewModel.updateUiState(it) }
         }
     }
 }
@@ -60,9 +65,10 @@ private fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             TransparentBackgroundTextField(
-                uiState.title,
-                { onUpdate(uiState.copy(title = it)) },
-                R.string.title
+                value = uiState.title,
+                onValueChange = { onUpdate(uiState.copy(title = it)) },
+                placeHolderId = R.string.title,
+                isSingleLine = true
             )
             Divider(
                 thickness = 1.dp,
@@ -70,10 +76,10 @@ private fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState)
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
             TransparentBackgroundTextField(
-                uiState.notes,
-                { onUpdate(uiState.copy(notes = it)) },
-                R.string.notes,
-                Modifier.height(100.dp)
+                value = uiState.notes,
+                onValueChange = { onUpdate(uiState.copy(notes = it)) },
+                placeHolderId = R.string.notes,
+                modifier = Modifier.height(100.dp)
             )
         }
     }
@@ -81,10 +87,11 @@ private fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState)
 
 @Composable
 private fun TransparentBackgroundTextField(
+    modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
     placeHolderId: Int,
-    modifier: Modifier = Modifier
+    isSingleLine: Boolean = false
 ) {
     TextField(
         value = value,
@@ -97,12 +104,16 @@ private fun TransparentBackgroundTextField(
             backgroundColor = transparent,
             unfocusedIndicatorColor = transparent,
             focusedIndicatorColor = transparent
-        )
+        ),
+        singleLine = isSingleLine
     )
 }
 
 @Composable
-private fun DetailsCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit) {
+private fun DetailsCard(
+    uiState: TaskUiState,
+    onUpdate: (TaskUiState) -> Unit
+) {
     Card(
         elevation = 0.dp,
         backgroundColor = grey,
@@ -115,63 +126,170 @@ private fun DetailsCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit) {
                 text = stringResource(id = R.string.details),
                 style = Typography.body2
             )
-            DetailSwitch(
-                icon = Icons.Filled.CalendarMonth,
-                iconDescriptionId = R.string.date,
-                titleId = R.string.date,
-                checked = uiState.isDateChecked,
-                onCheckedChange = {
-                    Log.d(TAG, "DetailsCard: $it")
-                    onUpdate(uiState.copy(isDateChecked = it))
-                }
-            )
-            Divider(
-                thickness = 1.dp,
-                color = green,
-                modifier = Modifier.padding(horizontal = medium)
-            )
-            DetailSwitch(
-                icon = Icons.Filled.AccessTime,
-                iconDescriptionId = R.string.time,
-                titleId = R.string.time
-            )
-            Divider(
-                thickness = 1.dp,
-                color = green,
-                modifier = Modifier.padding(horizontal = medium)
-            )
-            DetailSwitch(
-                icon = Icons.Filled.Repeat,
-                iconDescriptionId = R.string.repeat,
-                titleId = R.string.repeat
-            )
-            if (false) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = small)
-                ) {
-                    RepeatCard(titleId = R.string.hourly, onClick = {})
-                    RepeatCard(titleId = R.string.daily, onClick = {}, selected = true)
-                    RepeatCard(titleId = R.string.weekly, onClick = {})
-                    RepeatCard(titleId = R.string.monthly, onClick = {})
-                    RepeatCard(titleId = R.string.yearly, onClick = {})
-                }
+            DateComponent(uiState, onUpdate)
+            Divider()
+            TimeComponent(uiState, onUpdate)
+            Divider()
+            RepeatComponent(uiState, onUpdate)
+            Divider()
+            PriorityComponent(uiState, onUpdate)
+        }
+    }
+}
+
+@Composable
+private fun PriorityComponent(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit) {
+    DetailDropdown(
+        icon = Icons.Filled.PriorityHigh,
+        iconDescriptionId = R.string.priority,
+        titleId = R.string.priority,
+        priority = uiState.priority,
+        onSelect = { onUpdate(uiState.copy(priority = it)) }
+    )
+}
+
+@Composable
+private fun DateComponent(
+    uiState: TaskUiState,
+    onUpdate: (TaskUiState) -> Unit,
+) {
+    val context = LocalContext.current
+    DetailSwitch(
+        icon = Icons.Filled.CalendarMonth,
+        iconDescriptionId = R.string.date,
+        titleId = R.string.date,
+        checked = uiState.isDateChecked,
+        onCheckedChange = {
+            if (it) {
+                showDatePicker(
+                    onDateSetListener = { year, month, day ->
+                        onUpdate(
+                            uiState.copy(
+                                date = LocalDate.of(year, month, day),
+                                isDateChecked = true
+                            )
+                        )
+                    },
+                    context = context
+                )
+            } else {
+                onUpdate(uiState.copy(date = null, isDateChecked = false))
             }
 
-            Divider(
-                thickness = 1.dp,
-                color = green,
-                modifier = Modifier.padding(horizontal = medium)
+        },
+        detail = uiState.date?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: ""
+    )
+}
+
+@Composable
+private fun TimeComponent(
+    uiState: TaskUiState,
+    onUpdate: (TaskUiState) -> Unit,
+) {
+    val context = LocalContext.current
+    DetailSwitch(
+        icon = Icons.Filled.AccessTime,
+        iconDescriptionId = R.string.time,
+        titleId = R.string.time,
+        checked = uiState.isTimeChecked,
+        onCheckedChange = {
+            if (it) {
+                showTimePicker(
+                    onTimeSetListener = { hour, minute, is24 ->
+                        onUpdate(
+                            uiState.copy(
+                                time = LocalTime.of(
+                                    (hour + if (is24) 12 else 0) % 24,
+                                    minute
+                                ),
+                                isTimeChecked = true
+                            )
+                        )
+                    },
+                    context = context
+                )
+            } else {
+                onUpdate(uiState.copy(time = null, isTimeChecked = false))
+            }
+        },
+        detail = uiState.time?.format(DateTimeFormatter.ISO_LOCAL_TIME) ?: ""
+    )
+}
+
+@Composable
+private fun RepeatComponent(
+    uiState: TaskUiState,
+    onUpdate: (TaskUiState) -> Unit
+) {
+    DetailSwitchRepeat(
+        icon = Icons.Filled.Repeat,
+        iconDescriptionId = R.string.repeat,
+        titleId = R.string.repeat,
+        checked = uiState.isRepeatChecked,
+        onCheckedChange = {
+            onUpdate(
+                uiState.copy(
+                    isRepeatChecked = it,
+                    repeat = if (it) uiState.repeat else RepeatCycle.NO_REPEAT
+                )
             )
-            DetailDropdown(
-                icon = Icons.Filled.PriorityHigh,
-                iconDescriptionId = R.string.priority,
-                titleId = R.string.priority
+        }
+    )
+    if (uiState.isRepeatChecked) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = small)
+        ) {
+            RepeatCard(
+                titleId = R.string.hourly,
+                onClick = {
+                    onUpdate(uiState.copy(repeat = RepeatCycle.HOURLY))
+                },
+                selected = uiState.repeat == RepeatCycle.HOURLY
+            )
+            RepeatCard(
+                titleId = R.string.daily,
+                onClick = {
+                    onUpdate(uiState.copy(repeat = RepeatCycle.DAILY))
+                },
+                selected = uiState.repeat == RepeatCycle.DAILY
+            )
+            RepeatCard(
+                titleId = R.string.weekly,
+                onClick = {
+                    onUpdate(uiState.copy(repeat = RepeatCycle.WEEKLY))
+                },
+                selected = uiState.repeat == RepeatCycle.WEEKLY
+            )
+            RepeatCard(
+                titleId = R.string.monthly,
+                onClick = {
+                    onUpdate(uiState.copy(repeat = RepeatCycle.MONTHLY))
+                },
+                selected = uiState.repeat == RepeatCycle.MONTHLY
+            )
+            RepeatCard(
+                titleId = R.string.yearly,
+                onClick = {
+                    onUpdate(uiState.copy(repeat = RepeatCycle.YEARLY))
+                },
+                selected = uiState.repeat == RepeatCycle.YEARLY
             )
         }
     }
+}
+
+@Composable
+private fun Divider() {
+    Divider(
+        thickness = 1.dp,
+        color = green,
+        modifier = Modifier
+            .padding(horizontal = medium)
+            .padding(vertical = small)
+    )
 }
 
 @Composable
@@ -230,9 +348,10 @@ private fun RepeatCard(titleId: Int, onClick: () -> Unit, selected: Boolean = fa
     }
 }
 
-@Composable
-fun ShowDatePicker(onDateSetListener: (Int, Int, Int) -> Unit) {
-    val context = LocalContext.current
+fun showDatePicker(
+    onDateSetListener: (Int, Int, Int) -> Unit,
+    context: Context
+) {
     val calender = Calendar.getInstance()
 
     val presentYear = calender.get(Calendar.YEAR)
@@ -255,9 +374,7 @@ fun ShowDatePicker(onDateSetListener: (Int, Int, Int) -> Unit) {
     datePicker.show()
 }
 
-@Composable
-fun ShowTimePicker(onTimeSetListener: (Int, Int, Boolean) -> Unit) {
-    val context = LocalContext.current
+fun showTimePicker(onTimeSetListener: (Int, Int, Boolean) -> Unit, context: Context) {
     val calendar = Calendar.getInstance()
 
     val presentHour = calendar.get(Calendar.HOUR_OF_DAY)
@@ -286,7 +403,8 @@ private fun DetailSwitch(
     iconDescriptionId: Int,
     titleId: Int,
     checked: Boolean = false,
-    onCheckedChange: (Boolean) -> Unit = {}
+    onCheckedChange: (Boolean) -> Unit = {},
+    detail: String
 ) {
     Box(
         modifier = Modifier
@@ -311,7 +429,7 @@ private fun DetailSwitch(
             )
             if (checked) {
                 Text(
-                    text = "date",
+                    text = detail,
                     style = Typography.caption,
                     color = fontColorGrey
                 )
@@ -327,11 +445,51 @@ private fun DetailSwitch(
 }
 
 @Composable
+private fun DetailSwitchRepeat(
+    icon: ImageVector,
+    iconDescriptionId: Int,
+    titleId: Int,
+    checked: Boolean = false,
+    onCheckedChange: (Boolean) -> Unit = {}
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(35.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = stringResource(id = iconDescriptionId),
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .size(20.dp)
+        )
+        Column(
+            modifier = Modifier
+                .padding(start = 28.dp)
+                .align(Alignment.CenterStart)
+        ) {
+            Text(
+                text = stringResource(id = titleId),
+                style = Typography.body2
+            )
+        }
+        Switch(
+            checked = checked, onCheckedChange = onCheckedChange,
+            modifier = Modifier
+                .padding(0.dp)
+                .align(Alignment.CenterEnd),
+        )
+    }
+}
+
+@Composable
 private fun DetailDropdown(
     icon: ImageVector,
     iconDescriptionId: Int,
     titleId: Int,
-    onSelect: (Priority) -> Unit = {}
+    onSelect: (Priority) -> Unit = {},
+    priority: Priority
 ) {
     Box(
         modifier = Modifier
@@ -356,27 +514,36 @@ private fun DetailDropdown(
             )
         }
         var expanded by remember { mutableStateOf(false) }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.clickable { expanded = true }) {
-            PriorityDropdownMenuItem({
-                expanded = false
-                onSelect(Priority.NONE)
-            }, Priority.NONE.value)
-            PriorityDropdownMenuItem({
-                expanded = false
-                onSelect(Priority.LOW)
-            }, Priority.LOW.value)
-            PriorityDropdownMenuItem({
-                expanded = false
-                onSelect(Priority.MEDIUM)
-            }, Priority.MEDIUM.value)
-            PriorityDropdownMenuItem({
-                expanded = false
-                onSelect(Priority.HIGH)
-            }, Priority.HIGH.value)
+        onSelect(priority)
+        Box(
+            modifier = Modifier
+                .padding(end = medium)
+                .align(Alignment.CenterEnd)
+        ) {
+            Text(text = priority.value, modifier = Modifier.clickable { expanded = true })
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.clickable { expanded = true }) {
+                PriorityDropdownMenuItem({
+                    expanded = false
+                    onSelect(Priority.NONE)
+                }, Priority.NONE.value)
+                PriorityDropdownMenuItem({
+                    expanded = false
+                    onSelect(Priority.LOW)
+                }, Priority.LOW.value)
+                PriorityDropdownMenuItem({
+                    expanded = false
+                    onSelect(Priority.MEDIUM)
+                }, Priority.MEDIUM.value)
+                PriorityDropdownMenuItem({
+                    expanded = false
+                    onSelect(Priority.HIGH)
+                }, Priority.HIGH.value)
+            }
         }
+
     }
 }
 
@@ -390,6 +557,5 @@ private fun PriorityDropdownMenuItem(onClick: () -> Unit, value: String) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun DefaultAddTask() {
-
     AddAndModifyTaskScreen(viewModel = viewModel())
 }

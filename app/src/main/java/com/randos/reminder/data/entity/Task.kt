@@ -2,6 +2,7 @@ package com.randos.reminder.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.TypeConverter
 import com.randos.reminder.enums.Priority
 import com.randos.reminder.enums.RepeatCycle
 import java.time.LocalDate
@@ -19,6 +20,28 @@ data class Task(
     val priority: Priority = Priority.NONE,
     val done: Boolean = false
 )
+
+class Converters {
+    @TypeConverter
+    fun localDateToEpochDay(localDate: LocalDate): Long {
+        return localDate.toEpochDay()
+    }
+
+    @TypeConverter
+    fun epochDayToLocalDate(epochDay: Long): LocalDate {
+        return LocalDate.ofEpochDay(epochDay)
+    }
+
+    @TypeConverter
+    fun localTimeToNanoOfDay(localTime: LocalTime): Long {
+        return localTime.toNanoOfDay()
+    }
+
+    @TypeConverter
+    fun nanoOfDayToLocalTime(nanoOfDay: Long): LocalTime {
+        return LocalTime.ofNanoOfDay(nanoOfDay)
+    }
+}
 
 data class TaskUiState(
     val id: Long = 0,
