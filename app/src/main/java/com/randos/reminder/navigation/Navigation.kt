@@ -31,6 +31,8 @@ fun NavGraph(
         composable(route = ReminderScreen.ADD_AND_MODIFY_TASK_SCREEN.name) {
             AddAndModifyTaskScreen(
                 onCancel = { navController.popBackStack() },
+                onAdd = { navController.popBackStack() },
+                onSave = { navController.popBackStack() },
                 viewModel = addAndModifyTaskViewModel
             )
         }

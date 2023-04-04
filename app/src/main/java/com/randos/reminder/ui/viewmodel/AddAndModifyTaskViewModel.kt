@@ -26,7 +26,7 @@ class AddAndModifyTaskViewModel @Inject constructor(
         }
     }
 
-    fun updateTask(task: Task) {
+    fun updateTask() {
         viewModelScope.launch {
             uiState.value?.toTask()?.apply {
                 taskRepository.updateTask(this)

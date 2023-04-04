@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.randos.reminder.R
 import com.randos.reminder.data.entity.TaskUiState
+import com.randos.reminder.data.entity.isValid
 import com.randos.reminder.enums.Priority
 import com.randos.reminder.enums.RepeatCycle
 import com.randos.reminder.ui.theme.*
@@ -32,7 +33,6 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-private const val TAG = "AddAndModifyTaskScreen"
 
 @Composable
 fun AddAndModifyTaskScreen(
@@ -49,7 +49,7 @@ fun AddAndModifyTaskScreen(
     ) {
         Column {
             val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
-            Header(onAdd, onSave, onCancel, uiState)
+            Header(onAdd, onSave, onCancel, uiState, viewModel)
             InputTitleAndNotesCard(uiState) { viewModel.updateUiState(it) }
             DetailsCard(uiState) { viewModel.updateUiState(it) }
         }
@@ -297,7 +297,8 @@ private fun Header(
     onAdd: () -> Unit = {},
     onSave: () -> Unit = {},
     onCancel: () -> Unit = {},
-    viewModel: TaskUiState
+    uiState: TaskUiState,
+    viewModel: AddAndModifyTaskViewModel
 ) {
     Box(
         Modifier
@@ -312,17 +313,28 @@ private fun Header(
             style = Typography.body1,
             color = fontColorBlack
         )
+        val isNewTask = uiState.id == 0L
         Text(
-            text = stringResource(id = R.string.new_reminder),
+            text = stringResource(id = if (isNewTask) R.string.new_reminder else R.string.details),
             modifier = Modifier.align(Alignment.Center),
             style = Typography.body1,
             color = fontColorBlack
         )
         Text(
-            text = stringResource(id = R.string.add),
+            text = stringResource(
+                id = if (isNewTask) R.string.add else R.string.save
+            ),
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .clickable { onAdd() },
+                .clickable(enabled = uiState.isValid()) {
+                    if(isNewTask){
+                        viewModel.addTask()
+                        onAdd()
+                    }else{
+                        viewModel.updateTask()
+                        onSave()
+                    }
+                },
             style = Typography.body1,
             color = fontColorBlack
         )
