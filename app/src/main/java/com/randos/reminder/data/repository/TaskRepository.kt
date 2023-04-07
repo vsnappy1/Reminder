@@ -16,6 +16,8 @@ interface TaskRepository {
 
     fun getTasks(): Flow<List<Task>>
 
+    fun getTodayAndDueTasks(date: LocalDate): Flow<List<Task>>
+
     fun getTasksOn(date: LocalDate): Flow<List<Task>>
 
     fun getTasksBetween(start: LocalDate, end: LocalDate): Flow<List<Task>>

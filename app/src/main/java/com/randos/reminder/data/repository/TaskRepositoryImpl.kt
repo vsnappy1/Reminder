@@ -20,6 +20,7 @@ class TaskRepositoryImpl @Inject constructor(private val taskDao: TaskDao) : Tas
     override fun getTask(id: Long): Flow<Task> = taskDao.getTask(id)
 
     override fun getTasks(): Flow<List<Task>> = taskDao.getTasks(done = false)
+    override fun getTodayAndDueTasks(date: LocalDate): Flow<List<Task>> = taskDao.getTodayAndDueTasks(date)
 
     override fun getTasksOn(date: LocalDate): Flow<List<Task>> =
         taskDao.getTasks(date, false)

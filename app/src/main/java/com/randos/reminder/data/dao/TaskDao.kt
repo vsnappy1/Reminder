@@ -26,6 +26,9 @@ interface TaskDao {
     @Query("SELECT * FROM task WHERE done = :done")
     fun getTasks(done: Boolean): Flow<List<Task>>
 
+    @Query("SELECT * FROM task WHERE date <= :date AND done = false")
+    fun getTodayAndDueTasks(date: LocalDate): Flow<List<Task>>
+
     @Query("SELECT * FROM task WHERE date = :date AND done = :done")
     fun getTasks(date: LocalDate, done: Boolean): Flow<List<Task>>
 
