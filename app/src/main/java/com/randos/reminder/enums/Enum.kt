@@ -13,6 +13,12 @@ enum class Priority(val value: String) {
     NONE("None"), LOW("Low"), MEDIUM("Medium"), HIGH("High");
 }
 
-enum class ReminderScreen{
-    REMINDER_LIST, ADD_AND_MODIFY_TASK_SCREEN
+enum class ReminderScreen {
+    ADD_TASK_SCREEN,
+    EDIT_TASK_SCREEN,
+    TODAY_TASK_SCREEN,
+    SCHEDULED_TASK_SCREEN,
+    COMPLETED_TASK_SCREEN,
+    ALL_TASK_SCREEN,
+    HOME_SCREEN
 }

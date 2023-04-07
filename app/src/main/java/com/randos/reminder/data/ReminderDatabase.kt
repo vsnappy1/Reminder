@@ -18,16 +18,12 @@ abstract class ReminderDatabase : RoomDatabase() {
         @Volatile
         private var instance: ReminderDatabase? = null
         fun getDatabase(context: Context): ReminderDatabase {
-            return Room.databaseBuilder(
-                context,
-                ReminderDatabase::class.java, "task_database"
-            ).build()
-//            return instance ?: synchronized(this) {
-//                Room.databaseBuilder(
-//                    context,
-//                    ReminderDatabase::class.java, "task_database"
-//                ).build().also { instance = it }
-//            }
+            return instance ?: synchronized(this) {
+                Room.databaseBuilder(
+                    context,
+                    ReminderDatabase::class.java, "task_database"
+                ).build().also { instance = it }
+            }
         }
     }
 }

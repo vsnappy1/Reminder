@@ -9,55 +9,91 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.PriorityHigh
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.randos.reminder.R
-import com.randos.reminder.data.entity.TaskUiState
-import com.randos.reminder.data.entity.isValid
 import com.randos.reminder.enums.Priority
+import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.enums.RepeatCycle
+import com.randos.reminder.navigation.NavigationDestination
+import com.randos.reminder.ui.component.ReminderDefaultText
+import com.randos.reminder.ui.component.TransparentBackgroundTextField
 import com.randos.reminder.ui.theme.*
-import com.randos.reminder.ui.viewmodel.AddAndModifyTaskViewModel
+import com.randos.reminder.ui.uiState.TaskUiState
+import com.randos.reminder.ui.uiState.isValid
+import com.randos.reminder.ui.viewmodel.AddTaskViewModel
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
+object TaskAddDestination: NavigationDestination{
+    override val route: String = ReminderScreen.ADD_TASK_SCREEN.name
+    override val titleRes: Int = R.string.new_reminder
+}
 
 @Composable
-fun AddAndModifyTaskScreen(
+fun AddTaskScreen(
     onAdd: () -> Unit = {},
-    onSave: () -> Unit = {},
     onCancel: () -> Unit = {},
-    viewModel: AddAndModifyTaskViewModel
+    viewModel: AddTaskViewModel = hiltViewModel()
 ) {
-    Box(
+    val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
+    Column(
         modifier = Modifier
             .background(white)
             .padding(medium)
             .fillMaxSize()
     ) {
-        Column {
-            val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
-            Header(onAdd, onSave, onCancel, uiState, viewModel)
-            InputTitleAndNotesCard(uiState) { viewModel.updateUiState(it) }
-            DetailsCard(uiState) { viewModel.updateUiState(it) }
+        Header(
+            uiState = uiState,
+            headerResourceId = R.string.new_reminder,
+            saveButtonTextResourceId = R.string.add,
+            onCancel = onCancel
+        ) {
+            viewModel.addTask()
+            onAdd()
         }
+        InputTitleAndNotesCard(uiState = uiState) { viewModel.updateUiState(it) }
+        DetailsCard(uiState = uiState) { viewModel.updateUiState(it) }
     }
 }
 
+private fun updateUi(
+    taskUiState: TaskUiState,
+    onUpdate: (TaskUiState) -> Unit
+) {
+    onUpdate(
+        TaskUiState(
+            id = taskUiState.id,
+            title = taskUiState.title,
+            notes = taskUiState.notes,
+            isDateChecked = taskUiState.isDateChecked,
+            date = taskUiState.date,
+            isTimeChecked = taskUiState.isTimeChecked,
+            time = taskUiState.time,
+            isRepeatChecked = taskUiState.isRepeatChecked,
+            repeat = taskUiState.repeat,
+            priority = taskUiState.priority,
+            done = taskUiState.done
+        )
+    )
+}
+
 @Composable
-private fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit) {
+fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit) {
     Card(
         elevation = 0.dp,
         backgroundColor = grey,
@@ -66,7 +102,9 @@ private fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState)
         Column(modifier = Modifier.fillMaxWidth()) {
             TransparentBackgroundTextField(
                 value = uiState.title,
-                onValueChange = { onUpdate(uiState.copy(title = it)) },
+                onValueChange = {
+                    onUpdate(uiState.copy(title = it))
+                },
                 placeHolderId = R.string.title,
                 isSingleLine = true
             )
@@ -76,7 +114,7 @@ private fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState)
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
             TransparentBackgroundTextField(
-                value = uiState.notes,
+                value = uiState.notes ?: "",
                 onValueChange = { onUpdate(uiState.copy(notes = it)) },
                 placeHolderId = R.string.notes,
                 modifier = Modifier.height(100.dp)
@@ -86,31 +124,7 @@ private fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState)
 }
 
 @Composable
-private fun TransparentBackgroundTextField(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeHolderId: Int,
-    isSingleLine: Boolean = false
-) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier
-            .fillMaxWidth()
-            .shadow(elevation = 0.dp),
-        placeholder = { Text(text = stringResource(id = placeHolderId)) },
-        colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = transparent,
-            unfocusedIndicatorColor = transparent,
-            focusedIndicatorColor = transparent
-        ),
-        singleLine = isSingleLine
-    )
-}
-
-@Composable
-private fun DetailsCard(
+fun DetailsCard(
     uiState: TaskUiState,
     onUpdate: (TaskUiState) -> Unit
 ) {
@@ -165,7 +179,7 @@ private fun DateComponent(
                     onDateSetListener = { year, month, day ->
                         onUpdate(
                             uiState.copy(
-                                date = LocalDate.of(year, month, day),
+                                date = LocalDate.of(year, month + 1, day),
                                 isDateChecked = true
                             )
                         )
@@ -293,50 +307,33 @@ private fun Divider() {
 }
 
 @Composable
-private fun Header(
-    onAdd: () -> Unit = {},
-    onSave: () -> Unit = {},
-    onCancel: () -> Unit = {},
+fun Header(
     uiState: TaskUiState,
-    viewModel: AddAndModifyTaskViewModel
+    headerResourceId: Int,
+    saveButtonTextResourceId: Int,
+    onCancel: () -> Unit = {},
+    onSave: () -> Unit = {},
 ) {
     Box(
         Modifier
             .fillMaxWidth()
             .padding(bottom = medium)
     ) {
-        Text(
-            text = stringResource(id = R.string.cancel),
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .clickable { onCancel() },
-            style = Typography.body1,
-            color = fontColorBlack
+        ReminderDefaultText(
+            textResourceId = R.string.cancel,
+            modifier = Modifier.align(Alignment.CenterStart),
+            onClick = { onCancel() })
+
+        ReminderDefaultText(
+            textResourceId = headerResourceId,
+            modifier = Modifier.align(Alignment.Center)
         )
-        val isNewTask = uiState.id == 0L
-        Text(
-            text = stringResource(id = if (isNewTask) R.string.new_reminder else R.string.details),
-            modifier = Modifier.align(Alignment.Center),
-            style = Typography.body1,
-            color = fontColorBlack
-        )
-        Text(
-            text = stringResource(
-                id = if (isNewTask) R.string.add else R.string.save
-            ),
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .clickable(enabled = uiState.isValid()) {
-                    if(isNewTask){
-                        viewModel.addTask()
-                        onAdd()
-                    }else{
-                        viewModel.updateTask()
-                        onSave()
-                    }
-                },
-            style = Typography.body1,
-            color = fontColorBlack
+
+        ReminderDefaultText(
+            textResourceId = saveButtonTextResourceId,
+            modifier = Modifier.align(Alignment.CenterEnd),
+            enabled = uiState.isValid(),
+            onClick = { onSave() },
         )
     }
 }
@@ -389,9 +386,10 @@ fun showDatePicker(
 fun showTimePicker(onTimeSetListener: (Int, Int, Boolean) -> Unit, context: Context) {
     val calendar = Calendar.getInstance()
 
-    val presentHour = calendar.get(Calendar.HOUR_OF_DAY)
-    val presentMinute = calendar.get(Calendar.MINUTE)
+    var presentHour = calendar.get(Calendar.HOUR_OF_DAY)
+    val presentMinute = 0
     val is24HourFormat = android.text.format.DateFormat.is24HourFormat(context)
+    presentHour = (presentHour + 1) % if (is24HourFormat) 24 else 12
 
     val timePicker = TimePickerDialog(
         context,
@@ -526,7 +524,6 @@ private fun DetailDropdown(
             )
         }
         var expanded by remember { mutableStateOf(false) }
-        onSelect(priority)
         Box(
             modifier = Modifier
                 .padding(end = medium)
@@ -569,5 +566,5 @@ private fun PriorityDropdownMenuItem(onClick: () -> Unit, value: String) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun DefaultAddTask() {
-    AddAndModifyTaskScreen(viewModel = viewModel())
+    AddTaskScreen()
 }

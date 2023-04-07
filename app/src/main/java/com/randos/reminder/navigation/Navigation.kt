@@ -1,39 +1,74 @@
 package com.randos.reminder.navigation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.randos.reminder.enums.ReminderScreen
-import com.randos.reminder.ui.screen.AddAndModifyTaskScreen
-import com.randos.reminder.ui.screen.ReminderListScreen
-import com.randos.reminder.ui.viewmodel.AddAndModifyTaskViewModel
-
-private const val TAG = "Navigation"
+import androidx.navigation.navArgument
+import com.randos.reminder.ui.screen.*
+import com.randos.reminder.utils.toJson
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    addAndModifyTaskViewModel: AddAndModifyTaskViewModel
 ) {
     NavHost(
         navController = navController,
-        startDestination = ReminderScreen.REMINDER_LIST.name
+        startDestination = HomeDestination.route
     ) {
-        composable(route = ReminderScreen.REMINDER_LIST.name) {
-            ReminderListScreen(
-                tasks = listOf(),
-                onAddTaskClick = {
-                    navController.navigate(ReminderScreen.ADD_AND_MODIFY_TASK_SCREEN.name)
-                })
+
+        composable(route = HomeDestination.route) {
+            HomeScreen(
+                onTodayClick = { navController.navigate(TaskTodayDestination.route) },
+                onAllClick = { navController.navigate(TaskAllDestination.route) },
+                onCompletedClick = { navController.navigate(TaskCompletedDestination.route) },
+                onScheduledClick = { navController.navigate(TaskScheduledDestination.route) }
+            )
         }
-        composable(route = ReminderScreen.ADD_AND_MODIFY_TASK_SCREEN.name) {
-            AddAndModifyTaskScreen(
-                onCancel = { navController.popBackStack() },
+
+        composable(route = TaskTodayDestination.route) {
+            TodayTaskScreen(
+                onAddTaskClick = { navController.navigate(TaskAddDestination.route) },
+                onItemClick = { navController.navigate("${TaskEditDestination.route}/${it}") }
+            )
+        }
+        composable(route = TaskAllDestination.route) {
+            AllTaskScreen(
+                onAddTaskClick = { navController.navigate(TaskAddDestination.route) },
+                onItemClick = { navController.navigate("${TaskEditDestination.route}/${it}") }
+            )
+        }
+
+        composable(route = TaskCompletedDestination.route) {
+            CompletedTaskScreen(
+                onItemClick = { navController.navigate("${TaskEditDestination.route}/${it}") }
+            )
+        }
+
+
+        composable(route = TaskScheduledDestination.route) {
+            ScheduledTaskScreen(
+                onAddTaskClick = { navController.navigate(TaskAddDestination.route) },
+                onItemClick = { navController.navigate("${TaskEditDestination.route}/${it}") })
+        }
+
+        composable(route = TaskAddDestination.route) {
+            AddTaskScreen(
                 onAdd = { navController.popBackStack() },
+                onCancel = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = TaskEditDestination.routeWithArgs,
+            arguments = listOf(navArgument(TaskEditDestination.taskIdArg) {
+                type = NavType.LongType
+            })
+        ) {
+            EditTaskScreen(
                 onSave = { navController.popBackStack() },
-                viewModel = addAndModifyTaskViewModel
+                onCancel = { navController.popBackStack() },
             )
         }
     }

@@ -5,6 +5,8 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 import com.randos.reminder.enums.Priority
 import com.randos.reminder.enums.RepeatCycle
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.ToJson
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -13,7 +15,7 @@ data class Task(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val title: String,
-    val notes: String,
+    val notes: String? = null,
     val date: LocalDate? = null,
     val time: LocalTime? = null,
     val repeat: RepeatCycle = RepeatCycle.NO_REPEAT,
@@ -23,71 +25,46 @@ data class Task(
 
 class Converters {
     @TypeConverter
-    fun localDateToEpochDay(localDate: LocalDate): Long {
-        return localDate.toEpochDay()
+    fun fromTimestamp(value: String?): LocalDate? {
+        return value?.let { LocalDate.parse(it) }
     }
 
     @TypeConverter
-    fun epochDayToLocalDate(epochDay: Long): LocalDate {
-        return LocalDate.ofEpochDay(epochDay)
+    fun toTimestamp(date: LocalDate?): String? {
+        return date?.toString()
     }
 
     @TypeConverter
-    fun localTimeToNanoOfDay(localTime: LocalTime): Long {
-        return localTime.toNanoOfDay()
+    fun localTimeToNanoOfDay(time: LocalTime?): String? {
+        return time?.toString()
     }
 
     @TypeConverter
-    fun nanoOfDayToLocalTime(nanoOfDay: Long): LocalTime {
-        return LocalTime.ofNanoOfDay(nanoOfDay)
+    fun nanoOfDayToLocalTime(value: String?): LocalTime? {
+        return value?.let { LocalTime.parse(it) }
     }
 }
 
-data class TaskUiState(
-    val id: Long = 0,
-    val title: String = "",
-    val notes: String = "",
-    val isDateChecked: Boolean = false,
-    val date: LocalDate? = null,
-    val isTimeChecked: Boolean = false,
-    val time: LocalTime? = null,
-    val isRepeatChecked: Boolean = false,
-    val repeat: RepeatCycle = RepeatCycle.NO_REPEAT,
-    val priority: Priority = Priority.NONE,
-    val done: Boolean = false
-)
+class LocalDateAdapter {
+    @ToJson
+    fun toJson(localDate: LocalDate): String {
+        return localDate.toString()
+    }
 
-fun Task.toTaskUiState(): TaskUiState {
-    return TaskUiState(
-        this.id,
-        this.title,
-        this.notes,
-        this.date != null,
-        this.date,
-        this.time != null,
-        this.time,
-        this.repeat != RepeatCycle.NO_REPEAT,
-        this.repeat,
-        this.priority,
-        this.done
-    )
+    @FromJson
+    fun fromJson(json: String): LocalDate {
+        return LocalDate.parse(json)
+    }
 }
+class LocalTimeAdapter {
+    @ToJson
+    fun toJson(localTime: LocalTime): String {
+        return localTime.toString()
+    }
 
-fun TaskUiState.toTask(): Task {
-    return Task(
-        this.id,
-        this.title,
-        this.notes,
-        this.date,
-        this.time,
-        this.repeat,
-        this.priority,
-        this.done
-    )
+    @FromJson
+    fun fromJson(json: String): LocalTime {
+        return LocalTime.parse(json)
+    }
 }
-
-fun TaskUiState.isValid(): Boolean {
-    return title.isNotBlank()
-}
-
 
