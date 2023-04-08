@@ -18,13 +18,7 @@ data class TaskUiState(
     val isDateChecked: Boolean = date != null,
     val isTimeChecked: Boolean = time != null,
     val isRepeatChecked: Boolean = repeat != RepeatCycle.NO_REPEAT,
-
-    //TODO improve this logic, some time date is passed but time is still not after current time
-    val isDue: Boolean = (!done && date?.isBefore(LocalDate.now()) == true) ||
-            (!done && date?.isBefore(LocalDate.now()) == true) && if (isTimeChecked) time?.isBefore(
-        LocalTime.now()
-    ) == true else true
-
+    val isDue: Boolean = (!done && (date?.isBefore(LocalDate.now()) == true || time?.isBefore(LocalTime.now()) == true))
 )
 
 fun Task.toTaskUiState(): TaskUiState {

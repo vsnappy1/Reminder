@@ -9,11 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.PriorityHigh
-import androidx.compose.material.icons.filled.Repeat
-import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -31,6 +27,7 @@ import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.enums.RepeatCycle
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.ReminderDefaultText
+import com.randos.reminder.ui.component.ReminderDropDown
 import com.randos.reminder.ui.component.TransparentBackgroundTextField
 import com.randos.reminder.ui.theme.*
 import com.randos.reminder.ui.uiState.TaskUiState
@@ -46,10 +43,13 @@ object TaskAddDestination : NavigationDestination {
     override val titleRes: Int = R.string.new_reminder
 }
 
-// TODO modularize this file, it has a lot of code
-// TODO finalize color
-// TODO apply font style to every Text
 // TODO Resolve why next item is selected or deselected when one item is removed form screen
+// TODO beautify and add search functionality in home screen
+// TODO write test cases
+// TODO implement notification
+// TODO get the theme reviewed
+// TODO ask for a QA
+
 @Composable
 fun AddTaskScreen(
     onAdd: () -> Unit = {}, onCancel: () -> Unit = {}, viewModel: AddTaskViewModel = hiltViewModel()
@@ -57,7 +57,7 @@ fun AddTaskScreen(
     val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
     Column(
         modifier = Modifier
-            .background(white)
+            .background(White)
             .padding(medium)
             .fillMaxSize()
     ) {
@@ -80,7 +80,7 @@ fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
     Card(
         shape = Shapes.small,
         elevation = 0.dp,
-        backgroundColor = grey,
+        backgroundColor = GrayLight,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -90,7 +90,7 @@ fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
                 }, placeHolderId = R.string.title, isSingleLine = true
             )
             Divider(
-                thickness = 1.dp, color = green, modifier = Modifier.padding(horizontal = 8.dp)
+                thickness = 1.dp, color = Green, modifier = Modifier.padding(horizontal = 8.dp)
             )
             TransparentBackgroundTextField(
                 value = uiState.notes ?: "",
@@ -109,7 +109,7 @@ fun DetailsCard(
     Card(
         shape = Shapes.small,
         elevation = 0.dp,
-        backgroundColor = grey,
+        backgroundColor = GrayLight,
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = medium)
@@ -133,7 +133,7 @@ fun DetailsCard(
 
 @Composable
 private fun PriorityComponent(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit) {
-    DetailDropdown(icon = Icons.Filled.PriorityHigh,
+    DetailDropdown(icon = Icons.Rounded.PriorityHigh,
         iconDescriptionId = R.string.priority,
         titleId = R.string.priority,
         priority = uiState.priority,
@@ -147,7 +147,7 @@ private fun DateComponent(
 ) {
     val context = LocalContext.current
     DetailSwitch(
-        icon = Icons.Filled.CalendarMonth,
+        icon = Icons.Rounded.CalendarMonth,
         iconDescriptionId = R.string.date,
         titleId = R.string.date,
         checked = uiState.isDateChecked,
@@ -157,7 +157,7 @@ private fun DateComponent(
                     onDateSetListener = { year, month, day ->
                         onUpdate(
                             uiState.copy(
-                                date = LocalDate.of(year, month + 1, day), isDateChecked = true
+                                date = LocalDate.of(year, month, day), isDateChecked = true
                             )
                         )
                     }, context = context
@@ -174,7 +174,7 @@ private fun DateComponent(
             }
 
         },
-        detail = uiState.date?.format() ?: ""
+        detail = uiState.date?.format()
     )
 }
 
@@ -185,7 +185,7 @@ private fun TimeComponent(
 ) {
     val context = LocalContext.current
     DetailSwitch(
-        icon = Icons.Filled.AccessTime,
+        icon = Icons.Rounded.AccessTime,
         iconDescriptionId = R.string.time,
         titleId = R.string.time,
         checked = uiState.isTimeChecked,
@@ -223,7 +223,7 @@ private fun TimeComponent(
 private fun RepeatComponent(
     uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
 ) {
-    DetailSwitchRepeat(icon = Icons.Filled.Repeat,
+    DetailSwitchRepeat(icon = Icons.Rounded.Repeat,
         iconDescriptionId = R.string.repeat,
         titleId = R.string.repeat,
         checked = uiState.isRepeatChecked,
@@ -273,10 +273,32 @@ private fun RepeatComponent(
 }
 
 @Composable
+private fun RepeatCard(titleId: Int, onClick: () -> Unit, selected: Boolean = false) {
+    Card(
+        shape = Shapes.small,
+        elevation = 0.dp,
+        modifier = Modifier
+            .clip(Shapes.small)
+            .clickable { onClick() },
+        border = BorderStroke(
+            width = if (selected) 1.dp else 0.dp, color = if (selected) Green else Transparent
+        )
+    ) {
+        Text(
+            text = stringResource(id = titleId),
+            modifier = Modifier.padding(vertical = small, horizontal = medium),
+            color = if (selected) Green else Black,
+            style = Typography.caption
+        )
+    }
+}
+
+
+@Composable
 private fun Divider() {
     Divider(
         thickness = 1.dp,
-        color = green,
+        color = Green,
         modifier = Modifier
             .padding(horizontal = medium)
             .padding(vertical = small)
@@ -301,7 +323,8 @@ fun Header(
             onClick = { onCancel() })
 
         ReminderDefaultText(
-            textResourceId = headerResourceId, modifier = Modifier.align(Alignment.Center)
+            textResourceId = headerResourceId, modifier = Modifier.align(Alignment.Center),
+            clickEnabled = false
         )
 
         ReminderDefaultText(
@@ -309,27 +332,6 @@ fun Header(
             modifier = Modifier.align(Alignment.CenterEnd),
             enabled = uiState.isValid(),
             onClick = { onSave() },
-        )
-    }
-}
-
-@Composable
-private fun RepeatCard(titleId: Int, onClick: () -> Unit, selected: Boolean = false) {
-    Card(
-        shape = Shapes.small,
-        elevation = 0.dp,
-        modifier = Modifier
-            .clip(Shapes.small)
-            .clickable { onClick() },
-        border = BorderStroke(
-            width = if (selected) 1.dp else 0.dp, color = if (selected) green else transparent
-        )
-    ) {
-        Text(
-            text = stringResource(id = titleId),
-            modifier = Modifier.padding(vertical = small, horizontal = medium),
-            color = if (selected) green else fontBlack,
-            style = Typography.caption
         )
     }
 }
@@ -346,7 +348,7 @@ fun showDatePicker(
     val datePicker = DatePickerDialog(
         context, { _, selectedYear, selectedMonth, selectedDay ->
             onDateSetListener(
-                selectedYear, selectedMonth, selectedDay
+                selectedYear, selectedMonth + 1, selectedDay
             )
         }, presentYear, presentMonth, presentDay
     )
@@ -356,29 +358,27 @@ fun showDatePicker(
 fun showTimePicker(onTimeSetListener: (Int, Int, Boolean) -> Unit, context: Context) {
     val calendar = Calendar.getInstance()
 
-    var presentHour = calendar.get(Calendar.HOUR_OF_DAY)
-    val presentMinute = 0
     val is24HourFormat = android.text.format.DateFormat.is24HourFormat(context)
-    presentHour = (presentHour + 1) % if (is24HourFormat) 24 else 12
+    // Advance hour by 1 to create better user experience
+    val presentHour = (calendar.get(Calendar.HOUR_OF_DAY) + 1) % 24
 
     val timePicker = TimePickerDialog(
         context, { _, selectedHour, selectedMinute ->
             onTimeSetListener(
                 selectedHour, selectedMinute, is24HourFormat
             )
-        }, presentHour, presentMinute, is24HourFormat
+        }, presentHour, 0, is24HourFormat
     )
     timePicker.show()
 }
 
 @Composable
-private fun DetailSwitch(
+private fun DetailItem(
     icon: ImageVector,
     iconDescriptionId: Int,
     titleId: Int,
-    checked: Boolean = false,
-    onCheckedChange: (Boolean) -> Unit = {},
-    detail: String
+    contentColumn: @Composable (ColumnScope.() -> Unit) = {},
+    trailingComposable: @Composable (BoxScope.() -> Unit) = {},
 ) {
     Box(
         modifier = Modifier
@@ -400,17 +400,43 @@ private fun DetailSwitch(
             Text(
                 text = stringResource(id = titleId), style = Typography.body2
             )
-            if (checked) {
-                Text(
-                    text = detail, style = Typography.caption, color = fontGrey
-                )
-            }
+            contentColumn()
         }
-        Switch(
-            checked = checked, onCheckedChange = onCheckedChange,
+        Box(
             modifier = Modifier
                 .padding(0.dp)
-                .align(Alignment.CenterEnd),
+                .align(Alignment.CenterEnd)
+        ) {
+            trailingComposable()
+        }
+    }
+}
+
+@Composable
+private fun DetailSwitch(
+    icon: ImageVector,
+    iconDescriptionId: Int,
+    titleId: Int,
+    checked: Boolean = false,
+    onCheckedChange: (Boolean) -> Unit = {},
+    detail: String?
+) {
+    DetailItem(
+        icon = icon,
+        iconDescriptionId = iconDescriptionId,
+        titleId = titleId,
+        contentColumn = {
+            if (checked) {
+                detail?.let {
+                    Text(
+                        text = it, style = Typography.caption, color = GrayDark
+                    )
+                }
+            }
+        }
+    ) {
+        Switch(
+            checked = checked, onCheckedChange = onCheckedChange
         )
     }
 }
@@ -423,32 +449,13 @@ private fun DetailSwitchRepeat(
     checked: Boolean = false,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(35.dp)
+    DetailItem(
+        icon = icon,
+        iconDescriptionId = iconDescriptionId,
+        titleId = titleId
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = stringResource(id = iconDescriptionId),
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .size(20.dp)
-        )
-        Column(
-            modifier = Modifier
-                .padding(start = 28.dp)
-                .align(Alignment.CenterStart)
-        ) {
-            Text(
-                text = stringResource(id = titleId), style = Typography.body2
-            )
-        }
         Switch(
-            checked = checked, onCheckedChange = onCheckedChange,
-            modifier = Modifier
-                .padding(0.dp)
-                .align(Alignment.CenterEnd),
+            checked = checked, onCheckedChange = onCheckedChange
         )
     }
 }
@@ -461,65 +468,43 @@ private fun DetailDropdown(
     onSelect: (Priority) -> Unit = {},
     priority: Priority
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(35.dp)
+    DetailItem(
+        icon = icon,
+        iconDescriptionId = iconDescriptionId,
+        titleId = titleId
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = stringResource(id = iconDescriptionId),
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .size(20.dp)
-        )
-        Column(
-            modifier = Modifier
-                .padding(start = 28.dp)
-                .align(Alignment.CenterStart)
-        ) {
-            Text(
-                text = stringResource(id = titleId), style = Typography.body2
-            )
-        }
-        var expanded by remember { mutableStateOf(false) }
-        Box(
-            modifier = Modifier
-                .padding(end = medium)
-                .align(Alignment.CenterEnd)
-        ) {
-            Row(modifier = Modifier
-                .clip(Shapes.small)
-                .clickable { expanded = true }) {
-                Text(text = priority.value, modifier = Modifier.padding(start = 6.dp))
-                Icon(
-                    imageVector = Icons.Rounded.ArrowDropDown,
-                    contentDescription = stringResource(id = R.string.arrow_drop_down)
-                )
-            }
+        PriorityDropDown(priority, onSelect)
+    }
+}
 
-            DropdownMenu(expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.clickable { expanded = true }) {
-                PriorityDropdownMenuItem({
-                    expanded = false
-                    onSelect(Priority.NONE)
-                }, Priority.NONE.value)
-                PriorityDropdownMenuItem({
-                    expanded = false
-                    onSelect(Priority.LOW)
-                }, Priority.LOW.value)
-                PriorityDropdownMenuItem({
-                    expanded = false
-                    onSelect(Priority.MEDIUM)
-                }, Priority.MEDIUM.value)
-                PriorityDropdownMenuItem({
-                    expanded = false
-                    onSelect(Priority.HIGH)
-                }, Priority.HIGH.value)
-            }
-        }
-
+@Composable
+private fun PriorityDropDown(
+    priority: Priority,
+    onSelect: (Priority) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    ReminderDropDown(
+        value = priority.value,
+        onClick = { expanded = true },
+        onDismiss = { expanded = false },
+        expanded = expanded
+    ) {
+        PriorityDropdownMenuItem({
+            expanded = false
+            onSelect(Priority.NONE)
+        }, Priority.NONE.value)
+        PriorityDropdownMenuItem({
+            expanded = false
+            onSelect(Priority.LOW)
+        }, Priority.LOW.value)
+        PriorityDropdownMenuItem({
+            expanded = false
+            onSelect(Priority.MEDIUM)
+        }, Priority.MEDIUM.value)
+        PriorityDropdownMenuItem({
+            expanded = false
+            onSelect(Priority.HIGH)
+        }, Priority.HIGH.value)
     }
 }
 

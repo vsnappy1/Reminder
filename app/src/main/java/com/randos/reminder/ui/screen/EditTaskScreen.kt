@@ -13,7 +13,7 @@ import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.theme.medium
-import com.randos.reminder.ui.theme.white
+import com.randos.reminder.ui.theme.White
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.viewmodel.EditTaskViewModel
 
@@ -33,7 +33,7 @@ fun EditTaskScreen(
     val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
     Column(
         modifier = Modifier
-            .background(white)
+            .background(White)
             .padding(medium)
             .fillMaxSize()
     ) {

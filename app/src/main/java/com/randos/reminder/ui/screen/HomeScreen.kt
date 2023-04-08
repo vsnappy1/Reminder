@@ -10,6 +10,7 @@ import androidx.compose.ui.res.stringResource
 import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
+import com.randos.reminder.ui.component.ReminderButton
 
 object HomeDestination : NavigationDestination {
     override val route: String = ReminderScreen.HOME_SCREEN.name
@@ -24,18 +25,21 @@ fun HomeScreen(
     onCompletedClick: () -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        Button(onClick = onTodayClick) {
-            Text(text = stringResource(id = R.string.today))
-        }
-        Button(onClick = onScheduledClick) {
-            Text(text = stringResource(id = R.string.scheduled))
-        }
-        Button(onClick = onAllClick) {
-            Text(text = stringResource(id = R.string.all))
-        }
-        Button(onClick = onCompletedClick) {
-            Text(text = stringResource(id = R.string.completed))
-        }
-
+        ReminderButton(
+            valueRes = R.string.today,
+            onClick = onTodayClick
+        )
+        ReminderButton(
+            valueRes = R.string.scheduled,
+            onClick = onScheduledClick
+        )
+        ReminderButton(
+            valueRes = R.string.all,
+            onClick = onAllClick
+        )
+        ReminderButton(
+            valueRes = R.string.completed,
+            onClick = onCompletedClick
+        )
     }
 }

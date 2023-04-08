@@ -6,11 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.Typography
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.rounded.Done
-import androidx.compose.material.icons.rounded.PriorityHigh
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,13 +45,19 @@ fun TransparentBackgroundTextField(
         modifier = modifier
             .fillMaxWidth()
             .shadow(elevation = 0.dp),
-        placeholder = { Text(text = stringResource(id = placeHolderId)) },
+        placeholder = {
+            Text(
+                text = stringResource(id = placeHolderId),
+                style = Typography.body1
+            )
+        },
         colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = transparent,
-            unfocusedIndicatorColor = transparent,
-            focusedIndicatorColor = transparent
+            backgroundColor = Transparent,
+            unfocusedIndicatorColor = Transparent,
+            focusedIndicatorColor = Transparent
         ),
-        singleLine = isSingleLine
+        singleLine = isSingleLine,
+        textStyle = Typography.body1
     )
 }
 
@@ -61,34 +66,18 @@ fun ReminderDefaultText(
     modifier: Modifier = Modifier,
     textResourceId: Int,
     enabled: Boolean = true,
+    clickEnabled: Boolean = true,
     onClick: () -> Unit = {}
 ) {
     Text(
         text = stringResource(id = textResourceId),
         modifier = modifier
             .clip(Shapes.small)
-            .clickable(enabled = enabled) { onClick() },
+            .clickable(enabled = enabled && clickEnabled) { onClick() }
+            .padding(horizontal = small),
         style = Typography.body1,
-        color = if (enabled) fontBlack else fontGrey
+        color = if (enabled) Black else GrayDark
     )
-}
-
-@Composable
-fun ReminderDefaultDropdown(
-    modifier: Modifier = Modifier,
-    value: String,
-    content: @Composable (ColumnScope.() -> Unit)
-) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier = modifier) {
-        Text(text = value, modifier = Modifier.clickable { expanded = true })
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.clickable { expanded = true }) {
-            content()
-        }
-    }
 }
 
 @Composable
@@ -102,7 +91,7 @@ fun BaseView(
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .background(grey)
+                .background(GrayLight)
         ) {
             Header(titleRes = titleRes)
             contentColumn()
@@ -129,12 +118,12 @@ fun BaseViewWithFAB(
                     .padding(large)
                     .size(50.dp)
                     .align(Alignment.BottomEnd),
-                backgroundColor = green
+                backgroundColor = Green
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Add,
+                    imageVector = Icons.Rounded.Add,
                     contentDescription = stringResource(id = R.string.add),
-                    tint = white,
+                    tint = White,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -147,7 +136,7 @@ fun BaseViewWithFAB(
 fun Header(modifier: Modifier = Modifier, titleRes: Int) {
     Row(
         modifier = modifier
-            .background(white)
+            .background(White)
             .fillMaxWidth()
             .padding(all = medium),
         verticalAlignment = Alignment.CenterVertically
@@ -155,40 +144,11 @@ fun Header(modifier: Modifier = Modifier, titleRes: Int) {
         Text(
             text = stringResource(id = titleRes),
             fontSize = 24.sp,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.ExtraBold,
+            style = Typography.body2
         )
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.CenterEnd
-        ) {
-            Row {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = stringResource(id = R.string.search),
-                )
-            }
-        }
     }
 }
-
-//@Composable
-//fun TimeFrame(
-//    titleResourceId: Int,
-//    tasks: List<TaskUiState>,
-//    onDoneClick: (TaskUiState) -> Unit = {},
-//    onItemClick: (Long) -> Unit = {}
-//) {
-//    TimeFrameHeader(
-//        title = stringResource(id = titleResourceId),
-//        modifier = Modifier.padding(horizontal = medium)
-//    )
-//    ListOfTasks(
-//        tasks = tasks,
-//        modifier = Modifier.padding(horizontal = medium),
-//        onDoneClick = onDoneClick,
-//        onItemClick = onItemClick
-//    )
-//}
 
 @Composable
 fun TimeFrameHeader(titleRes: Int, modifier: Modifier = Modifier) {
@@ -202,7 +162,8 @@ fun TimeFrameHeader(titleRes: Int, modifier: Modifier = Modifier) {
             fontSize = 20.sp,
             modifier = Modifier.align(Alignment.CenterStart),
             fontWeight = FontWeight.Bold,
-            color = green
+            color = Green,
+            style = Typography.h5
         )
     }
 }
@@ -237,14 +198,14 @@ fun TaskCard(
     task: TaskUiState = TaskUiState(
         id = 1,
         title = "Shopping",
-        notes = "Get ready for fast and convenient shopping together with the Shopping List app! It’s a simple and smart application where you can input tasks on one screen. The app will help you to prepare for food shopping, purchasing clothes, online ordering and any other shopping activity.",
-        isDateChecked = true,
-        date = LocalDate.now(),
-        isTimeChecked = true,
-        time = LocalTime.now(),
-        isRepeatChecked = true,
-        repeat = RepeatCycle.WEEKLY,
-        priority = Priority.MEDIUM
+//        notes = "Get ready for fast and convenient shopping together with the Shopping List app! It’s a simple and smart application where you can input tasks on one screen. The app will help you to prepare for food shopping, purchasing clothes, online ordering and any other shopping activity.",
+//        isDateChecked = true,
+//        date = LocalDate.now(),
+//        isTimeChecked = true,
+//        time = LocalTime.now(),
+//        isRepeatChecked = true,
+//        repeat = RepeatCycle.WEEKLY,
+//        priority = Priority.MEDIUM
     ),
     onItemClick: (Long) -> Unit = {},
     onDoneClick: (TaskUiState) -> Unit = {},
@@ -288,8 +249,7 @@ fun TaskCard(
                         text = task.title,
                         fontWeight = FontWeight.Bold,
                         style = Typography.body1,
-                        color = if (selected) fontGrey else fontBlack,
-                        modifier = Modifier.padding(top = 2.dp)
+                        color = if (selected) GrayDark else Black
                     )
 
                     if (task.priority != Priority.NONE) {
@@ -300,17 +260,17 @@ fun TaskCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             val color =
-                                if (task.priority == Priority.HIGH) red else if (task.priority == Priority.MEDIUM) green_dark else blue
+                                if (task.priority == Priority.HIGH) Red else if (task.priority == Priority.MEDIUM) Green else Blue
 
                             Text(
                                 text = task.priority.value,
                                 style = Typography.body2,
-                                color = if (selected) fontGrey else color
+                                color = if (selected) GrayDark else color
                             )
                             Icon(
                                 imageVector = Icons.Rounded.PriorityHigh,
                                 contentDescription = stringResource(id = R.string.priority),
-                                tint = if (selected) fontGrey else color,
+                                tint = if (selected) GrayDark else color,
                                 modifier = Modifier.size(14.dp)
                             )
                         }
@@ -322,13 +282,13 @@ fun TaskCard(
                         Text(
                             text = it,
                             style = Typography.caption,
-                            color = fontGrey
+                            color = GrayDark
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(2.dp))
                 Row {
-                    val color = if (task.isDue) fontRed else fontGrey
+                    val color = if (task.isDue) Red else GrayDark
 
                     if (isDateVisible) {
                         task.date?.let {
@@ -336,7 +296,7 @@ fun TaskCard(
                                 text = it.format(),
                                 fontWeight = FontWeight.SemiBold,
                                 style = Typography.caption,
-                                color = if (selected) fontGrey else color
+                                color = if (selected) GrayDark else color
                             )
                         }
                     }
@@ -346,7 +306,7 @@ fun TaskCard(
                             text = ", ",
                             style = Typography.caption,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (selected) fontGrey else color
+                            color = if (selected) GrayDark else color
                         )
                     }
 
@@ -356,7 +316,7 @@ fun TaskCard(
                                 text = it.format(),
                                 style = Typography.caption,
                                 fontWeight = FontWeight.SemiBold,
-                                color = if (selected) fontGrey else color
+                                color = if (selected) GrayDark else color
                             )
                         }
                     }
@@ -366,7 +326,7 @@ fun TaskCard(
                             text = ", ",
                             style = Typography.caption,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (selected) fontGrey else color
+                            color = if (selected) GrayDark else color
                         )
                     }
 
@@ -376,7 +336,7 @@ fun TaskCard(
                                 text = task.repeat.value,
                                 style = Typography.caption,
                                 fontWeight = FontWeight.SemiBold,
-                                color = if (selected) fontGrey else color
+                                color = if (selected) GrayDark else color
                             )
                         }
                     }
@@ -399,16 +359,76 @@ private fun ReminderRadioButton(
             .size(18.dp)
             .clip(RoundedCornerShape(9.dp))
             .clickable { onClick() },
-        border = BorderStroke(1.dp, green),
-        backgroundColor = if (selected) green else white
+        border = BorderStroke(1.dp, Green),
+        backgroundColor = if (selected) Green else White
     ) {
         if (selected) {
             Icon(
                 imageVector = Icons.Rounded.Done,
                 contentDescription = stringResource(id = R.string.done),
                 modifier = Modifier.padding(1.dp),
-                tint = white
+                tint = White
             )
         }
+    }
+}
+
+@Preview
+@Composable
+fun ReminderDropDown(
+    value: String = " None",
+    onClick: () -> Unit = {},
+    onDismiss: () -> Unit = {},
+    expanded: Boolean = false,
+    content: @Composable (ColumnScope.() -> Unit) = {}
+) {
+    Box {
+        Row(modifier = Modifier
+            .padding(vertical = small)
+            .clip(Shapes.small)
+            .clickable { onClick() }) {
+            Text(
+                text = value,
+                modifier = Modifier
+                    .height(20.dp)
+                    .padding(start = medium),
+                style = Typography.body2,
+                textAlign = TextAlign.Center
+            )
+            Icon(
+                imageVector = Icons.Rounded.ArrowDropDown,
+                contentDescription = stringResource(id = R.string.arrow_drop_down),
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        DropdownMenu(expanded = expanded,
+            onDismissRequest = { onDismiss() }) {
+            content()
+        }
+    }
+}
+
+@Composable
+fun ReminderButton(
+    modifier: Modifier = Modifier,
+    valueRes: Int,
+    onClick: () -> Unit = {},
+    enabled: Boolean = true,
+    showBackground: Boolean = true
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = if (showBackground) MaterialTheme.colors.secondary else Transparent,
+            disabledBackgroundColor = if (showBackground) MaterialTheme.colors.primaryVariant else Transparent
+        )
+    ) {
+        Text(
+            text = stringResource(id = valueRes),
+            style = Typography.body1,
+            color = if (enabled) Black else GrayDark
+        )
     }
 }

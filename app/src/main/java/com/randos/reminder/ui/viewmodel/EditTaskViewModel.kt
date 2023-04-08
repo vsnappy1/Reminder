@@ -6,7 +6,6 @@ import com.randos.reminder.data.repository.TaskRepository
 import com.randos.reminder.ui.screen.TaskEditDestination
 import com.randos.reminder.ui.uiState.toTask
 import com.randos.reminder.ui.uiState.toTaskUiState
-import com.randos.reminder.utils.toObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

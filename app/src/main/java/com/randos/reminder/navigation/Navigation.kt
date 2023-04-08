@@ -7,7 +7,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.randos.reminder.ui.screen.*
-import com.randos.reminder.utils.toJson
 
 @Composable
 fun NavGraph(

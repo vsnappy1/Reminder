@@ -1,7 +1,5 @@
 package com.randos.reminder.ui.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,7 +14,6 @@ import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.*
-import com.randos.reminder.ui.theme.grey
 import com.randos.reminder.ui.theme.medium
 import com.randos.reminder.ui.viewmodel.ScheduledTaskViewModel
 
