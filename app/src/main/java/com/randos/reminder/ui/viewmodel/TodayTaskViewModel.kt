@@ -17,16 +17,13 @@ class TodayTaskViewModel @Inject constructor(
     taskRepository: TaskRepository
 ) : BaseViewModel(taskRepository) {
 
+    val todayTasks: LiveData<List<TaskUiState>> = taskRepository
+        .getTasksOn(LocalDate.now())
+        .map { it.toTaskUiStateList() }
+        .asLiveData()
 
-    // TODO Make this flow combine work
-//    private val todayTasks = taskRepository.getTasksOn(LocalDate.now())
-//    private val dueTasks = taskRepository.getTasksBefore(LocalDate.now())
-//    private val combine = merge(todayTasks, dueTasks)
-//    val tasks: LiveData<List<TaskUiState>> = combine.map { it.toTaskUiStateList() }
-//        .asLiveData()
-
-    val tasks: LiveData<List<TaskUiState>> = taskRepository
-        .getTodayAndDueTasks(LocalDate.now())
+    val dueTasks: LiveData<List<TaskUiState>> = taskRepository
+        .getTasksBefore(LocalDate.now())
         .map { it.toTaskUiStateList() }
         .asLiveData()
 }

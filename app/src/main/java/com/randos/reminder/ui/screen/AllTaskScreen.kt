@@ -24,7 +24,9 @@ import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseView
+import com.randos.reminder.ui.component.BaseViewWithFAB
 import com.randos.reminder.ui.component.ListOfTasks
+import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.theme.*
 import com.randos.reminder.ui.viewmodel.AllTaskViewModel
 
@@ -40,9 +42,15 @@ fun AllTaskScreen(
     onItemClick: (Long) -> Unit = {}
 ) {
     val tasks by viewModel.tasks.observeAsState(listOf())
-    BaseView(titleRes = R.string.all, onAddTaskClick = onAddTaskClick) {
-        ListOfTasks(tasks = tasks, onItemClick = onItemClick, onDoneClick = {
-            viewModel.markDone(it)
-        })
+    BaseViewWithFAB(titleRes = R.string.all, onAddTaskClick = onAddTaskClick) {
+        LazyColumn(modifier = Modifier.padding(medium)) {
+            items(tasks) {
+                TaskCard(
+                    task = it,
+                    onItemClick = onItemClick,
+                    onDoneClick = { state -> viewModel.markDone(state) }
+                )
+            }
+        }
     }
 }

@@ -8,31 +8,38 @@ import java.time.LocalTime
 
 data class TaskUiState(
     val id: Long = 0,
-    val title: String = "aa",
+    val title: String = "",
     val notes: String? = null,
-    val isDateChecked: Boolean = true,
-    val date: LocalDate? = LocalDate.now(),
-    val isTimeChecked: Boolean = false,
+    val date: LocalDate? = null,
     val time: LocalTime? = null,
-    val isRepeatChecked: Boolean = false,
     val repeat: RepeatCycle = RepeatCycle.NO_REPEAT,
     val priority: Priority = Priority.NONE,
-    val done: Boolean = false
+    val done: Boolean = false,
+    val isDateChecked: Boolean = date != null,
+    val isTimeChecked: Boolean = time != null,
+    val isRepeatChecked: Boolean = repeat != RepeatCycle.NO_REPEAT,
+
+    //TODO improve this logic, some time date is passed but time is still not after current time
+    val isDue: Boolean = (!done && date?.isBefore(LocalDate.now()) == true) ||
+            (!done && date?.isBefore(LocalDate.now()) == true) && if (isTimeChecked) time?.isBefore(
+        LocalTime.now()
+    ) == true else true
+
 )
 
 fun Task.toTaskUiState(): TaskUiState {
     return TaskUiState(
-        this.id,
-        this.title,
-        this.notes,
-        this.date != null,
-        this.date,
-        this.time != null,
-        this.time,
-        this.repeat != RepeatCycle.NO_REPEAT,
-        this.repeat,
-        this.priority,
-        this.done
+        id = this.id,
+        title = this.title,
+        notes = this.notes,
+        isDateChecked = this.date != null,
+        date = this.date,
+        isTimeChecked = this.time != null,
+        time = this.time,
+        isRepeatChecked = this.repeat != RepeatCycle.NO_REPEAT,
+        repeat = this.repeat,
+        priority = this.priority,
+        done = this.done
     )
 }
 

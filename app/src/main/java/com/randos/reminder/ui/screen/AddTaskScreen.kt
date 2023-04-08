@@ -13,10 +13,12 @@ import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.PriorityHigh
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -34,21 +36,23 @@ import com.randos.reminder.ui.theme.*
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.uiState.isValid
 import com.randos.reminder.ui.viewmodel.AddTaskViewModel
+import com.randos.reminder.utils.format
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 
-object TaskAddDestination: NavigationDestination{
+object TaskAddDestination : NavigationDestination {
     override val route: String = ReminderScreen.ADD_TASK_SCREEN.name
     override val titleRes: Int = R.string.new_reminder
 }
 
+// TODO modularize this file, it has a lot of code
+// TODO finalize color
+// TODO apply font style to every Text
+// TODO Resolve why next item is selected or deselected when one item is removed form screen
 @Composable
 fun AddTaskScreen(
-    onAdd: () -> Unit = {},
-    onCancel: () -> Unit = {},
-    viewModel: AddTaskViewModel = hiltViewModel()
+    onAdd: () -> Unit = {}, onCancel: () -> Unit = {}, viewModel: AddTaskViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
     Column(
@@ -71,47 +75,22 @@ fun AddTaskScreen(
     }
 }
 
-private fun updateUi(
-    taskUiState: TaskUiState,
-    onUpdate: (TaskUiState) -> Unit
-) {
-    onUpdate(
-        TaskUiState(
-            id = taskUiState.id,
-            title = taskUiState.title,
-            notes = taskUiState.notes,
-            isDateChecked = taskUiState.isDateChecked,
-            date = taskUiState.date,
-            isTimeChecked = taskUiState.isTimeChecked,
-            time = taskUiState.time,
-            isRepeatChecked = taskUiState.isRepeatChecked,
-            repeat = taskUiState.repeat,
-            priority = taskUiState.priority,
-            done = taskUiState.done
-        )
-    )
-}
-
 @Composable
 fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit) {
     Card(
+        shape = Shapes.small,
         elevation = 0.dp,
         backgroundColor = grey,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             TransparentBackgroundTextField(
-                value = uiState.title,
-                onValueChange = {
+                value = uiState.title, onValueChange = {
                     onUpdate(uiState.copy(title = it))
-                },
-                placeHolderId = R.string.title,
-                isSingleLine = true
+                }, placeHolderId = R.string.title, isSingleLine = true
             )
             Divider(
-                thickness = 1.dp,
-                color = green,
-                modifier = Modifier.padding(horizontal = 8.dp)
+                thickness = 1.dp, color = green, modifier = Modifier.padding(horizontal = 8.dp)
             )
             TransparentBackgroundTextField(
                 value = uiState.notes ?: "",
@@ -125,10 +104,10 @@ fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
 
 @Composable
 fun DetailsCard(
-    uiState: TaskUiState,
-    onUpdate: (TaskUiState) -> Unit
+    uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
 ) {
     Card(
+        shape = Shapes.small,
         elevation = 0.dp,
         backgroundColor = grey,
         modifier = Modifier
@@ -137,14 +116,15 @@ fun DetailsCard(
     ) {
         Column(modifier = Modifier.padding(medium)) {
             Text(
-                text = stringResource(id = R.string.details),
-                style = Typography.body2
+                text = stringResource(id = R.string.details), style = Typography.body2
             )
             DateComponent(uiState, onUpdate)
             Divider()
             TimeComponent(uiState, onUpdate)
-            Divider()
-            RepeatComponent(uiState, onUpdate)
+            if (uiState.isDateChecked) {
+                Divider()
+                RepeatComponent(uiState, onUpdate)
+            }
             Divider()
             PriorityComponent(uiState, onUpdate)
         }
@@ -153,13 +133,11 @@ fun DetailsCard(
 
 @Composable
 private fun PriorityComponent(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit) {
-    DetailDropdown(
-        icon = Icons.Filled.PriorityHigh,
+    DetailDropdown(icon = Icons.Filled.PriorityHigh,
         iconDescriptionId = R.string.priority,
         titleId = R.string.priority,
         priority = uiState.priority,
-        onSelect = { onUpdate(uiState.copy(priority = it)) }
-    )
+        onSelect = { onUpdate(uiState.copy(priority = it)) })
 }
 
 @Composable
@@ -179,19 +157,24 @@ private fun DateComponent(
                     onDateSetListener = { year, month, day ->
                         onUpdate(
                             uiState.copy(
-                                date = LocalDate.of(year, month + 1, day),
-                                isDateChecked = true
+                                date = LocalDate.of(year, month + 1, day), isDateChecked = true
                             )
                         )
-                    },
-                    context = context
+                    }, context = context
                 )
             } else {
-                onUpdate(uiState.copy(date = null, isDateChecked = false))
+                onUpdate(
+                    uiState.copy(
+                        date = null,
+                        isDateChecked = false,
+                        repeat = RepeatCycle.NO_REPEAT,
+                        isRepeatChecked = false
+                    )
+                )
             }
 
         },
-        detail = uiState.date?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: ""
+        detail = uiState.date?.format() ?: ""
     )
 }
 
@@ -213,42 +196,44 @@ private fun TimeComponent(
                         onUpdate(
                             uiState.copy(
                                 time = LocalTime.of(
-                                    (hour + if (is24) 12 else 0) % 24,
-                                    minute
+                                    (hour + if (is24) 12 else 0) % 24, minute
                                 ),
-                                isTimeChecked = true
+                                isTimeChecked = true,
+                                date = uiState.date ?: LocalDate.now(),
+                                isDateChecked = true
                             )
                         )
-                    },
-                    context = context
+                    }, context = context
                 )
             } else {
-                onUpdate(uiState.copy(time = null, isTimeChecked = false))
+                onUpdate(
+                    uiState.copy(
+                        time = null,
+                        isTimeChecked = false,
+                        repeat = if (uiState.repeat == RepeatCycle.HOURLY) RepeatCycle.NO_REPEAT else uiState.repeat
+                    )
+                )
             }
         },
-        detail = uiState.time?.format(DateTimeFormatter.ISO_LOCAL_TIME) ?: ""
+        detail = uiState.time?.format() ?: ""
     )
 }
 
 @Composable
 private fun RepeatComponent(
-    uiState: TaskUiState,
-    onUpdate: (TaskUiState) -> Unit
+    uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
 ) {
-    DetailSwitchRepeat(
-        icon = Icons.Filled.Repeat,
+    DetailSwitchRepeat(icon = Icons.Filled.Repeat,
         iconDescriptionId = R.string.repeat,
         titleId = R.string.repeat,
         checked = uiState.isRepeatChecked,
         onCheckedChange = {
             onUpdate(
                 uiState.copy(
-                    isRepeatChecked = it,
-                    repeat = if (it) uiState.repeat else RepeatCycle.NO_REPEAT
+                    isRepeatChecked = it, repeat = if (it) uiState.repeat else RepeatCycle.NO_REPEAT
                 )
             )
-        }
-    )
+        })
     if (uiState.isRepeatChecked) {
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -256,40 +241,32 @@ private fun RepeatComponent(
                 .fillMaxWidth()
                 .padding(vertical = small)
         ) {
+            if (uiState.isTimeChecked) {
+                RepeatCard(
+                    titleId = R.string.hourly, onClick = {
+                        onUpdate(uiState.copy(repeat = RepeatCycle.HOURLY))
+                    }, selected = uiState.repeat == RepeatCycle.HOURLY
+                )
+            }
             RepeatCard(
-                titleId = R.string.hourly,
-                onClick = {
-                    onUpdate(uiState.copy(repeat = RepeatCycle.HOURLY))
-                },
-                selected = uiState.repeat == RepeatCycle.HOURLY
-            )
-            RepeatCard(
-                titleId = R.string.daily,
-                onClick = {
+                titleId = R.string.daily, onClick = {
                     onUpdate(uiState.copy(repeat = RepeatCycle.DAILY))
-                },
-                selected = uiState.repeat == RepeatCycle.DAILY
+                }, selected = uiState.repeat == RepeatCycle.DAILY
             )
             RepeatCard(
-                titleId = R.string.weekly,
-                onClick = {
+                titleId = R.string.weekly, onClick = {
                     onUpdate(uiState.copy(repeat = RepeatCycle.WEEKLY))
-                },
-                selected = uiState.repeat == RepeatCycle.WEEKLY
+                }, selected = uiState.repeat == RepeatCycle.WEEKLY
             )
             RepeatCard(
-                titleId = R.string.monthly,
-                onClick = {
+                titleId = R.string.monthly, onClick = {
                     onUpdate(uiState.copy(repeat = RepeatCycle.MONTHLY))
-                },
-                selected = uiState.repeat == RepeatCycle.MONTHLY
+                }, selected = uiState.repeat == RepeatCycle.MONTHLY
             )
             RepeatCard(
-                titleId = R.string.yearly,
-                onClick = {
+                titleId = R.string.yearly, onClick = {
                     onUpdate(uiState.copy(repeat = RepeatCycle.YEARLY))
-                },
-                selected = uiState.repeat == RepeatCycle.YEARLY
+                }, selected = uiState.repeat == RepeatCycle.YEARLY
             )
         }
     }
@@ -319,14 +296,12 @@ fun Header(
             .fillMaxWidth()
             .padding(bottom = medium)
     ) {
-        ReminderDefaultText(
-            textResourceId = R.string.cancel,
+        ReminderDefaultText(textResourceId = R.string.cancel,
             modifier = Modifier.align(Alignment.CenterStart),
             onClick = { onCancel() })
 
         ReminderDefaultText(
-            textResourceId = headerResourceId,
-            modifier = Modifier.align(Alignment.Center)
+            textResourceId = headerResourceId, modifier = Modifier.align(Alignment.Center)
         )
 
         ReminderDefaultText(
@@ -341,25 +316,26 @@ fun Header(
 @Composable
 private fun RepeatCard(titleId: Int, onClick: () -> Unit, selected: Boolean = false) {
     Card(
+        shape = Shapes.small,
         elevation = 0.dp,
-        modifier = Modifier.clickable { onClick() },
+        modifier = Modifier
+            .clip(Shapes.small)
+            .clickable { onClick() },
         border = BorderStroke(
-            width = if (selected) 1.dp else 0.dp,
-            color = if (selected) green else transparent
+            width = if (selected) 1.dp else 0.dp, color = if (selected) green else transparent
         )
     ) {
         Text(
             text = stringResource(id = titleId),
             modifier = Modifier.padding(vertical = small, horizontal = medium),
-            color = if (selected) green else fontColorBlack,
+            color = if (selected) green else fontBlack,
             style = Typography.caption
         )
     }
 }
 
 fun showDatePicker(
-    onDateSetListener: (Int, Int, Int) -> Unit,
-    context: Context
+    onDateSetListener: (Int, Int, Int) -> Unit, context: Context
 ) {
     val calender = Calendar.getInstance()
 
@@ -368,17 +344,11 @@ fun showDatePicker(
     val presentDay = calender.get(Calendar.DAY_OF_MONTH)
 
     val datePicker = DatePickerDialog(
-        context,
-        { _, selectedYear, selectedMonth, selectedDay ->
+        context, { _, selectedYear, selectedMonth, selectedDay ->
             onDateSetListener(
-                selectedYear,
-                selectedMonth,
-                selectedDay
+                selectedYear, selectedMonth, selectedDay
             )
-        },
-        presentYear,
-        presentMonth,
-        presentDay
+        }, presentYear, presentMonth, presentDay
     )
     datePicker.show()
 }
@@ -392,17 +362,11 @@ fun showTimePicker(onTimeSetListener: (Int, Int, Boolean) -> Unit, context: Cont
     presentHour = (presentHour + 1) % if (is24HourFormat) 24 else 12
 
     val timePicker = TimePickerDialog(
-        context,
-        { _, selectedHour, selectedMinute ->
+        context, { _, selectedHour, selectedMinute ->
             onTimeSetListener(
-                selectedHour,
-                selectedMinute,
-                is24HourFormat
+                selectedHour, selectedMinute, is24HourFormat
             )
-        },
-        presentHour,
-        presentMinute,
-        is24HourFormat
+        }, presentHour, presentMinute, is24HourFormat
     )
     timePicker.show()
 }
@@ -434,14 +398,11 @@ private fun DetailSwitch(
                 .align(Alignment.CenterStart)
         ) {
             Text(
-                text = stringResource(id = titleId),
-                style = Typography.body2
+                text = stringResource(id = titleId), style = Typography.body2
             )
             if (checked) {
                 Text(
-                    text = detail,
-                    style = Typography.caption,
-                    color = fontColorGrey
+                    text = detail, style = Typography.caption, color = fontGrey
                 )
             }
         }
@@ -480,8 +441,7 @@ private fun DetailSwitchRepeat(
                 .align(Alignment.CenterStart)
         ) {
             Text(
-                text = stringResource(id = titleId),
-                style = Typography.body2
+                text = stringResource(id = titleId), style = Typography.body2
             )
         }
         Switch(
@@ -519,8 +479,7 @@ private fun DetailDropdown(
                 .align(Alignment.CenterStart)
         ) {
             Text(
-                text = stringResource(id = titleId),
-                style = Typography.body2
+                text = stringResource(id = titleId), style = Typography.body2
             )
         }
         var expanded by remember { mutableStateOf(false) }
@@ -529,9 +488,17 @@ private fun DetailDropdown(
                 .padding(end = medium)
                 .align(Alignment.CenterEnd)
         ) {
-            Text(text = priority.value, modifier = Modifier.clickable { expanded = true })
-            DropdownMenu(
-                expanded = expanded,
+            Row(modifier = Modifier
+                .clip(Shapes.small)
+                .clickable { expanded = true }) {
+                Text(text = priority.value, modifier = Modifier.padding(start = 6.dp))
+                Icon(
+                    imageVector = Icons.Rounded.ArrowDropDown,
+                    contentDescription = stringResource(id = R.string.arrow_drop_down)
+                )
+            }
+
+            DropdownMenu(expanded = expanded,
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.clickable { expanded = true }) {
                 PriorityDropdownMenuItem({

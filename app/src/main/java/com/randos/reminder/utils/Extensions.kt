@@ -1,5 +1,6 @@
 package com.randos.reminder.utils
 
+import androidx.compose.ui.res.stringResource
 import com.randos.reminder.data.entity.LocalDateAdapter
 import com.randos.reminder.data.entity.LocalTimeAdapter
 import com.randos.reminder.data.entity.Task
@@ -12,6 +13,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.toList
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 suspend fun <T> Flow<List<T>>.toList() =
     flatMapConcat { it.asFlow() }.toList()
@@ -47,4 +51,15 @@ inline fun <reified T> String?.toObject(): T? {
         return jsonAdapter.fromJson(this)
     }
     return null
+}
+
+fun LocalTime.format(): String {
+    return format(DateTimeFormatter.ofPattern("hh:mm a"))
+}
+
+fun LocalDate.format(): String {
+    if(this == LocalDate.now()) return "Today"
+    if(this == LocalDate.now().plusDays(1)) return "Tomorrow"
+    if(this == LocalDate.now().minusDays(1)) return "Yesterday"
+    return format(DateTimeFormatter.ISO_LOCAL_DATE)
 }
