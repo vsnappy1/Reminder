@@ -1,14 +1,17 @@
 package com.randos.reminder.ui.component
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.Typography
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.Done
+import androidx.compose.material.icons.rounded.PriorityHigh
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,8 +31,8 @@ import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.utils.format
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalTime
+
+private const val TAG = "Component"
 
 @Composable
 fun TransparentBackgroundTextField(
@@ -195,25 +198,15 @@ fun ListOfTasks(
 @Composable
 @Preview
 fun TaskCard(
-    task: TaskUiState = TaskUiState(
-        id = 1,
-        title = "Shopping",
-//        notes = "Get ready for fast and convenient shopping together with the Shopping List app! It’s a simple and smart application where you can input tasks on one screen. The app will help you to prepare for food shopping, purchasing clothes, online ordering and any other shopping activity.",
-//        isDateChecked = true,
-//        date = LocalDate.now(),
-//        isTimeChecked = true,
-//        time = LocalTime.now(),
-//        isRepeatChecked = true,
-//        repeat = RepeatCycle.WEEKLY,
-//        priority = Priority.MEDIUM
-    ),
+    task: TaskUiState = TaskUiState(),
     onItemClick: (Long) -> Unit = {},
     onDoneClick: (TaskUiState) -> Unit = {},
     isDateVisible: Boolean = true,
     isTimeVisible: Boolean = true,
     isRepeatVisible: Boolean = true,
 ) {
-    var selected by remember { mutableStateOf(task.done) }
+    var selected by remember{ mutableStateOf(task.done) }
+    Log.d(TAG, "TaskCard: ${task.title} | $selected")
     val coroutineScope = rememberCoroutineScope()
     Card(
         shape = Shapes.small,
@@ -227,14 +220,17 @@ fun TaskCard(
             modifier = Modifier
                 .padding(small)
         ) {
-            var updatingStatus by remember { mutableStateOf(false) }
+//            var updatingStatus by remember { mutableStateOf(false) }
             ReminderRadioButton(
                 selected = selected, onClick = {
+//                    onDoneClick(task)
                     selected = !selected
-                    updatingStatus = !updatingStatus
+//                    updatingStatus = !updatingStatus
                     coroutineScope.launch {
                         delay(1000)
-                        if (updatingStatus) onDoneClick(task)
+                        onDoneClick(task)
+                        delay(25)
+                        selected = !selected
                     }
                 },
                 modifier = Modifier.padding(0.dp)
