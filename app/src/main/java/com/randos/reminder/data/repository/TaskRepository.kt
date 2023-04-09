@@ -33,4 +33,8 @@ interface TaskRepository {
     fun getCompletedTasksAfter(date: LocalDate): Flow<List<Task>>
 
     fun getCompletedTasksBefore(date: LocalDate): Flow<List<Task>>
+    fun getTasksCount(): Flow<Int>
+    fun getTodayTasksCount(date: LocalDate): Flow<Int>
+    fun getScheduledTasksCount(): Flow<Int>
+    fun getCompletedTasksCount(): Flow<Int>
 }

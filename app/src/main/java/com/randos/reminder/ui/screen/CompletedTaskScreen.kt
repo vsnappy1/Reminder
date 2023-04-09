@@ -12,6 +12,7 @@ import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseView
+import com.randos.reminder.ui.component.NoTaskMessage
 import com.randos.reminder.ui.component.TimeFrameHeader
 import com.randos.reminder.ui.theme.medium
 import com.randos.reminder.ui.viewmodel.CompletedTaskViewModel
@@ -41,7 +42,7 @@ fun CompletedTaskScreen(
         getListOfTaskCards(
             tasks = todayTasks,
             onItemClick = onItemClick,
-            onDoneClick = { state -> viewModel.markNotDone(state) })
+            onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
     if (yesterdayTasks.isNotEmpty()) {
@@ -51,7 +52,7 @@ fun CompletedTaskScreen(
         getListOfTaskCards(
             tasks = yesterdayTasks,
             onItemClick = onItemClick,
-            onDoneClick = { state -> viewModel.markNotDone(state) })
+            onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
     if (previousSevenDaysTasks.isNotEmpty()) {
@@ -61,7 +62,7 @@ fun CompletedTaskScreen(
         getListOfTaskCards(
             tasks = previousSevenDaysTasks,
             onItemClick = onItemClick,
-            onDoneClick = { state -> viewModel.markNotDone(state) })
+            onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
     if (previousTasks.isNotEmpty()) {
@@ -71,7 +72,7 @@ fun CompletedTaskScreen(
         getListOfTaskCards(
             tasks = previousTasks,
             onItemClick = onItemClick,
-            onDoneClick = { state -> viewModel.markNotDone(state) })
+            onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
     BaseView(titleRes = R.string.completed) {
@@ -79,6 +80,14 @@ fun CompletedTaskScreen(
             items(list) {
                 it()
             }
+        }
+        if (
+            todayTasks.isEmpty() &&
+            yesterdayTasks.isEmpty() &&
+            previousSevenDaysTasks.isEmpty() &&
+            previousTasks.isEmpty()
+        ) {
+            NoTaskMessage()
         }
     }
 }

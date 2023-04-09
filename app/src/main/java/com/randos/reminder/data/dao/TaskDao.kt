@@ -21,21 +21,43 @@ interface TaskDao {
     @Query("SELECT * FROM task WHERE id = :id")
     fun getTask(id: Long): Flow<Task>
 
-    @Query("SELECT * FROM task")
+    @Query("SELECT * FROM task WHERE completedOn IS NULL $orderBy")
     fun getTasks(): Flow<List<Task>>
+    
+    @Query("SELECT * FROM task WHERE date = :date AND completedOn IS NULL $orderBy")
+    fun getTasks(date: LocalDate): Flow<List<Task>>
 
-    @Query("SELECT * FROM task WHERE done = :done $orderBy")
-    fun getTasks(done: Boolean): Flow<List<Task>>
+    @Query("SELECT * FROM task WHERE date >= :start AND date <= :end AND completedOn IS NULL $orderBy")
+    fun getTasks(start: LocalDate, end: LocalDate): Flow<List<Task>>
 
-    @Query("SELECT * FROM task WHERE date = :date AND done = :done $orderBy")
-    fun getTasks(date: LocalDate, done: Boolean): Flow<List<Task>>
+    @Query("SELECT * FROM task WHERE date > :date AND completedOn IS NULL $orderBy")
+    fun getTasksAfter(date: LocalDate): Flow<List<Task>>
 
-    @Query("SELECT * FROM task WHERE date >= :start AND date <= :end AND done = :done $orderBy")
-    fun getTasks(start: LocalDate, end: LocalDate, done: Boolean): Flow<List<Task>>
+    @Query("SELECT * FROM task WHERE date < :date AND completedOn IS NULL $orderBy")
+    fun getTasksBefore(date: LocalDate): Flow<List<Task>>
 
-    @Query("SELECT * FROM task WHERE date > :date AND done = :done $orderBy")
-    fun getTasksAfter(date: LocalDate, done: Boolean): Flow<List<Task>>
+    @Query("SELECT * FROM task WHERE completedOn IS NOT NULL $orderBy")
+    fun getCompletedTasks(): Flow<List<Task>>
 
-    @Query("SELECT * FROM task WHERE date < :date AND done = :done $orderBy")
-    fun getTasksBefore(date: LocalDate, done: Boolean): Flow<List<Task>>
+    @Query("SELECT * FROM task WHERE date = :date AND completedOn IS NOT NULL $orderBy")
+    fun getCompletedTasks(date: LocalDate): Flow<List<Task>>
+
+    @Query("SELECT * FROM task WHERE date >= :start AND date <= :end AND completedOn IS NOT NULL $orderBy")
+    fun getCompletedTasks(start: LocalDate, end: LocalDate): Flow<List<Task>>
+
+    @Query("SELECT * FROM task WHERE date > :date AND completedOn IS NOT NULL $orderBy")
+    fun getCompletedTasksAfter(date: LocalDate): Flow<List<Task>>
+
+    @Query("SELECT * FROM task WHERE date < :date AND completedOn IS NOT NULL $orderBy")
+    fun getCompletedTasksBefore(date: LocalDate): Flow<List<Task>>
+
+    @Query("SELECT COUNT(*) FROM task WHERE completedOn IS NULL $orderBy")
+    fun getTasksCount(): Flow<Int>
+    @Query("SELECT COUNT(*) FROM task WHERE date <= :date AND completedOn IS NULL $orderBy")
+    fun getTodayTasksCount(date: LocalDate): Flow<Int>
+    @Query("SELECT COUNT(*) FROM task WHERE date IS NOT NULL AND completedOn IS NULL $orderBy")
+    fun getScheduledTasksCount(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM task WHERE completedOn IS NOT NULL $orderBy")
+    fun getCompletedTasksCount(): Flow<Int>
 }

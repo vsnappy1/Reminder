@@ -43,8 +43,8 @@ object TaskAddDestination : NavigationDestination {
     override val titleRes: Int = R.string.new_reminder
 }
 
-// TODO Resolve why next item is selected or deselected when one item is removed form screen
 // TODO beautify and add search functionality in home screen
+// TODO refactor the completed task so that task are displayed based on when completed
 // TODO write test cases
 // TODO implement notification
 // TODO get the theme reviewed

@@ -34,14 +34,14 @@ fun TodayTaskScreen(
                 TaskCard(
                     task = it,
                     onItemClick = onItemClick,
-                    onDoneClick = { state -> viewModel.markDone(state) }
+                    onDoneClick = { state -> viewModel.updateTaskStatus(state) }
                 )
             }
             items(todayTasks) {
                 TaskCard(
                     task = it,
                     onItemClick = onItemClick,
-                    onDoneClick = { state -> viewModel.markDone(state) },
+                    onDoneClick = { state -> viewModel.updateTaskStatus(state) },
                     isDateVisible = false
                 )
             }

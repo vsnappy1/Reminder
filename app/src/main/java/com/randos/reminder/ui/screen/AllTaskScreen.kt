@@ -35,7 +35,7 @@ fun AllTaskScreen(
                 TaskCard(
                     task = it,
                     onItemClick = onItemClick,
-                    onDoneClick = { state -> viewModel.markDone(state) }
+                    onDoneClick = { state -> viewModel.updateTaskStatus(state) }
                 )
             }
         }

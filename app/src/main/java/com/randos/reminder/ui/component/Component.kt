@@ -177,7 +177,6 @@ fun TaskCard(
     isTimeVisible: Boolean = true,
     isRepeatVisible: Boolean = true,
 ) {
-    var selected by remember { mutableStateOf(task.done) }
     val coroutineScope = rememberCoroutineScope()
     Card(
         shape = Shapes.small,
@@ -192,19 +191,19 @@ fun TaskCard(
                 .padding(small)
         ) {
             var updatingStatus by remember { mutableStateOf(false) }
+
             ReminderRadioButton(
-                selected = selected, onClick = {
-                    selected = !selected
-                    updatingStatus = !updatingStatus
-                    coroutineScope.launch {
-                        delay(1000)
-                        if (updatingStatus) {
-                            onDoneClick(task)
-                            delay(25)
-                            selected = !selected
-                            updatingStatus = !updatingStatus
-                        }
-                    }
+                selected = task.done, onClick = {
+                    onDoneClick(task)
+//                    updatingStatus = !updatingStatus
+//                    coroutineScope.launch {
+//                        delay(1000)
+//                        if (updatingStatus) {
+//                            onDoneClick(task)
+//                            delay(25)
+//                            updatingStatus = !updatingStatus
+//                        }
+//                    }
                 },
                 modifier = Modifier.padding(0.dp)
             )
@@ -218,7 +217,7 @@ fun TaskCard(
                         text = task.title,
                         fontWeight = FontWeight.Bold,
                         style = Typography.body1,
-                        color = if (selected) GrayDark else Black
+                        color = if (task.done) GrayDark else Black
                     )
 
                     if (task.priority != Priority.NONE) {
@@ -234,12 +233,12 @@ fun TaskCard(
                             Text(
                                 text = task.priority.value,
                                 style = Typography.body2,
-                                color = if (selected) GrayDark else color
+                                color = if (task.done) GrayDark else color
                             )
                             Icon(
                                 imageVector = Icons.Rounded.PriorityHigh,
                                 contentDescription = stringResource(id = R.string.priority),
-                                tint = if (selected) GrayDark else color,
+                                tint = if (task.done) GrayDark else color,
                                 modifier = Modifier.size(14.dp)
                             )
                         }
@@ -265,7 +264,7 @@ fun TaskCard(
                                 text = it.format(),
                                 fontWeight = FontWeight.SemiBold,
                                 style = Typography.caption,
-                                color = if (selected) GrayDark else color
+                                color = if (task.done) GrayDark else color
                             )
                         }
                     }
@@ -275,7 +274,7 @@ fun TaskCard(
                             text = ", ",
                             style = Typography.caption,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (selected) GrayDark else color
+                            color = if (task.done) GrayDark else color
                         )
                     }
 
@@ -285,7 +284,7 @@ fun TaskCard(
                                 text = it.format(),
                                 style = Typography.caption,
                                 fontWeight = FontWeight.SemiBold,
-                                color = if (selected) GrayDark else color
+                                color = if (task.done) GrayDark else color
                             )
                         }
                     }
@@ -295,7 +294,7 @@ fun TaskCard(
                             text = ", ",
                             style = Typography.caption,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (selected) GrayDark else color
+                            color = if (task.done) GrayDark else color
                         )
                     }
 
@@ -305,7 +304,7 @@ fun TaskCard(
                                 text = task.repeat.value,
                                 style = Typography.caption,
                                 fontWeight = FontWeight.SemiBold,
-                                color = if (selected) GrayDark else color
+                                color = if (task.done) GrayDark else color
                             )
                         }
                     }

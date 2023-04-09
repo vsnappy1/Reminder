@@ -47,7 +47,7 @@ fun ScheduledTaskScreen(
         getListOfTaskCards(
             tasks = pastDueTasks,
             onItemClick = onItemClick,
-            onDoneClick = { state -> viewModel.markDone(state) })
+            onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
     if (todayTasks.isNotEmpty()) {
@@ -57,7 +57,7 @@ fun ScheduledTaskScreen(
         getListOfTaskCards(
             tasks = todayTasks,
             onItemClick = onItemClick,
-            onDoneClick = { state -> viewModel.markDone(state) })
+            onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
     if (tomorrowTasks.isNotEmpty()) {
@@ -67,7 +67,7 @@ fun ScheduledTaskScreen(
         getListOfTaskCards(
             tasks = tomorrowTasks,
             onItemClick = onItemClick,
-            onDoneClick = { state -> viewModel.markDone(state) })
+            onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
     if (thisWeekTasks.isNotEmpty()) {
@@ -77,7 +77,7 @@ fun ScheduledTaskScreen(
         getListOfTaskCards(
             tasks = thisWeekTasks,
             onItemClick = onItemClick,
-            onDoneClick = { state -> viewModel.markDone(state) })
+            onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
     if (upcomingTasks.isNotEmpty()) {
@@ -87,7 +87,7 @@ fun ScheduledTaskScreen(
         getListOfTaskCards(
             tasks = upcomingTasks,
             onItemClick = onItemClick,
-            onDoneClick = { state -> viewModel.markDone(state) })
+            onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
     BaseViewWithFAB(titleRes = R.string.scheduled, onAddTaskClick = onAddTaskClick) {

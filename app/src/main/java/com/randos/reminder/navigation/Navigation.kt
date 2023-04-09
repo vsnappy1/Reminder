@@ -22,7 +22,8 @@ fun NavGraph(
                 onTodayClick = { navController.navigate(TaskTodayDestination.route) },
                 onAllClick = { navController.navigate(TaskAllDestination.route) },
                 onCompletedClick = { navController.navigate(TaskCompletedDestination.route) },
-                onScheduledClick = { navController.navigate(TaskScheduledDestination.route) }
+                onScheduledClick = { navController.navigate(TaskScheduledDestination.route) },
+                onAddTaskClick = { navController.navigate(TaskAddDestination.route) },
             )
         }
 

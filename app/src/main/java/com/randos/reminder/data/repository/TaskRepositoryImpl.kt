@@ -18,31 +18,40 @@ class TaskRepositoryImpl @Inject constructor(private val taskDao: TaskDao) : Tas
 
     override fun getTask(id: Long): Flow<Task> = taskDao.getTask(id)
 
-    override fun getTasks(): Flow<List<Task>> = taskDao.getTasks(done = false)
+    override fun getTasks(): Flow<List<Task>> = taskDao.getTasks()
 
     override fun getTasksOn(date: LocalDate): Flow<List<Task>> =
-        taskDao.getTasks(date, false)
+        taskDao.getTasks(date)
 
     override fun getTasksBetween(start: LocalDate, end: LocalDate): Flow<List<Task>> =
-        taskDao.getTasks(start, end, false)
+        taskDao.getTasks(start, end)
 
     override fun getTasksAfter(date: LocalDate): Flow<List<Task>> =
-        taskDao.getTasksAfter(date, false)
+        taskDao.getTasksAfter(date)
 
     override fun getTasksBefore(date: LocalDate): Flow<List<Task>> =
-        taskDao.getTasksBefore(date, false)
+        taskDao.getTasksBefore(date)
 
-    override fun getCompletedTasks() = taskDao.getTasks(done = true)
+    override fun getCompletedTasks() = taskDao.getCompletedTasks()
 
     override fun getCompletedTasksOn(date: LocalDate): Flow<List<Task>> =
-        taskDao.getTasks(date, true)
+        taskDao.getCompletedTasks(date)
 
     override fun getCompletedTasksBetween(start: LocalDate, end: LocalDate): Flow<List<Task>> =
-        taskDao.getTasks(start, end, true)
+        taskDao.getCompletedTasks(start, end)
 
     override fun getCompletedTasksAfter(date: LocalDate): Flow<List<Task>> =
-        taskDao.getTasksAfter(date, true)
+        taskDao.getCompletedTasksAfter(date)
 
     override fun getCompletedTasksBefore(date: LocalDate): Flow<List<Task>> =
-        taskDao.getTasksBefore(date, true)
+        taskDao.getCompletedTasksBefore(date)
+
+    override fun getTasksCount(): Flow<Int> = taskDao.getTasksCount()
+
+    override fun getTodayTasksCount(date: LocalDate): Flow<Int> =
+        taskDao.getTodayTasksCount(date)
+
+    override fun getScheduledTasksCount(): Flow<Int> = taskDao.getScheduledTasksCount()
+
+    override fun getCompletedTasksCount(): Flow<Int> = taskDao.getCompletedTasksCount()
 }

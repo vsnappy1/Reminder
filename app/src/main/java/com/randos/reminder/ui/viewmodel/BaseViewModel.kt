@@ -9,18 +9,37 @@ import com.randos.reminder.enums.RepeatCycle
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.uiState.toTask
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
-@Suppress("unused", "unused", "unused")
+private const val DELAY = 1000L
+
 @HiltViewModel
 open class BaseViewModel @Inject constructor(
     private val taskRepository: TaskRepository
 ) : ViewModel() {
 
-    fun markDone(taskUiState: TaskUiState) {
+    private val jobMap = mutableMapOf<Long, Job>()
+
+    fun updateTaskStatus(taskUiState: TaskUiState) {
         viewModelScope.launch {
+            if (taskUiState.done) {
+                markAsNotDone(taskUiState)
+            } else {
+                markAsDone(taskUiState)
+            }
+        }
+    }
+
+    private suspend fun markAsDone(taskUiState: TaskUiState) {
+        val job = viewModelScope.launch {
+            taskRepository.updateTask(
+                taskUiState.copy(done = true, repeat = RepeatCycle.NO_REPEAT).toTask()
+            )
+            delay(DELAY)
             taskRepository.updateTask(
                 taskUiState.copy(
                     done = true,
@@ -29,13 +48,33 @@ open class BaseViewModel @Inject constructor(
                 ).toTask()
             )
             if (taskUiState.repeat != RepeatCycle.NO_REPEAT) {
-                // Add a new task
-                addTask(getNewTask(taskUiState.copy(id = 0)))
+                // Add a new task for next cycle
+                taskRepository.insertTask(getTaskForNextCycle(taskUiState.copy(id = 0)).toTask())
             }
         }
+        if (jobMap.containsKey(taskUiState.id)) {
+            jobMap[taskUiState.id]?.apply {
+                if (isActive) cancel()
+            }
+        }
+        jobMap[taskUiState.id] = job
     }
 
-    private fun getNewTask(taskUiState: TaskUiState): TaskUiState {
+    private suspend fun markAsNotDone(taskUiState: TaskUiState) {
+        val job = viewModelScope.launch {
+            taskRepository.updateTask(taskUiState.copy(done = false).toTask())
+            delay(DELAY)
+            taskRepository.updateTask(taskUiState.copy(done = false, completedOn = null).toTask())
+        }
+        if (jobMap.containsKey(taskUiState.id)) {
+            jobMap[taskUiState.id]?.apply {
+                if (isActive) cancel()
+            }
+        }
+        jobMap[taskUiState.id] = job
+    }
+
+    private fun getTaskForNextCycle(taskUiState: TaskUiState): TaskUiState {
         if (taskUiState.repeat == RepeatCycle.HOURLY) {
             return taskUiState.copy(time = taskUiState.time?.plusHours(1))
         }
@@ -52,20 +91,5 @@ open class BaseViewModel @Inject constructor(
             return taskUiState.copy(date = taskUiState.date?.plusYears(1))
         }
         return taskUiState
-    }
-
-    fun markNotDone(taskUiState: TaskUiState) {
-        viewModelScope.launch {
-            taskRepository.updateTask(
-                taskUiState.copy(done = false, completedOn = LocalDate.now()).toTask()
-            )
-        }
-    }
-
-
-    private fun addTask(taskUiState: TaskUiState) {
-        viewModelScope.launch {
-            taskRepository.insertTask(taskUiState.toTask())
-        }
     }
 }
