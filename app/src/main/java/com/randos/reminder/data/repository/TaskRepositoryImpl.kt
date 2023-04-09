@@ -1,6 +1,5 @@
 package com.randos.reminder.data.repository
 
-import androidx.room.Query
 import com.randos.reminder.data.dao.TaskDao
 import com.randos.reminder.data.entity.Task
 import kotlinx.coroutines.flow.Flow

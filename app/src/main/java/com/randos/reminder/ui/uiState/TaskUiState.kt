@@ -8,17 +8,21 @@ import java.time.LocalTime
 
 data class TaskUiState(
     val id: Long = 0,
-    val title: String = "",
+    val title: String = "title",
     val notes: String? = null,
-    val date: LocalDate? = null,
+    val date: LocalDate? = LocalDate.now(),
     val time: LocalTime? = null,
     val repeat: RepeatCycle = RepeatCycle.NO_REPEAT,
     val priority: Priority = Priority.NONE,
     val done: Boolean = false,
+    val addedOn: LocalDate = LocalDate.now(),
+    val completedOn: LocalDate? = null,
     val isDateChecked: Boolean = date != null,
     val isTimeChecked: Boolean = time != null,
     val isRepeatChecked: Boolean = repeat != RepeatCycle.NO_REPEAT,
-    val isDue: Boolean = (!done && (date?.isBefore(LocalDate.now()) == true || time?.isBefore(LocalTime.now()) == true))
+    val isDue: Boolean = (!done && (date?.isBefore(LocalDate.now()) == true || time?.isBefore(
+        LocalTime.now()
+    ) == true))
 )
 
 fun Task.toTaskUiState(): TaskUiState {
@@ -26,27 +30,31 @@ fun Task.toTaskUiState(): TaskUiState {
         id = this.id,
         title = this.title,
         notes = this.notes,
-        isDateChecked = this.date != null,
         date = this.date,
-        isTimeChecked = this.time != null,
         time = this.time,
-        isRepeatChecked = this.repeat != RepeatCycle.NO_REPEAT,
         repeat = this.repeat,
         priority = this.priority,
-        done = this.done
+        done = this.done,
+        addedOn = this.addedOn,
+        completedOn = this.completedOn,
+        isDateChecked = this.date != null,
+        isTimeChecked = this.time != null,
+        isRepeatChecked = this.repeat != RepeatCycle.NO_REPEAT,
     )
 }
 
 fun TaskUiState.toTask(): Task {
     return Task(
-        this.id,
-        this.title,
-        this.notes,
-        this.date,
-        this.time,
-        this.repeat,
-        this.priority,
-        this.done
+        id = this.id,
+        title = this.title,
+        notes = this.notes,
+        date = this.date,
+        time = this.time,
+        repeat = this.repeat,
+        priority = this.priority,
+        done = this.done,
+        addedOn = this.addedOn,
+        completedOn = this.completedOn
     )
 }
 

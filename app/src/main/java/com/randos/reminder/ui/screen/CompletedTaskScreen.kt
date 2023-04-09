@@ -12,7 +12,6 @@ import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseView
-import com.randos.reminder.ui.component.ListOfTasks
 import com.randos.reminder.ui.component.TimeFrameHeader
 import com.randos.reminder.ui.theme.medium
 import com.randos.reminder.ui.viewmodel.CompletedTaskViewModel
@@ -30,54 +29,56 @@ fun CompletedTaskScreen(
     val todayTasks by viewModel.todayTasks.observeAsState(listOf())
     val yesterdayTasks by viewModel.yesterdayTasks.observeAsState(listOf())
     val previousSevenDaysTasks by viewModel.previousSevenDaysTasks.observeAsState(listOf())
-    val allOtherTasks by viewModel.allOtherTasks.observeAsState(listOf())
+    val previousTasks by viewModel.allOtherTasks.observeAsState(listOf())
+
+    // Creating flat list of views because nested lazy columns are not supported
+    val list = mutableListOf<@Composable () -> Unit>()
+
+    if (todayTasks.isNotEmpty()) {
+        list.add { TimeFrameHeader(titleRes = R.string.today) }
+    }
+    list.addAll(
+        getListOfTaskCards(
+            tasks = todayTasks,
+            onItemClick = onItemClick,
+            onDoneClick = { state -> viewModel.markNotDone(state) })
+    )
+
+    if (yesterdayTasks.isNotEmpty()) {
+        list.add { TimeFrameHeader(titleRes = R.string.yesterday) }
+    }
+    list.addAll(
+        getListOfTaskCards(
+            tasks = yesterdayTasks,
+            onItemClick = onItemClick,
+            onDoneClick = { state -> viewModel.markNotDone(state) })
+    )
+
+    if (previousSevenDaysTasks.isNotEmpty()) {
+        list.add { TimeFrameHeader(titleRes = R.string.previous_seven_days) }
+    }
+    list.addAll(
+        getListOfTaskCards(
+            tasks = previousSevenDaysTasks,
+            onItemClick = onItemClick,
+            onDoneClick = { state -> viewModel.markNotDone(state) })
+    )
+
+    if (previousTasks.isNotEmpty()) {
+        list.add { TimeFrameHeader(titleRes = R.string.previous) }
+    }
+    list.addAll(
+        getListOfTaskCards(
+            tasks = previousTasks,
+            onItemClick = onItemClick,
+            onDoneClick = { state -> viewModel.markNotDone(state) })
+    )
 
     BaseView(titleRes = R.string.completed) {
-        val timeFrames = listOf(
-            R.string.today,
-            R.string.yesterday,
-            R.string.previous_seven_days,
-            R.string.all_other
-        )
-        LazyColumn(modifier = Modifier.padding(medium)) {
-            items(items = timeFrames, itemContent = {
-                when (it) {
-                    R.string.today -> {
-                        TimeFrameHeader(titleRes = it)
-                        ListOfTasks(
-                            tasks = todayTasks,
-                            onDoneClick = { task -> viewModel.markNotDone(task) },
-                            onItemClick = onItemClick,
-                            isDateVisible = false
-                        )
-                    }
-                    R.string.yesterday -> {
-                        TimeFrameHeader(titleRes = it)
-                        ListOfTasks(
-                            tasks = yesterdayTasks,
-                            onDoneClick = { task -> viewModel.markNotDone(task) },
-                            onItemClick = onItemClick,
-                            isDateVisible = false
-                        )
-                    }
-                    R.string.previous_seven_days -> {
-                        TimeFrameHeader(titleRes = it)
-                        ListOfTasks(
-                            tasks = previousSevenDaysTasks,
-                            onDoneClick = { task -> viewModel.markNotDone(task) },
-                            onItemClick = onItemClick,
-                        )
-                    }
-                    R.string.all_other -> {
-                        TimeFrameHeader(titleRes = it)
-                        ListOfTasks(
-                            tasks = allOtherTasks,
-                            onDoneClick = { task -> viewModel.markNotDone(task) },
-                            onItemClick = onItemClick,
-                        )
-                    }
-                }
-            })
+        LazyColumn(modifier = Modifier.padding(horizontal = medium)) {
+            items(list) {
+                it()
+            }
         }
     }
 }

@@ -13,8 +13,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
-import com.randos.reminder.ui.component.*
+import com.randos.reminder.ui.component.BaseViewWithFAB
+import com.randos.reminder.ui.component.NoTaskMessage
+import com.randos.reminder.ui.component.TaskCard
+import com.randos.reminder.ui.component.TimeFrameHeader
 import com.randos.reminder.ui.theme.medium
+import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.viewmodel.ScheduledTaskViewModel
 
 object TaskScheduledDestination : NavigationDestination {
@@ -32,65 +36,93 @@ fun ScheduledTaskScreen(
     val todayTasks by viewModel.todayTasks.observeAsState(listOf())
     val tomorrowTasks by viewModel.tomorrowTasks.observeAsState(listOf())
     val thisWeekTasks by viewModel.thisWeekTasks.observeAsState(listOf())
-    val allOtherTasks by viewModel.allOtherTasks.observeAsState(listOf())
+    val upcomingTasks by viewModel.upcomingTasks.observeAsState(listOf())
+
+    // Creating flat list of views because nested lazy columns are not supported
+    val list = mutableListOf<@Composable () -> Unit>()
+    if (pastDueTasks.isNotEmpty()) {
+        list.add { TimeFrameHeader(titleRes = R.string.past_due) }
+    }
+    list.addAll(
+        getListOfTaskCards(
+            tasks = pastDueTasks,
+            onItemClick = onItemClick,
+            onDoneClick = { state -> viewModel.markDone(state) })
+    )
+
+    if (todayTasks.isNotEmpty()) {
+        list.add { TimeFrameHeader(titleRes = R.string.today) }
+    }
+    list.addAll(
+        getListOfTaskCards(
+            tasks = todayTasks,
+            onItemClick = onItemClick,
+            onDoneClick = { state -> viewModel.markDone(state) })
+    )
+
+    if (tomorrowTasks.isNotEmpty()) {
+        list.add { TimeFrameHeader(titleRes = R.string.tomorrow) }
+    }
+    list.addAll(
+        getListOfTaskCards(
+            tasks = tomorrowTasks,
+            onItemClick = onItemClick,
+            onDoneClick = { state -> viewModel.markDone(state) })
+    )
+
+    if (thisWeekTasks.isNotEmpty()) {
+        list.add { TimeFrameHeader(titleRes = R.string.this_week) }
+    }
+    list.addAll(
+        getListOfTaskCards(
+            tasks = thisWeekTasks,
+            onItemClick = onItemClick,
+            onDoneClick = { state -> viewModel.markDone(state) })
+    )
+
+    if (upcomingTasks.isNotEmpty()) {
+        list.add { TimeFrameHeader(titleRes = R.string.upcoming) }
+    }
+    list.addAll(
+        getListOfTaskCards(
+            tasks = upcomingTasks,
+            onItemClick = onItemClick,
+            onDoneClick = { state -> viewModel.markDone(state) })
+    )
 
     BaseViewWithFAB(titleRes = R.string.scheduled, onAddTaskClick = onAddTaskClick) {
-        val timeFrames = listOf(
-            R.string.past_due,
-            R.string.today,
-            R.string.tomorrow,
-            R.string.this_week,
-            R.string.all_other
-        )
-        LazyColumn(modifier = Modifier.padding(medium)) {
-            items(items = timeFrames, itemContent = {
-                when (it) {
-                    R.string.past_due -> {
-                        TimeFrameHeader(titleRes = it)
-                        ListOfTasks(
-                            tasks = pastDueTasks,
-                            onDoneClick = { task -> viewModel.markDone(task) },
-                            onItemClick = onItemClick,
-                        )
-                    }
-                    R.string.today -> {
-                        TimeFrameHeader(titleRes = it)
-                        ListOfTasks(
-                            tasks = todayTasks,
-                            onDoneClick = { task -> viewModel.markDone(task) },
-                            onItemClick = onItemClick,
-                            isDateVisible = false
-                        )
-                    }
-                    R.string.tomorrow -> {
-                        TimeFrameHeader(titleRes = it)
-                        ListOfTasks(
-                            tasks = tomorrowTasks,
-                            onDoneClick = { task -> viewModel.markDone(task) },
-                            onItemClick = onItemClick,
-                            isDateVisible = false
-                        )
-                    }
-                    R.string.this_week -> {
-                        TimeFrameHeader(titleRes = it)
-                        ListOfTasks(
-                            tasks = thisWeekTasks,
-                            onDoneClick = { task -> viewModel.markDone(task) },
-                            onItemClick = onItemClick,
-                        )
-                    }
-                    R.string.all_other -> {
-                        TimeFrameHeader(titleRes = it)
-                        ListOfTasks(
-                            tasks = allOtherTasks,
-                            onDoneClick = { task -> viewModel.markDone(task) },
-                            onItemClick = onItemClick,
-                        )
-                    }
-                }
-            })
+        LazyColumn(modifier = Modifier.padding(horizontal = medium)) {
+            items(list) {
+                it()
+            }
+        }
+        if (pastDueTasks.isEmpty() &&
+            todayTasks.isEmpty() &&
+            tomorrowTasks.isEmpty() &&
+            thisWeekTasks.isEmpty() &&
+            upcomingTasks.isEmpty()
+        ) {
+            NoTaskMessage()
         }
     }
+}
+
+fun getListOfTaskCards(
+    tasks: List<TaskUiState>,
+    onItemClick: (Long) -> Unit,
+    onDoneClick: (TaskUiState) -> Unit
+): List<@Composable () -> Unit> {
+    val list = mutableListOf<@Composable () -> Unit>()
+    tasks.forEach {
+        list.add {
+            TaskCard(
+                task = it,
+                onItemClick = onItemClick,
+                onDoneClick = onDoneClick
+            )
+        }
+    }
+    return list
 }
 
 

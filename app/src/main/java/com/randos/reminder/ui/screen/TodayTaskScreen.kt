@@ -11,10 +11,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
-import com.randos.reminder.ui.component.BaseView
-import com.randos.reminder.ui.component.BaseViewWithFAB
-import com.randos.reminder.ui.component.ListOfTasks
-import com.randos.reminder.ui.component.TaskCard
+import com.randos.reminder.ui.component.*
 import com.randos.reminder.ui.theme.medium
 import com.randos.reminder.ui.viewmodel.TodayTaskViewModel
 
@@ -29,8 +26,8 @@ fun TodayTaskScreen(
     onAddTaskClick: () -> Unit = {},
     onItemClick: (Long) -> Unit = {}
 ) {
-    val todayTasks by viewModel.todayTasks.observeAsState(listOf())
     val dueTasks by viewModel.dueTasks.observeAsState(listOf())
+    val todayTasks by viewModel.todayTasks.observeAsState(listOf())
     BaseViewWithFAB(titleRes = R.string.today, onAddTaskClick = onAddTaskClick) {
         LazyColumn(modifier = Modifier.padding(medium)) {
             items(dueTasks) {
@@ -48,6 +45,9 @@ fun TodayTaskScreen(
                     isDateVisible = false
                 )
             }
+        }
+        if (todayTasks.isEmpty() && dueTasks.isEmpty()) {
+            NoTaskMessage()
         }
     }
 }

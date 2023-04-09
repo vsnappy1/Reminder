@@ -1,13 +1,8 @@
 package com.randos.reminder.utils
 
-import com.randos.reminder.data.entity.LocalDateAdapter
-import com.randos.reminder.data.entity.LocalTimeAdapter
 import com.randos.reminder.data.entity.Task
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.uiState.toTaskUiState
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter

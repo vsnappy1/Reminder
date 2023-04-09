@@ -6,6 +6,7 @@ import com.randos.reminder.data.repository.TaskRepository
 import com.randos.reminder.ui.uiState.toTask
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,7 +19,7 @@ class AddTaskViewModel @Inject constructor(
 
     fun addTask() {
         viewModelScope.launch {
-            uiState.value?.toTask()?.apply {
+            uiState.value?.copy(addedOn = LocalDate.now())?.toTask()?.apply {
                 taskRepository.insertTask(this)
             }
         }

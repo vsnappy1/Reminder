@@ -4,7 +4,8 @@
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="this_week">This Week</string>
-    <string name="all_other">All Other</string>
+    <string name="upcoming">Upcoming</string>
+    <string name="previous">Previous</string>
     <string name="yesterday">Yesterday</string>
     <string name="previous_seven_days">Previous 7 Days</string>
     <string name="add">Add</string>
@@ -33,5 +34,6 @@
     <string name="all">All</string>
     <string name="done">Done</string>
     <string name="arrow_drop_down">Arrow drop down</string>
+    <string name="no_task_message">Looks like you don\'t have any tasks to view right now. Don\'t worry, it\'s a great opportunity to add a new task and start being productive!</string>
 
 </resources>

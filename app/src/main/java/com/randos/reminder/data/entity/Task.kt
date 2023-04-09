@@ -20,7 +20,9 @@ data class Task(
     val time: LocalTime? = null,
     val repeat: RepeatCycle = RepeatCycle.NO_REPEAT,
     val priority: Priority = Priority.NONE,
-    val done: Boolean = false
+    val done: Boolean = false,
+    val addedOn: LocalDate = LocalDate.now(),
+    val completedOn: LocalDate? = null
 )
 
 class Converters {

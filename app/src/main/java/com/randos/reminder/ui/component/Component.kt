@@ -1,6 +1,5 @@
 package com.randos.reminder.ui.component
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,8 +30,6 @@ import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.utils.format
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-private const val TAG = "Component"
 
 @Composable
 fun TransparentBackgroundTextField(
@@ -157,41 +154,16 @@ fun Header(modifier: Modifier = Modifier, titleRes: Int) {
 fun TimeFrameHeader(titleRes: Int, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .padding(vertical = medium)
+            .padding(vertical = small)
             .fillMaxWidth()
     ) {
         Text(
             text = stringResource(id = titleRes),
-            fontSize = 20.sp,
             modifier = Modifier.align(Alignment.CenterStart),
             fontWeight = FontWeight.Bold,
             color = Green,
-            style = Typography.h5
+            style = Typography.h6.copy(fontSize = 18.sp)
         )
-    }
-}
-
-@Composable
-fun ListOfTasks(
-    tasks: List<TaskUiState>,
-    modifier: Modifier = Modifier,
-    onDoneClick: (TaskUiState) -> Unit = {},
-    onItemClick: (Long) -> Unit = {},
-    isDateVisible: Boolean = true,
-    isTimeVisible: Boolean = true,
-    isRepeatVisible: Boolean = true,
-) {
-    Column(modifier = modifier) {
-        tasks.forEach {
-            TaskCard(
-                task = it,
-                onItemClick = onItemClick,
-                onDoneClick = onDoneClick,
-                isDateVisible = isDateVisible,
-                isTimeVisible = isTimeVisible,
-                isRepeatVisible = isRepeatVisible
-            )
-        }
     }
 }
 
@@ -205,8 +177,7 @@ fun TaskCard(
     isTimeVisible: Boolean = true,
     isRepeatVisible: Boolean = true,
 ) {
-    var selected by remember{ mutableStateOf(task.done) }
-    Log.d(TAG, "TaskCard: ${task.title} | $selected")
+    var selected by remember { mutableStateOf(task.done) }
     val coroutineScope = rememberCoroutineScope()
     Card(
         shape = Shapes.small,
@@ -220,17 +191,19 @@ fun TaskCard(
             modifier = Modifier
                 .padding(small)
         ) {
-//            var updatingStatus by remember { mutableStateOf(false) }
+            var updatingStatus by remember { mutableStateOf(false) }
             ReminderRadioButton(
                 selected = selected, onClick = {
-//                    onDoneClick(task)
                     selected = !selected
-//                    updatingStatus = !updatingStatus
+                    updatingStatus = !updatingStatus
                     coroutineScope.launch {
                         delay(1000)
-                        onDoneClick(task)
-                        delay(25)
-                        selected = !selected
+                        if (updatingStatus) {
+                            onDoneClick(task)
+                            delay(25)
+                            selected = !selected
+                            updatingStatus = !updatingStatus
+                        }
                     }
                 },
                 modifier = Modifier.padding(0.dp)
@@ -369,7 +342,6 @@ private fun ReminderRadioButton(
     }
 }
 
-@Preview
 @Composable
 fun ReminderDropDown(
     value: String = " None",
@@ -427,4 +399,18 @@ fun ReminderButton(
             color = if (enabled) Black else GrayDark
         )
     }
+}
+
+@Composable
+fun NoTaskMessage() {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        Text(
+            text = stringResource(id = R.string.no_task_message),
+            modifier = Modifier
+                .padding(large),
+            style = Typography.body1,
+            textAlign = TextAlign.Center
+        )
+    }
+
 }
