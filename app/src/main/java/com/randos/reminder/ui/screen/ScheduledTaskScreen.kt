@@ -57,7 +57,9 @@ fun ScheduledTaskScreen(
         getListOfTaskCards(
             tasks = todayTasks,
             onItemClick = onItemClick,
-            onDoneClick = { state -> viewModel.updateTaskStatus(state) })
+            onDoneClick = { state -> viewModel.updateTaskStatus(state) },
+            isDateVisible = false
+        )
     )
 
     if (tomorrowTasks.isNotEmpty()) {
@@ -67,7 +69,9 @@ fun ScheduledTaskScreen(
         getListOfTaskCards(
             tasks = tomorrowTasks,
             onItemClick = onItemClick,
-            onDoneClick = { state -> viewModel.updateTaskStatus(state) })
+            onDoneClick = { state -> viewModel.updateTaskStatus(state) },
+            isDateVisible = false
+        )
     )
 
     if (thisWeekTasks.isNotEmpty()) {
@@ -110,7 +114,10 @@ fun ScheduledTaskScreen(
 fun getListOfTaskCards(
     tasks: List<TaskUiState>,
     onItemClick: (Long) -> Unit,
-    onDoneClick: (TaskUiState) -> Unit
+    onDoneClick: (TaskUiState) -> Unit,
+    isDateVisible: Boolean = true,
+    isTimeVisible: Boolean = true,
+    isRepeatVisible: Boolean = true,
 ): List<@Composable () -> Unit> {
     val list = mutableListOf<@Composable () -> Unit>()
     tasks.forEach {
@@ -118,7 +125,10 @@ fun getListOfTaskCards(
             TaskCard(
                 task = it,
                 onItemClick = onItemClick,
-                onDoneClick = onDoneClick
+                onDoneClick = onDoneClick,
+                isDateVisible = isDateVisible,
+                isTimeVisible = isTimeVisible,
+                isRepeatVisible = isRepeatVisible
             )
         }
     }

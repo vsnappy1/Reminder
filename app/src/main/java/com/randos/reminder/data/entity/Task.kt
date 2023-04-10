@@ -5,9 +5,8 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 import com.randos.reminder.enums.Priority
 import com.randos.reminder.enums.RepeatCycle
-import com.squareup.moshi.FromJson
-import com.squareup.moshi.ToJson
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 
 @Entity
@@ -21,52 +20,39 @@ data class Task(
     val repeat: RepeatCycle = RepeatCycle.NO_REPEAT,
     val priority: Priority = Priority.NONE,
     val done: Boolean = false,
-    val addedOn: LocalDate = LocalDate.now(),
-    val completedOn: LocalDate? = null
+    val addedOn: LocalDateTime,
+    val completedOn: LocalDateTime? = null
 )
 
 class Converters {
     @TypeConverter
-    fun fromTimestamp(value: String?): LocalDate? {
+    fun fromStringDate(value: String?): LocalDate? {
         return value?.let { LocalDate.parse(it) }
     }
 
     @TypeConverter
-    fun toTimestamp(date: LocalDate?): String? {
+    fun toDate(date: LocalDate?): String? {
         return date?.toString()
     }
 
     @TypeConverter
-    fun localTimeToNanoOfDay(time: LocalTime?): String? {
+    fun fromStringTime(value: String?): LocalTime? {
+        return value?.let { LocalTime.parse(it) }
+    }
+
+    @TypeConverter
+    fun toTime(time: LocalTime?): String? {
         return time?.toString()
     }
 
     @TypeConverter
-    fun nanoOfDayToLocalTime(value: String?): LocalTime? {
-        return value?.let { LocalTime.parse(it) }
-    }
-}
-
-class LocalDateAdapter {
-    @ToJson
-    fun toJson(localDate: LocalDate): String {
-        return localDate.toString()
+    fun fromStringDateTime(value: String?): LocalDateTime? {
+        return value?.let { LocalDateTime.parse(it) }
     }
 
-    @FromJson
-    fun fromJson(json: String): LocalDate {
-        return LocalDate.parse(json)
-    }
-}
-class LocalTimeAdapter {
-    @ToJson
-    fun toJson(localTime: LocalTime): String {
-        return localTime.toString()
-    }
-
-    @FromJson
-    fun fromJson(json: String): LocalTime {
-        return LocalTime.parse(json)
+    @TypeConverter
+    fun toDateTime(time: LocalDateTime?): String? {
+        return time?.toString()
     }
 }
 

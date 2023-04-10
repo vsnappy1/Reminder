@@ -42,7 +42,8 @@ fun CompletedTaskScreen(
         getListOfTaskCards(
             tasks = todayTasks,
             onItemClick = onItemClick,
-            onDoneClick = { state -> viewModel.updateTaskStatus(state) })
+            onDoneClick = { state -> viewModel.updateTaskStatus(state) }
+        )
     )
 
     if (yesterdayTasks.isNotEmpty()) {

@@ -4,6 +4,7 @@ import com.randos.reminder.data.entity.Task
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.uiState.toTaskUiState
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -24,4 +25,8 @@ fun LocalDate.format(): String {
     if (this == LocalDate.now().plusDays(1)) return "Tomorrow"
     if (this == LocalDate.now().minusDays(1)) return "Yesterday"
     return format(DateTimeFormatter.ISO_LOCAL_DATE)
+}
+
+fun LocalDateTime.format(): String {
+    return "${this.toLocalDate().format()}, ${this.toLocalTime().format()}"
 }

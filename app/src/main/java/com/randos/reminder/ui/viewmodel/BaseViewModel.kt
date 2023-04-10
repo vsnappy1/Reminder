@@ -12,7 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 private const val DELAY = 1000L
@@ -43,7 +43,7 @@ open class BaseViewModel @Inject constructor(
             taskRepository.updateTask(
                 taskUiState.copy(
                     done = true,
-                    completedOn = LocalDate.now(),
+                    completedOn = LocalDateTime.now(),
                     repeat = RepeatCycle.NO_REPEAT
                 ).toTask()
             )

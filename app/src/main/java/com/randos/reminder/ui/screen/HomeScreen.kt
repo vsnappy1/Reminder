@@ -1,20 +1,19 @@
 package com.randos.reminder.ui.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AllInbox
-import androidx.compose.material.icons.rounded.CalendarMonth
-import androidx.compose.material.icons.rounded.Done
-import androidx.compose.material.icons.rounded.Today
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,10 +28,7 @@ import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseViewWithFAB
-import com.randos.reminder.ui.theme.Shapes
-import com.randos.reminder.ui.theme.Typography
-import com.randos.reminder.ui.theme.medium
-import com.randos.reminder.ui.theme.small
+import com.randos.reminder.ui.theme.*
 import com.randos.reminder.ui.viewmodel.HomeViewModel
 
 object HomeDestination : NavigationDestination {
@@ -84,7 +80,11 @@ fun HomeScreen(
             onClick = onCompletedClick
         ),
     )
+    var value by remember { mutableStateOf("") }
     BaseViewWithFAB(titleRes = R.string.app_name, onAddTaskClick = onAddTaskClick) {
+        ReminderTextField(
+            value = value,
+            onValueChange = { value = it })
         LazyVerticalGrid(columns = GridCells.Fixed(2)) {
             items(timeFrames) {
                 TimeFrameCard(
@@ -99,6 +99,50 @@ fun HomeScreen(
     }
 }
 
+@Preview
+@Composable
+private fun ReminderTextField(value: String = "Hello", onValueChange: (String) -> Unit = {}) {
+    Row(
+        modifier = Modifier
+            .padding(medium)
+            .background(color = White, shape = Shapes.small)
+            .border(width = 1.dp, color = Gray300, shape = Shapes.small)
+            .fillMaxWidth()
+            .padding(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.Search,
+            contentDescription = stringResource(id = R.string.search),
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(modifier = Modifier.width(small))
+        Box {
+            if (value.isEmpty())
+                Text(text = "Search", style = Typography.caption, color = Gray500)
+            BasicTextField(
+                value = value, onValueChange = onValueChange, singleLine = true,
+                textStyle = Typography.caption,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+
+//    OutlinedTextField(
+//        value = value,
+//        onValueChange = onValueChange,
+//        singleLine = true,
+//        leadingIcon = {
+//            Icon(
+//                imageVector = Icons.Rounded.Search,
+//                contentDescription = stringResource(id = R.string.search)
+//            )
+//        },
+//        placeholder = {
+//            Text(text = "Search")
+//        })
+}
+
 data class TimeFrame(
     val textRes: Int,
     val count: Int,
@@ -107,7 +151,6 @@ data class TimeFrame(
     val onClick: () -> Unit
 )
 
-@Preview
 @Composable
 fun TimeFrameCard(
     textRes: Int = R.string.today,

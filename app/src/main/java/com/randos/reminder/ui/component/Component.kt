@@ -11,7 +11,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material.icons.rounded.PriorityHigh
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,8 +28,6 @@ import com.randos.reminder.enums.RepeatCycle
 import com.randos.reminder.ui.theme.*
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.utils.format
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun TransparentBackgroundTextField(
@@ -118,13 +116,13 @@ fun BaseViewWithFAB(
                     .padding(large)
                     .size(50.dp)
                     .align(Alignment.BottomEnd),
-                backgroundColor = Green
+                backgroundColor = White
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Add,
                     contentDescription = stringResource(id = R.string.add),
-                    tint = White,
-                    modifier = Modifier.size(20.dp)
+                    tint = Green,
+                    modifier = Modifier.size(25.dp)
                 )
             }
         }) {
@@ -177,7 +175,6 @@ fun TaskCard(
     isTimeVisible: Boolean = true,
     isRepeatVisible: Boolean = true,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     Card(
         shape = Shapes.small,
         modifier = Modifier
@@ -190,21 +187,8 @@ fun TaskCard(
             modifier = Modifier
                 .padding(small)
         ) {
-            var updatingStatus by remember { mutableStateOf(false) }
-
             ReminderRadioButton(
-                selected = task.done, onClick = {
-                    onDoneClick(task)
-//                    updatingStatus = !updatingStatus
-//                    coroutineScope.launch {
-//                        delay(1000)
-//                        if (updatingStatus) {
-//                            onDoneClick(task)
-//                            delay(25)
-//                            updatingStatus = !updatingStatus
-//                        }
-//                    }
-                },
+                selected = task.done, onClick = { onDoneClick(task) },
                 modifier = Modifier.padding(0.dp)
             )
             Column(
@@ -309,6 +293,15 @@ fun TaskCard(
                         }
                     }
                 }
+                Spacer(modifier = Modifier.height(2.dp))
+                task.completedOn?.let {
+                    Text(
+                        text = "Completed: ${it.format()}",
+                        style = Typography.caption,
+                        fontWeight = FontWeight.SemiBold,
+                        color = GrayDark
+                    )
+                }
             }
         }
     }
@@ -376,31 +369,6 @@ fun ReminderDropDown(
 }
 
 @Composable
-fun ReminderButton(
-    modifier: Modifier = Modifier,
-    valueRes: Int,
-    onClick: () -> Unit = {},
-    enabled: Boolean = true,
-    showBackground: Boolean = true
-) {
-    Button(
-        onClick = onClick,
-        modifier = modifier,
-        enabled = enabled,
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = if (showBackground) MaterialTheme.colors.secondary else Transparent,
-            disabledBackgroundColor = if (showBackground) MaterialTheme.colors.primaryVariant else Transparent
-        )
-    ) {
-        Text(
-            text = stringResource(id = valueRes),
-            style = Typography.body1,
-            color = if (enabled) Black else GrayDark
-        )
-    }
-}
-
-@Composable
 fun NoTaskMessage() {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
         Text(
@@ -411,5 +379,4 @@ fun NoTaskMessage() {
             textAlign = TextAlign.Center
         )
     }
-
 }

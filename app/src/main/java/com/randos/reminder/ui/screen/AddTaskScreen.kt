@@ -44,7 +44,7 @@ object TaskAddDestination : NavigationDestination {
 }
 
 // TODO beautify and add search functionality in home screen
-// TODO refactor the completed task so that task are displayed based on when completed
+// TODO customize no task message for each of the screen
 // TODO write test cases
 // TODO implement notification
 // TODO get the theme reviewed

@@ -4,6 +4,7 @@ import com.randos.reminder.data.entity.Task
 import com.randos.reminder.enums.Priority
 import com.randos.reminder.enums.RepeatCycle
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 
 data class TaskUiState(
@@ -15,14 +16,13 @@ data class TaskUiState(
     val repeat: RepeatCycle = RepeatCycle.NO_REPEAT,
     val priority: Priority = Priority.NONE,
     val done: Boolean = false,
-    val addedOn: LocalDate = LocalDate.now(),
-    val completedOn: LocalDate? = null,
+    val addedOn: LocalDateTime = LocalDateTime.now(),
+    val completedOn: LocalDateTime? = null,
     val isDateChecked: Boolean = date != null,
     val isTimeChecked: Boolean = time != null,
     val isRepeatChecked: Boolean = repeat != RepeatCycle.NO_REPEAT,
-    val isDue: Boolean = (!done && (date?.isBefore(LocalDate.now()) == true || time?.isBefore(
-        LocalTime.now()
-    ) == true))
+    val isDue: Boolean = (!done && (date?.isBefore(LocalDate.now()) == true ||
+            (date?.isBefore(LocalDate.now()) == true && time?.isBefore(LocalTime.now()) == true)))
 )
 
 fun Task.toTaskUiState(): TaskUiState {
