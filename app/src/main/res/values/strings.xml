@@ -7,7 +7,7 @@
     <string name="upcoming">Upcoming</string>
     <string name="previous">Previous</string>
     <string name="yesterday">Yesterday</string>
-    <string name="previous_seven_days">Previous 7 Days</string>
+    <string name="last_seven_days">Last 7 Days</string>
     <string name="add">Add</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>

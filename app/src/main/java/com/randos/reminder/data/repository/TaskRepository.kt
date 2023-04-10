@@ -1,5 +1,6 @@
 package com.randos.reminder.data.repository
 
+import androidx.room.Query
 import com.randos.reminder.data.entity.Task
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -37,4 +38,7 @@ interface TaskRepository {
     fun getTodayTasksCount(date: LocalDate): Flow<Int>
     fun getScheduledTasksCount(): Flow<Int>
     fun getCompletedTasksCount(): Flow<Int>
+    fun getTasksByKeyword(keyword: String): Flow<List<Task>>
+
+    fun getCompletedTasksByKeyword(keyword: String): Flow<List<Task>>
 }

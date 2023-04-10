@@ -43,7 +43,7 @@ object TaskAddDestination : NavigationDestination {
     override val titleRes: Int = R.string.new_reminder
 }
 
-// TODO beautify and add search functionality in home screen
+// TODO beautify and add search functionality in home screen also create a homeScreen ui State
 // TODO customize no task message for each of the screen
 // TODO write test cases
 // TODO implement notification

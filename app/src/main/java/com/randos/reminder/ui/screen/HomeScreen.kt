@@ -3,11 +3,14 @@ package com.randos.reminder.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -18,7 +21,10 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,6 +36,7 @@ import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseViewWithFAB
 import com.randos.reminder.ui.theme.*
 import com.randos.reminder.ui.viewmodel.HomeViewModel
+import com.randos.reminder.utils.NoRippleInteractionSource
 
 object HomeDestination : NavigationDestination {
     override val route: String = ReminderScreen.HOME_SCREEN.name
@@ -81,19 +88,33 @@ fun HomeScreen(
         ),
     )
     var value by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+    var focusState by remember { mutableStateOf(false) }
     BaseViewWithFAB(titleRes = R.string.app_name, onAddTaskClick = onAddTaskClick) {
         ReminderTextField(
             value = value,
-            onValueChange = { value = it })
-        LazyVerticalGrid(columns = GridCells.Fixed(2)) {
-            items(timeFrames) {
-                TimeFrameCard(
-                    textRes = it.textRes,
-                    count = it.count,
-                    icon = it.icon,
-                    iconDescriptionRes = it.iconDescriptionRes,
-                    onClick = it.onClick
-                )
+            onValueChange = { value = it },
+            focusManager = focusManager,
+            onFocusChange = { focusState = it }
+        )
+
+        if (focusState) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .indication(NoRippleInteractionSource(), null)
+                .clickable { focusManager.clearFocus() }) {
+            }
+        } else {
+            LazyVerticalGrid(columns = GridCells.Fixed(2)) {
+                items(timeFrames) {
+                    TimeFrameCard(
+                        textRes = it.textRes,
+                        count = it.count,
+                        icon = it.icon,
+                        iconDescriptionRes = it.iconDescriptionRes,
+                        onClick = it.onClick
+                    )
+                }
             }
         }
     }
@@ -101,7 +122,12 @@ fun HomeScreen(
 
 @Preview
 @Composable
-private fun ReminderTextField(value: String = "Hello", onValueChange: (String) -> Unit = {}) {
+private fun ReminderTextField(
+    value: String = "Hello",
+    onValueChange: (String) -> Unit = {},
+    focusManager: FocusManager = LocalFocusManager.current,
+    onFocusChange: (Boolean) -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .padding(medium)
@@ -123,24 +149,29 @@ private fun ReminderTextField(value: String = "Hello", onValueChange: (String) -
             BasicTextField(
                 value = value, onValueChange = onValueChange, singleLine = true,
                 textStyle = Typography.caption,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 20.dp)
+                    .onFocusChanged { onFocusChange(it.hasFocus) },
+                keyboardActions = KeyboardActions { focusManager.clearFocus() },
             )
+            if (value.isNotBlank()) {
+                Icon(
+                    imageVector = Icons.Rounded.Cancel,
+                    contentDescription = stringResource(id = R.string.cancel),
+                    modifier = Modifier
+                        .size(16.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable {
+                            onValueChange("")
+                            focusManager.clearFocus()
+                        }
+                        .align(Alignment.CenterEnd)
+                )
+            }
         }
-    }
 
-//    OutlinedTextField(
-//        value = value,
-//        onValueChange = onValueChange,
-//        singleLine = true,
-//        leadingIcon = {
-//            Icon(
-//                imageVector = Icons.Rounded.Search,
-//                contentDescription = stringResource(id = R.string.search)
-//            )
-//        },
-//        placeholder = {
-//            Text(text = "Search")
-//        })
+    }
 }
 
 data class TimeFrame(

@@ -25,7 +25,7 @@ class CompletedTaskViewModel @Inject constructor(
         .map { it.toTaskUiStateList() }
         .asLiveData()
 
-    val previousSevenDaysTasks: LiveData<List<TaskUiState>> = taskRepository
+    val lastSevenDaysTasks: LiveData<List<TaskUiState>> = taskRepository
         .getCompletedTasksBetween(
             start = LocalDate.now().minusDays(8),
             end = LocalDate.now().minusDays(2)

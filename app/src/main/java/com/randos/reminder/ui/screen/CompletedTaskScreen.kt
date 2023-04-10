@@ -29,7 +29,7 @@ fun CompletedTaskScreen(
 ) {
     val todayTasks by viewModel.todayTasks.observeAsState(listOf())
     val yesterdayTasks by viewModel.yesterdayTasks.observeAsState(listOf())
-    val previousSevenDaysTasks by viewModel.previousSevenDaysTasks.observeAsState(listOf())
+    val lastSevenDaysTasks by viewModel.lastSevenDaysTasks.observeAsState(listOf())
     val previousTasks by viewModel.allOtherTasks.observeAsState(listOf())
 
     // Creating flat list of views because nested lazy columns are not supported
@@ -56,12 +56,12 @@ fun CompletedTaskScreen(
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
-    if (previousSevenDaysTasks.isNotEmpty()) {
-        list.add { TimeFrameHeader(titleRes = R.string.previous_seven_days) }
+    if (lastSevenDaysTasks.isNotEmpty()) {
+        list.add { TimeFrameHeader(titleRes = R.string.last_seven_days) }
     }
     list.addAll(
         getListOfTaskCards(
-            tasks = previousSevenDaysTasks,
+            tasks = lastSevenDaysTasks,
             onItemClick = onItemClick,
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
@@ -85,7 +85,7 @@ fun CompletedTaskScreen(
         if (
             todayTasks.isEmpty() &&
             yesterdayTasks.isEmpty() &&
-            previousSevenDaysTasks.isEmpty() &&
+            lastSevenDaysTasks.isEmpty() &&
             previousTasks.isEmpty()
         ) {
             NoTaskMessage()

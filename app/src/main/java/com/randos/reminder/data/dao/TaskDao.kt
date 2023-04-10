@@ -62,4 +62,10 @@ interface TaskDao {
 
     @Query("SELECT COUNT(*) FROM task WHERE completedOn IS NOT NULL $orderBy")
     fun getCompletedTasksCount(): Flow<Int>
+
+    @Query("SELECT * FROM task WHERE title LIKE :keyword || '%' OR title LIKE '% ' || :keyword || '%'")
+    fun getTasksByKeyword(keyword: String): Flow<List<Task>>
+
+    @Query("SELECT * FROM task WHERE title LIKE :keyword || '%' OR title LIKE '% ' || :keyword || '%' AND completedOn IS NOT NULL")
+    fun getCompletedTasksByKeyword(keyword: String): Flow<List<Task>>
 }
