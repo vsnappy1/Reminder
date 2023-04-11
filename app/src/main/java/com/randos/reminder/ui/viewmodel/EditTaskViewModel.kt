@@ -35,6 +35,13 @@ class EditTaskViewModel @Inject constructor(
             }
         }
     }
+    fun deleteTask() {
+        viewModelScope.launch {
+            uiState.value?.toTask()?.apply {
+                taskRepository.deleteTask(this)
+            }
+        }
+    }
 
     fun updateUiState(uiState: TaskUiState) {
         _uiState.value = uiState

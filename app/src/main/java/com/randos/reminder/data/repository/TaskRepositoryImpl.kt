@@ -72,4 +72,7 @@ class TaskRepositoryImpl @Inject constructor(private val taskDao: TaskDao) : Tas
 
     override fun getCompletedTasksByKeywordCount(keyword: String): Flow<Int> =
         taskDao.getCompletedTasksByKeywordCount(keyword)
+
+    override suspend fun deleteCompletedTasks() =
+        taskDao.deleteCompletedTasks()
 }

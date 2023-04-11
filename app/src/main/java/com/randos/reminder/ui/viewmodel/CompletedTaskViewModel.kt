@@ -2,18 +2,25 @@ package com.randos.reminder.ui.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import com.randos.reminder.data.repository.TaskRepository
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.utils.toTaskUiStateList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class CompletedTaskViewModel @Inject constructor(
-    taskRepository: TaskRepository
+    val taskRepository: TaskRepository
 ) : BaseViewModel(taskRepository) {
+    fun deleteAll() {
+        viewModelScope.launch {
+            taskRepository.deleteCompletedTasks()
+        }
+    }
 
     val todayTasks: LiveData<List<TaskUiState>> = taskRepository
         .getCompletedTasksOn(LocalDate.now())
@@ -37,4 +44,6 @@ class CompletedTaskViewModel @Inject constructor(
         .getCompletedTasksBefore(LocalDate.now().minusDays(8))
         .map { it.toTaskUiStateList() }
         .asLiveData()
+
+    val completedTaskCount = taskRepository.getCompletedTasksCount().asLiveData()
 }

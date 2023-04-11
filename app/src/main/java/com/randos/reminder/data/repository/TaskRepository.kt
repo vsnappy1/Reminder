@@ -40,4 +40,5 @@ interface TaskRepository {
     fun getTasksByKeyword(keyword: String): Flow<List<Task>>
     fun getCompletedTasksByKeyword(keyword: String): Flow<List<Task>>
     fun getCompletedTasksByKeywordCount(keyword: String): Flow<Int>
+    suspend fun deleteCompletedTasks()
 }

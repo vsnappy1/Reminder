@@ -141,7 +141,10 @@ private fun SearchView(
         if (homeUiState.search.isNotBlank()) {
             Column(modifier = Modifier.padding(medium)) {
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "${homeUiState.filteredCompletedTasksCount} Completed")
+                    Text(
+                        text = "${homeUiState.filteredCompletedTasksCount} Completed.",
+                        style = Typography.caption.copy(fontWeight = FontWeight.Bold)
+                    )
                     Icon(
                         imageVector = if (homeUiState.isFilteredCompletedTasksVisible) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
                         contentDescription = stringResource(id = R.string.show_completed_task),
@@ -251,7 +254,7 @@ fun TimeFrameCard(
             .height(62.dp)
             .width(100.dp)
             .clip(Shapes.small)
-            .noRippleClickable { onClick() }
+            .clickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(medium)) {
             Box(modifier = Modifier.fillMaxWidth()) {

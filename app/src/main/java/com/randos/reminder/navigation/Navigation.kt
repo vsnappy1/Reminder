@@ -70,6 +70,7 @@ fun NavGraph(
             EditTaskScreen(
                 onSave = { navController.popBackStack() },
                 onCancel = { navController.popBackStack() },
+                onDelete = { navController.popBackStack() },
             )
         }
     }

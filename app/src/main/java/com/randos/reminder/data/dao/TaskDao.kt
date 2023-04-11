@@ -71,4 +71,7 @@ interface TaskDao {
 
     @Query("SELECT COUNT(*) FROM task WHERE completedOn IS NOT NULL AND title LIKE :keyword || '%' OR title LIKE '% ' || :keyword || '%'")
     fun getCompletedTasksByKeywordCount(keyword: String): Flow<Int>
+
+    @Query("DELETE FROM task WHERE completedOn IS NOT NULL")
+    suspend fun deleteCompletedTasks()
 }

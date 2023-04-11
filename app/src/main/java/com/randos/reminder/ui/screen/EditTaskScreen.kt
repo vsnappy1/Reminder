@@ -26,6 +26,7 @@ object TaskEditDestination : NavigationDestination {
 fun EditTaskScreen(
     onSave: () -> Unit = {},
     onCancel: () -> Unit = {},
+    onDelete: () -> Unit = {},
     viewModel: EditTaskViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
@@ -33,10 +34,17 @@ fun EditTaskScreen(
         Column(modifier = Modifier.padding(medium)) {
             InputTitleAndNotesCard(uiState = uiState) { viewModel.updateUiState(it) }
             DetailsCard(uiState = uiState) { viewModel.updateUiState(it) }
-            ActionButton(uiState = uiState, onCancel = onCancel, textRes = R.string.save) {
-                viewModel.updateTask()
-                onSave()
-            }
+            ActionButton(uiState = uiState,
+                onCancel = onCancel,
+                onDelete = {
+                    viewModel.deleteTask()
+                    onDelete()
+                }, onAdd = {
+                    viewModel.updateTask()
+                    onSave()
+                },
+                textRes = R.string.save
+            )
         }
     }
 }

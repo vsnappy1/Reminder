@@ -31,7 +31,6 @@ import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.enums.RepeatCycle
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseView
-import com.randos.reminder.ui.component.ReminderDefaultText
 import com.randos.reminder.ui.component.ReminderDropDown
 import com.randos.reminder.ui.component.TransparentBackgroundTextField
 import com.randos.reminder.ui.theme.*
@@ -49,7 +48,6 @@ object TaskAddDestination : NavigationDestination {
 }
 
 // TODO customize no task message for each of the screen
-// TODO finalize ui (make add/edit screen look same as other | on item click does not feel very good)
 // TODO add animations
 // TODO implement notification
 // TODO write test cases
@@ -78,6 +76,7 @@ fun ActionButton(
     uiState: TaskUiState,
     textRes: Int,
     onCancel: () -> Unit,
+    onDelete: () -> Unit = {},
     onAdd: () -> Unit
 ) {
     Row(
@@ -93,6 +92,14 @@ fun ActionButton(
             borderColor = Gray500,
             textColor = Gray500
         )
+        if (uiState.done) {
+            ReminderButton(
+                text = stringResource(id = R.string.delete),
+                onClick = onDelete,
+                backgroundColor = Red,
+                borderColor = Red,
+            )
+        }
         ReminderButton(
             text = stringResource(id = textRes),
             onClick = onAdd,
@@ -329,37 +336,6 @@ private fun Divider() {
             .padding(horizontal = medium)
             .padding(vertical = small)
     )
-}
-
-@Composable
-fun Header(
-    uiState: TaskUiState,
-    headerResourceId: Int,
-    saveButtonTextResourceId: Int,
-    onCancel: () -> Unit = {},
-    onSave: () -> Unit = {},
-) {
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .padding(bottom = medium)
-    ) {
-        ReminderDefaultText(textResourceId = R.string.cancel,
-            modifier = Modifier.align(Alignment.CenterStart),
-            onClick = { onCancel() })
-
-        ReminderDefaultText(
-            textResourceId = headerResourceId, modifier = Modifier.align(Alignment.Center),
-            clickEnabled = false
-        )
-
-        ReminderDefaultText(
-            textResourceId = saveButtonTextResourceId,
-            modifier = Modifier.align(Alignment.CenterEnd),
-            enabled = uiState.isValid(),
-            onClick = { onSave() },
-        )
-    }
 }
 
 fun showDatePicker(
