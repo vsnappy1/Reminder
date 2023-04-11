@@ -9,9 +9,9 @@ import java.time.LocalTime
 
 data class TaskUiState(
     val id: Long = 0,
-    val title: String = "title",
+    val title: String = "",
     val notes: String? = null,
-    val date: LocalDate? = LocalDate.now(),
+    val date: LocalDate? = null,
     val time: LocalTime? = null,
     val repeat: RepeatCycle = RepeatCycle.NO_REPEAT,
     val priority: Priority = Priority.NONE,

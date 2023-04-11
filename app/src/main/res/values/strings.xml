@@ -13,12 +13,9 @@
     <string name="cancel">Cancel</string>
     <string name="new_reminder">New Reminder</string>
     <string name="details">Details</string>
-    <string name="all_tasks">All Tasks</string>
     <string name="search">Search</string>
-    <string name="time_format">hh:mm a</string>
     <string name="title">Title</string>
     <string name="notes">Notes</string>
-    <string name="calender">Calender</string>
     <string name="date">Date</string>
     <string name="time">Time</string>
     <string name="repeat">Repeat</string>
@@ -34,6 +31,7 @@
     <string name="all">All</string>
     <string name="done">Done</string>
     <string name="arrow_drop_down">Arrow drop down</string>
+    <string name="show_completed_task">Show Completed Tasks</string>
     <string name="no_task_message">Looks like you don\'t have any tasks to view right now. Don\'t worry, it\'s a great opportunity to add a new task and start being productive!</string>
 
 </resources>

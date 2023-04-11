@@ -15,7 +15,6 @@
         <activity
             android:name="com.randos.reminder.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.Reminder">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

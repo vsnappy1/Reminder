@@ -36,9 +36,7 @@ open class BaseViewModel @Inject constructor(
 
     private suspend fun markAsDone(taskUiState: TaskUiState) {
         val job = viewModelScope.launch {
-            taskRepository.updateTask(
-                taskUiState.copy(done = true, repeat = RepeatCycle.NO_REPEAT).toTask()
-            )
+            taskRepository.updateTask(taskUiState.copy(done = true).toTask())
             delay(DELAY)
             taskRepository.updateTask(
                 taskUiState.copy(

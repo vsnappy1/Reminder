@@ -1,5 +1,10 @@
 package com.randos.reminder.utils
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import com.randos.reminder.data.entity.Task
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.uiState.toTaskUiState
@@ -29,4 +34,14 @@ fun LocalDate.format(): String {
 
 fun LocalDateTime.format(): String {
     return "${this.toLocalDate().format()}, ${this.toLocalTime().format()}"
+}
+
+fun Modifier.noRippleClickable( enabled: Boolean = true, onClick: () -> Unit): Modifier = composed {
+    clickable(
+        indication = null,
+        interactionSource = remember { MutableInteractionSource() },
+        enabled = enabled
+    ) {
+        onClick()
+    }
 }

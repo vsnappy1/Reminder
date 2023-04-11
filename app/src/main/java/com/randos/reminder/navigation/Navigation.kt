@@ -24,6 +24,7 @@ fun NavGraph(
                 onCompletedClick = { navController.navigate(TaskCompletedDestination.route) },
                 onScheduledClick = { navController.navigate(TaskScheduledDestination.route) },
                 onAddTaskClick = { navController.navigate(TaskAddDestination.route) },
+                onSearchItemClick = { navController.navigate("${TaskEditDestination.route}/${it}") }
             )
         }
 

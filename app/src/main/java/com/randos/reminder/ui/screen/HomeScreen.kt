@@ -3,11 +3,12 @@ package com.randos.reminder.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.indication
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -16,7 +17,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,9 +36,12 @@ import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseViewWithFAB
+import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.theme.*
+import com.randos.reminder.ui.uiState.TaskUiState
+import com.randos.reminder.ui.viewmodel.HomeScreenUiState
 import com.randos.reminder.ui.viewmodel.HomeViewModel
-import com.randos.reminder.utils.NoRippleInteractionSource
+import com.randos.reminder.utils.noRippleClickable
 
 object HomeDestination : NavigationDestination {
     override val route: String = ReminderScreen.HOME_SCREEN.name
@@ -50,61 +55,51 @@ fun HomeScreen(
     onAllClick: () -> Unit = {},
     onCompletedClick: () -> Unit = {},
     onAddTaskClick: () -> Unit = {},
+    onSearchItemClick: (Long) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val todayTaskCount by viewModel.todayTaskCount.observeAsState(0)
-    val scheduledTasksCount by viewModel.scheduledTasksCount.observeAsState(0)
-    val allTasksCount by viewModel.allTasksCount.observeAsState(0)
-    val completedTaskCount by viewModel.completedTaskCount.observeAsState(0)
+
+    val homeUiState by viewModel.homeUiState.observeAsState(HomeScreenUiState())
 
     val timeFrames = mutableListOf(
         TimeFrame(
             textRes = R.string.today,
-            count = todayTaskCount,
+            count = homeUiState.todayTaskCount,
             icon = Icons.Rounded.Today,
             iconDescriptionRes = R.string.today,
             onClick = onTodayClick
         ),
         TimeFrame(
             textRes = R.string.scheduled,
-            count = scheduledTasksCount,
+            count = homeUiState.scheduledTaskCount,
             icon = Icons.Rounded.CalendarMonth,
             iconDescriptionRes = R.string.scheduled,
             onClick = onScheduledClick
         ),
         TimeFrame(
             textRes = R.string.all,
-            count = allTasksCount,
+            count = homeUiState.allTaskCount,
             icon = Icons.Rounded.AllInbox,
             iconDescriptionRes = R.string.all,
             onClick = onAllClick
         ),
         TimeFrame(
             textRes = R.string.completed,
-            count = completedTaskCount,
+            count = homeUiState.completedTaskCount,
             icon = Icons.Rounded.Done,
             iconDescriptionRes = R.string.completed,
             onClick = onCompletedClick
         ),
     )
-    var value by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
-    var focusState by remember { mutableStateOf(false) }
     BaseViewWithFAB(titleRes = R.string.app_name, onAddTaskClick = onAddTaskClick) {
         ReminderTextField(
-            value = value,
-            onValueChange = { value = it },
+            value = homeUiState.search,
+            onValueChange = { viewModel.setSearchText(it) },
             focusManager = focusManager,
-            onFocusChange = { focusState = it }
+            onFocusChange = { viewModel.setDoesSearchHasFocus(it) }
         )
-
-        if (focusState) {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .indication(NoRippleInteractionSource(), null)
-                .clickable { focusManager.clearFocus() }) {
-            }
-        } else {
+        Box {
             LazyVerticalGrid(columns = GridCells.Fixed(2)) {
                 items(timeFrames) {
                     TimeFrameCard(
@@ -114,6 +109,65 @@ fun HomeScreen(
                         iconDescriptionRes = it.iconDescriptionRes,
                         onClick = it.onClick
                     )
+                }
+            }
+
+            if (homeUiState.doesSearchHasFocus) {
+                SearchView(homeUiState, focusManager,
+                    onShowCompletedTaskClick = { viewModel.setIsCompletedTasksVisible(!homeUiState.isFilteredCompletedTasksVisible) },
+                    onDoneClick = { viewModel.updateTaskStatus(it) },
+                    onSearchItemClick = {
+                        viewModel.setSearchText("")
+                        onSearchItemClick(it)
+                    })
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchView(
+    homeUiState: HomeScreenUiState,
+    focusManager: FocusManager,
+    onShowCompletedTaskClick: () -> Unit,
+    onDoneClick: (TaskUiState) -> Unit,
+    onSearchItemClick: (Long) -> Unit
+) {
+    Box(modifier = Modifier
+        .background(if (homeUiState.search.isBlank()) GrayLight.copy(alpha = 0.1f) else GrayLight)
+        .fillMaxSize()
+        .noRippleClickable(enabled = homeUiState.search.isBlank()) { focusManager.clearFocus() }) {
+
+        if (homeUiState.search.isNotBlank()) {
+            Column(modifier = Modifier.padding(medium)) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Text(text = "${homeUiState.filteredCompletedTasksCount} Completed")
+                    Icon(
+                        imageVector = if (homeUiState.isFilteredCompletedTasksVisible) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
+                        contentDescription = stringResource(id = R.string.show_completed_task),
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .noRippleClickable { onShowCompletedTaskClick() }
+                    )
+                }
+                LazyColumn {
+                    if (homeUiState.isFilteredCompletedTasksVisible) {
+                        items(homeUiState.filteredCompletedTasks) {
+                            TaskCard(
+                                task = it,
+                                onItemClick = onSearchItemClick,
+                                onDoneClick = onDoneClick
+                            )
+                        }
+                    }
+
+                    items(homeUiState.filteredTasks) {
+                        TaskCard(
+                            task = it,
+                            onItemClick = onSearchItemClick,
+                            onDoneClick = onDoneClick
+                        )
+                    }
                 }
             }
         }
@@ -197,7 +251,7 @@ fun TimeFrameCard(
             .height(62.dp)
             .width(100.dp)
             .clip(Shapes.small)
-            .clickable { onClick() }
+            .noRippleClickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(medium)) {
             Box(modifier = Modifier.fillMaxWidth()) {

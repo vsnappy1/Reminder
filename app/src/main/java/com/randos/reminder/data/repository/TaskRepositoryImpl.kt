@@ -69,4 +69,7 @@ class TaskRepositoryImpl @Inject constructor(private val taskDao: TaskDao) : Tas
 
     override fun getCompletedTasksByKeyword(keyword: String): Flow<List<Task>> =
         taskDao.getCompletedTasksByKeyword(keyword)
+
+    override fun getCompletedTasksByKeywordCount(keyword: String): Flow<Int> =
+        taskDao.getCompletedTasksByKeywordCount(keyword)
 }

@@ -4,20 +4,24 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.rounded.AccessTime
+import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.PriorityHigh
+import androidx.compose.material.icons.rounded.Repeat
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -26,6 +30,7 @@ import com.randos.reminder.enums.Priority
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.enums.RepeatCycle
 import com.randos.reminder.navigation.NavigationDestination
+import com.randos.reminder.ui.component.BaseView
 import com.randos.reminder.ui.component.ReminderDefaultText
 import com.randos.reminder.ui.component.ReminderDropDown
 import com.randos.reminder.ui.component.TransparentBackgroundTextField
@@ -43,10 +48,11 @@ object TaskAddDestination : NavigationDestination {
     override val titleRes: Int = R.string.new_reminder
 }
 
-// TODO beautify and add search functionality in home screen also create a homeScreen ui State
 // TODO customize no task message for each of the screen
-// TODO write test cases
+// TODO finalize ui (make add/edit screen look same as other | on item click does not feel very good)
+// TODO add animations
 // TODO implement notification
+// TODO write test cases
 // TODO get the theme reviewed
 // TODO ask for a QA
 
@@ -55,23 +61,43 @@ fun AddTaskScreen(
     onAdd: () -> Unit = {}, onCancel: () -> Unit = {}, viewModel: AddTaskViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
-    Column(
-        modifier = Modifier
-            .background(White)
-            .padding(medium)
-            .fillMaxSize()
-    ) {
-        Header(
-            uiState = uiState,
-            headerResourceId = R.string.new_reminder,
-            saveButtonTextResourceId = R.string.add,
-            onCancel = onCancel
-        ) {
-            viewModel.addTask()
-            onAdd()
+    BaseView(titleRes = R.string.new_reminder) {
+        Column(modifier = Modifier.padding(medium)) {
+            InputTitleAndNotesCard(uiState = uiState) { viewModel.updateUiState(it) }
+            DetailsCard(uiState = uiState) { viewModel.updateUiState(it) }
+            ActionButton(uiState = uiState, onCancel = onCancel, textRes = R.string.add) {
+                viewModel.addTask()
+                onAdd()
+            }
         }
-        InputTitleAndNotesCard(uiState = uiState) { viewModel.updateUiState(it) }
-        DetailsCard(uiState = uiState) { viewModel.updateUiState(it) }
+    }
+}
+
+@Composable
+fun ActionButton(
+    uiState: TaskUiState,
+    textRes: Int,
+    onCancel: () -> Unit,
+    onAdd: () -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = medium)
+    ) {
+        ReminderButton(
+            text = stringResource(id = R.string.cancel),
+            onClick = onCancel,
+            backgroundColor = Transparent,
+            borderColor = Gray500,
+            textColor = Gray500
+        )
+        ReminderButton(
+            text = stringResource(id = textRes),
+            onClick = onAdd,
+            enabled = uiState.isValid()
+        )
     }
 }
 
@@ -80,7 +106,7 @@ fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
     Card(
         shape = Shapes.small,
         elevation = 0.dp,
-        backgroundColor = GrayLight,
+        backgroundColor = White,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -109,7 +135,7 @@ fun DetailsCard(
     Card(
         shape = Shapes.small,
         elevation = 0.dp,
-        backgroundColor = GrayLight,
+        backgroundColor = White,
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = medium)
@@ -515,8 +541,34 @@ private fun PriorityDropdownMenuItem(onClick: () -> Unit, value: String) {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview
 @Composable
-fun DefaultAddTask() {
-    AddTaskScreen()
+fun ReminderButton(
+    modifier: Modifier = Modifier,
+    text: String = "Save",
+    onClick: () -> Unit = {},
+    enabled: Boolean = true,
+    backgroundColor: Color = Green,
+    borderColor: Color = Green,
+    textColor: Color = White
+) {
+
+    OutlinedButton(
+        modifier = modifier
+            .width(100.dp),
+        onClick = onClick,
+        enabled = enabled,
+        shape = Shapes.small,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = backgroundColor,
+            disabledBackgroundColor = Gray500
+        ),
+        border = BorderStroke(1.dp, color = if (enabled) borderColor else Transparent)
+    ) {
+        Text(
+            text = text,
+            style = Typography.body2.copy(fontWeight = FontWeight.Bold),
+            color = if (enabled) textColor else GrayLight
+        )
+    }
 }
