@@ -24,8 +24,10 @@ import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseView
 import com.randos.reminder.ui.component.NoTaskMessage
+import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.component.TimeFrameHeader
 import com.randos.reminder.ui.theme.*
+import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.viewmodel.CompletedTaskViewModel
 import com.randos.reminder.utils.noRippleClickable
 
@@ -91,7 +93,7 @@ fun CompletedTaskScreen(
     var isDialogVisible by remember { mutableStateOf(false) }
     BaseView(titleRes = R.string.completed) {
         Box(modifier = Modifier.fillMaxSize()) {
-            Column() {
+            Column {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -145,6 +147,31 @@ fun CompletedTaskScreen(
             }
         }
     }
+}
+
+private fun getListOfTaskCards(
+    tasks: List<TaskUiState>,
+    onItemClick: (Long) -> Unit,
+    onDoneClick: (TaskUiState) -> Unit,
+    isDateVisible: Boolean = true,
+    isTimeVisible: Boolean = true,
+    isRepeatVisible: Boolean = true,
+): List<@Composable () -> Unit> {
+    val list = mutableListOf<@Composable () -> Unit>()
+    tasks.forEach {
+        list.add {
+            TaskCard(
+                task = it,
+                onItemClick = onItemClick,
+                onDoneClick = onDoneClick,
+                isDateVisible = isDateVisible,
+                isTimeVisible = isTimeVisible,
+                isRepeatVisible = isRepeatVisible,
+                visible = it.done
+            )
+        }
+    }
+    return list
 }
 
 @Preview

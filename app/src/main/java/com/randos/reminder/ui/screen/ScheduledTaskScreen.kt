@@ -111,7 +111,7 @@ fun ScheduledTaskScreen(
     }
 }
 
-fun getListOfTaskCards(
+private fun getListOfTaskCards(
     tasks: List<TaskUiState>,
     onItemClick: (Long) -> Unit,
     onDoneClick: (TaskUiState) -> Unit,
@@ -128,7 +128,8 @@ fun getListOfTaskCards(
                 onDoneClick = onDoneClick,
                 isDateVisible = isDateVisible,
                 isTimeVisible = isTimeVisible,
-                isRepeatVisible = isRepeatVisible
+                isRepeatVisible = isRepeatVisible,
+                visible = !it.done
             )
         }
     }

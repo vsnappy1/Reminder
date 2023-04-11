@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-private const val DELAY = 1000L
+const val DELAY = 3000L
 
 @HiltViewModel
 open class BaseViewModel @Inject constructor(

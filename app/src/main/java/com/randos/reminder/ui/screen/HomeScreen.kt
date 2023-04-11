@@ -1,5 +1,10 @@
 package com.randos.reminder.ui.screen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,6 +28,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -120,6 +126,8 @@ fun HomeScreen(
                         viewModel.setSearchText("")
                         onSearchItemClick(it)
                     })
+            }else{
+                viewModel.setIsCompletedTasksVisible(false)
             }
         }
     }
@@ -133,12 +141,14 @@ private fun SearchView(
     onDoneClick: (TaskUiState) -> Unit,
     onSearchItemClick: (Long) -> Unit
 ) {
+    val alpha by animateFloatAsState(targetValue = if(homeUiState.search.isNotBlank()) 1f else 0.1f)
+    val rotation by animateFloatAsState(targetValue = if(homeUiState.isFilteredCompletedTasksVisible) 180f else 0f)
     Box(modifier = Modifier
-        .background(if (homeUiState.search.isBlank()) GrayLight.copy(alpha = 0.1f) else GrayLight)
+        .background(GrayLight.copy(alpha = alpha))
         .fillMaxSize()
         .noRippleClickable(enabled = homeUiState.search.isBlank()) { focusManager.clearFocus() }) {
 
-        if (homeUiState.search.isNotBlank()) {
+        FadeAnimatedVisibility (homeUiState.search.isNotBlank()) {
             Column(modifier = Modifier.padding(medium)) {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
@@ -146,20 +156,24 @@ private fun SearchView(
                         style = Typography.caption.copy(fontWeight = FontWeight.Bold)
                     )
                     Icon(
-                        imageVector = if (homeUiState.isFilteredCompletedTasksVisible) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
+                        imageVector = Icons.Rounded.KeyboardArrowDown,
                         contentDescription = stringResource(id = R.string.show_completed_task),
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
                             .noRippleClickable { onShowCompletedTaskClick() }
+                            .rotate(rotation)
                     )
                 }
                 LazyColumn {
-                    if (homeUiState.isFilteredCompletedTasksVisible) {
-                        items(homeUiState.filteredCompletedTasks) {
+                    items(homeUiState.filteredCompletedTasks) {
+                        AnimatedVisibility(
+                            visible = homeUiState.isFilteredCompletedTasksVisible
+                        ) {
                             TaskCard(
                                 task = it,
                                 onItemClick = onSearchItemClick,
-                                onDoneClick = onDoneClick
+                                onDoneClick = onDoneClick,
+                                visible = it.done
                             )
                         }
                     }
@@ -168,7 +182,8 @@ private fun SearchView(
                         TaskCard(
                             task = it,
                             onItemClick = onSearchItemClick,
-                            onDoneClick = onDoneClick
+                            onDoneClick = onDoneClick,
+                            visible = !it.done
                         )
                     }
                 }
@@ -199,8 +214,11 @@ private fun ReminderTextField(
             contentDescription = stringResource(id = R.string.search),
             modifier = Modifier.size(16.dp)
         )
-        Spacer(modifier = Modifier.width(small))
-        Box {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = small)
+        ) {
             if (value.isEmpty())
                 Text(text = "Search", style = Typography.caption, color = Gray500)
             BasicTextField(
@@ -208,26 +226,39 @@ private fun ReminderTextField(
                 textStyle = Typography.caption,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 20.dp)
                     .onFocusChanged { onFocusChange(it.hasFocus) },
                 keyboardActions = KeyboardActions { focusManager.clearFocus() },
             )
-            if (value.isNotBlank()) {
-                Icon(
-                    imageVector = Icons.Rounded.Cancel,
-                    contentDescription = stringResource(id = R.string.cancel),
-                    modifier = Modifier
-                        .size(16.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable {
-                            onValueChange("")
-                            focusManager.clearFocus()
-                        }
-                        .align(Alignment.CenterEnd)
-                )
-            }
         }
+        FadeAnimatedVisibility(
+            visible = value.isNotBlank()
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Cancel,
+                contentDescription = stringResource(id = R.string.cancel),
+                modifier = Modifier
+                    .size(16.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable {
+                        onValueChange("")
+                        focusManager.clearFocus()
+                    }
+            )
+        }
+    }
+}
 
+@Composable
+fun FadeAnimatedVisibility(
+    visible: Boolean,
+    content: @Composable AnimatedVisibilityScope.() -> Unit
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        content()
     }
 }
 
