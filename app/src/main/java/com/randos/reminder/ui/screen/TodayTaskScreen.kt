@@ -11,7 +11,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
-import com.randos.reminder.ui.component.*
+import com.randos.reminder.ui.component.BaseViewWithFAB
+import com.randos.reminder.ui.component.NoTaskMessage
+import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.theme.medium
 import com.randos.reminder.ui.viewmodel.TodayTaskViewModel
 
@@ -34,7 +36,8 @@ fun TodayTaskScreen(
                 TaskCard(
                     task = it,
                     onItemClick = onItemClick,
-                    onDoneClick = { state -> viewModel.updateTaskStatus(state) }
+                    onDoneClick = { state -> viewModel.updateTaskStatus(state) },
+                    visible = !it.done
                 )
             }
             items(todayTasks) {
@@ -42,7 +45,8 @@ fun TodayTaskScreen(
                     task = it,
                     onItemClick = onItemClick,
                     onDoneClick = { state -> viewModel.updateTaskStatus(state) },
-                    isDateVisible = false
+                    isDateVisible = false,
+                    visible = !it.done
                 )
             }
         }

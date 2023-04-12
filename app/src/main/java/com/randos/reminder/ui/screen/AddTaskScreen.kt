@@ -3,6 +3,8 @@ package com.randos.reminder.ui.screen
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -49,6 +51,7 @@ object TaskAddDestination : NavigationDestination {
 
 // TODO customize no task message for each of the screen
 // TODO add animations
+// TODO make BaseView accept box scope instead of column scope
 // TODO implement notification
 // TODO write test cases
 // TODO get the theme reviewed
@@ -307,15 +310,15 @@ private fun RepeatComponent(
 
 @Composable
 private fun RepeatCard(titleId: Int, onClick: () -> Unit, selected: Boolean = false) {
+    val borderWidth by animateDpAsState(targetValue = if (selected) 1.dp else 0.dp)
+    val color by animateColorAsState(targetValue = if (selected) Green else Transparent)
     Card(
         shape = Shapes.small,
         elevation = 0.dp,
         modifier = Modifier
             .clip(Shapes.small)
             .clickable { onClick() },
-        border = BorderStroke(
-            width = if (selected) 1.dp else 0.dp, color = if (selected) Green else Transparent
-        )
+        border = BorderStroke(width = borderWidth, color = color)
     ) {
         Text(
             text = stringResource(id = titleId),
@@ -529,6 +532,8 @@ fun ReminderButton(
     textColor: Color = White
 ) {
 
+    val color by animateColorAsState(targetValue = if (enabled) backgroundColor else Gray500)
+    val border by animateColorAsState(targetValue = if (enabled) borderColor else Transparent)
     OutlinedButton(
         modifier = modifier
             .width(100.dp),
@@ -536,10 +541,10 @@ fun ReminderButton(
         enabled = enabled,
         shape = Shapes.small,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = backgroundColor,
-            disabledBackgroundColor = Gray500
+            backgroundColor = color,
+            disabledBackgroundColor = color
         ),
-        border = BorderStroke(1.dp, color = if (enabled) borderColor else Transparent)
+        border = BorderStroke(1.dp, color = border)
     ) {
         Text(
             text = text,

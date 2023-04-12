@@ -35,11 +35,12 @@ fun AllTaskScreen(
                 TaskCard(
                     task = it,
                     onItemClick = onItemClick,
-                    onDoneClick = { state -> viewModel.updateTaskStatus(state) }
+                    onDoneClick = { state -> viewModel.updateTaskStatus(state) },
+                    visible = !it.done
                 )
             }
         }
-        if(tasks.isEmpty()){
+        if (tasks.isEmpty()) {
             NoTaskMessage()
         }
     }

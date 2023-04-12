@@ -1,5 +1,9 @@
 package com.randos.reminder.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,7 +23,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.randos.reminder.R
@@ -27,6 +30,7 @@ import com.randos.reminder.enums.Priority
 import com.randos.reminder.enums.RepeatCycle
 import com.randos.reminder.ui.theme.*
 import com.randos.reminder.ui.uiState.TaskUiState
+import com.randos.reminder.ui.viewmodel.DELAY
 import com.randos.reminder.utils.format
 
 @Composable
@@ -56,25 +60,6 @@ fun TransparentBackgroundTextField(
         ),
         singleLine = isSingleLine,
         textStyle = Typography.body1
-    )
-}
-
-@Composable
-fun ReminderDefaultText(
-    modifier: Modifier = Modifier,
-    textResourceId: Int,
-    enabled: Boolean = true,
-    clickEnabled: Boolean = true,
-    onClick: () -> Unit = {}
-) {
-    Text(
-        text = stringResource(id = textResourceId),
-        modifier = modifier
-            .clip(Shapes.small)
-            .clickable(enabled = enabled && clickEnabled) { onClick() }
-            .padding(horizontal = small),
-        style = Typography.body1,
-        color = if (enabled) Black else GrayDark
     )
 }
 
@@ -165,146 +150,161 @@ fun TimeFrameHeader(titleRes: Int, modifier: Modifier = Modifier) {
     }
 }
 
+const val defaultAnimationDuration = 250
+
 @Composable
-@Preview
 fun TaskCard(
+    modifier: Modifier = Modifier,
     task: TaskUiState = TaskUiState(),
     onItemClick: (Long) -> Unit = {},
     onDoneClick: (TaskUiState) -> Unit = {},
     isDateVisible: Boolean = true,
     isTimeVisible: Boolean = true,
     isRepeatVisible: Boolean = true,
+    visible: Boolean
 ) {
-    Card(
-        shape = Shapes.small,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = small)
-            .clip(Shapes.small)
-            .clickable { onItemClick(task.id) }
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(small)
-        ) {
-            ReminderRadioButton(
-                selected = task.done, onClick = { onDoneClick(task) },
-                modifier = Modifier.padding(0.dp)
+    AnimatedVisibility(
+        visible = visible,
+        enter = EnterTransition.None,
+        exit = fadeOut(
+            tween(
+                durationMillis = defaultAnimationDuration,
+                delayMillis = (DELAY - 2 * defaultAnimationDuration).toInt()
             )
-            Column(
+        )
+    ) {
+        Card(
+            shape = Shapes.small,
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = small)
+                .clip(Shapes.small)
+                .clickable { onItemClick(task.id) }
+        ) {
+            Row(
                 modifier = Modifier
-                    .weight(1f, true)
-                    .padding(start = small)
+                    .padding(small)
             ) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = task.title,
-                        fontWeight = FontWeight.Bold,
-                        style = Typography.body1,
-                        color = if (task.done) GrayDark else Black
-                    )
+                ReminderRadioButton(
+                    selected = task.done, onClick = { onDoneClick(task) },
+                    modifier = Modifier.padding(0.dp)
+                )
+                Column(
+                    modifier = Modifier
+                        .weight(1f, true)
+                        .padding(start = small)
+                ) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = task.title,
+                            fontWeight = FontWeight.Bold,
+                            style = Typography.body1,
+                            color = if (task.done) GrayDark else Black
+                        )
 
-                    if (task.priority != Priority.NONE) {
-                        Row(
-                            modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .padding(end = medium),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            val color =
-                                if (task.priority == Priority.HIGH) Red else if (task.priority == Priority.MEDIUM) Green else Blue
+                        if (task.priority != Priority.NONE) {
+                            Row(
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .padding(end = medium),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                val color =
+                                    if (task.priority == Priority.HIGH) Red else if (task.priority == Priority.MEDIUM) Green else Blue
 
+                                Text(
+                                    text = task.priority.value,
+                                    style = Typography.body2,
+                                    color = if (task.done) GrayDark else color
+                                )
+                                Icon(
+                                    imageVector = Icons.Rounded.PriorityHigh,
+                                    contentDescription = stringResource(id = R.string.priority),
+                                    tint = if (task.done) GrayDark else color,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    task.notes?.let {
+                        if (it.isNotBlank()) {
                             Text(
-                                text = task.priority.value,
-                                style = Typography.body2,
-                                color = if (task.done) GrayDark else color
-                            )
-                            Icon(
-                                imageVector = Icons.Rounded.PriorityHigh,
-                                contentDescription = stringResource(id = R.string.priority),
-                                tint = if (task.done) GrayDark else color,
-                                modifier = Modifier.size(14.dp)
+                                text = it,
+                                style = Typography.caption,
+                                color = GrayDark
                             )
                         }
                     }
-                }
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Row {
+                        val color = if (task.isDue) Red else GrayDark
 
-                task.notes?.let {
-                    if (it.isNotBlank()) {
+                        if (isDateVisible) {
+                            task.date?.let {
+                                Text(
+                                    text = it.format(),
+                                    fontWeight = FontWeight.SemiBold,
+                                    style = Typography.caption,
+                                    color = if (task.done) GrayDark else color
+                                )
+                            }
+                        }
+
+                        if (isDateVisible && task.isDateChecked && isTimeVisible && task.isTimeChecked) {
+                            Text(
+                                text = ", ",
+                                style = Typography.caption,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (task.done) GrayDark else color
+                            )
+                        }
+
+                        if (isTimeVisible) {
+                            task.time?.let {
+                                Text(
+                                    text = it.format(),
+                                    style = Typography.caption,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (task.done) GrayDark else color
+                                )
+                            }
+                        }
+
+                        if ((isDateVisible && task.isDateChecked || isTimeVisible && task.isTimeChecked) && isRepeatVisible && task.isRepeatChecked) {
+                            Text(
+                                text = ", ",
+                                style = Typography.caption,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (task.done) GrayDark else color
+                            )
+                        }
+
+                        if (isRepeatVisible) {
+                            if (task.repeat != RepeatCycle.NO_REPEAT) {
+                                Text(
+                                    text = task.repeat.value,
+                                    style = Typography.caption,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (task.done) GrayDark else color
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
+                    task.completedOn?.let {
                         Text(
-                            text = it,
+                            text = "Completed: ${it.format()}",
                             style = Typography.caption,
+                            fontWeight = FontWeight.SemiBold,
                             color = GrayDark
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(2.dp))
-                Row {
-                    val color = if (task.isDue) Red else GrayDark
-
-                    if (isDateVisible) {
-                        task.date?.let {
-                            Text(
-                                text = it.format(),
-                                fontWeight = FontWeight.SemiBold,
-                                style = Typography.caption,
-                                color = if (task.done) GrayDark else color
-                            )
-                        }
-                    }
-
-                    if (isDateVisible && task.isDateChecked && isTimeVisible && task.isTimeChecked) {
-                        Text(
-                            text = ", ",
-                            style = Typography.caption,
-                            fontWeight = FontWeight.SemiBold,
-                            color = if (task.done) GrayDark else color
-                        )
-                    }
-
-                    if (isTimeVisible) {
-                        task.time?.let {
-                            Text(
-                                text = it.format(),
-                                style = Typography.caption,
-                                fontWeight = FontWeight.SemiBold,
-                                color = if (task.done) GrayDark else color
-                            )
-                        }
-                    }
-
-                    if ((isDateVisible && task.isDateChecked || isTimeVisible && task.isTimeChecked) && isRepeatVisible && task.isRepeatChecked) {
-                        Text(
-                            text = ", ",
-                            style = Typography.caption,
-                            fontWeight = FontWeight.SemiBold,
-                            color = if (task.done) GrayDark else color
-                        )
-                    }
-
-                    if (isRepeatVisible) {
-                        if (task.repeat != RepeatCycle.NO_REPEAT) {
-                            Text(
-                                text = task.repeat.value,
-                                style = Typography.caption,
-                                fontWeight = FontWeight.SemiBold,
-                                color = if (task.done) GrayDark else color
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(2.dp))
-                task.completedOn?.let {
-                    Text(
-                        text = "Completed: ${it.format()}",
-                        style = Typography.caption,
-                        fontWeight = FontWeight.SemiBold,
-                        color = GrayDark
-                    )
-                }
             }
         }
     }
+
 }
 
 @Composable
