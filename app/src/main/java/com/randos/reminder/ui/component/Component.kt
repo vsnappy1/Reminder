@@ -169,7 +169,7 @@ fun TaskCard(
         exit = fadeOut(
             tween(
                 durationMillis = defaultAnimationDuration,
-                delayMillis = (DELAY - defaultAnimationDuration).toInt()
+                delayMillis = (DELAY - 2 * defaultAnimationDuration).toInt()
             )
         )
     ) {
