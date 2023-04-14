@@ -11,4 +11,4 @@ In addition to the above, I have also implemented **Animations** that enhance th
 To keep users informed and engaged, I implemented **Notifications** that are triggered by various events within the app. These notifications provide users with relevant information and encourage them to return to the app.
 
 
-Overall, my app demonstrates my expertise in Android development and showcases my ability to build **robust**, scalable, and engaging apps** using the **latest technologies and best practices**.
+Overall, my app demonstrates my expertise in Android development and showcases my ability to build **robust, scalable, and engaging apps** using the **latest technologies and best practices**.
