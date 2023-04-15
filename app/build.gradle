@@ -87,6 +87,9 @@ dependencies {
 
     //Moshi
     implementation "com.squareup.moshi:moshi-kotlin:1.14.0"
+
+    // WorkManager dependency
+    implementation "androidx.work:work-runtime-ktx:2.8.1"
 }
 
 // Allow references to generated code

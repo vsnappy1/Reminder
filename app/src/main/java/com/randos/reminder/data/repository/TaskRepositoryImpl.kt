@@ -10,7 +10,7 @@ import javax.inject.Singleton
 @Singleton
 class TaskRepositoryImpl @Inject constructor(private val taskDao: TaskDao) : TaskRepository {
 
-    override suspend fun insertTask(task: Task) =
+    override suspend fun insertTask(task: Task): Long =
         taskDao.insert(task)
 
     override suspend fun updateTask(task: Task) =

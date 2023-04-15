@@ -10,7 +10,7 @@ private const val orderBy = "ORDER BY date IS NULL, date ASC, time IS NULL, time
 @Dao
 interface TaskDao {
     @Insert
-    suspend fun insert(task: Task)
+    suspend fun insert(task: Task): Long
 
     @Update
     suspend fun update(task: Task)

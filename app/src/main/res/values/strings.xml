@@ -35,5 +35,8 @@
     <string name="show_completed_task">Show Completed Tasks</string>
     <string name="no_task_message">Looks like you don\'t have any tasks to view right now. Don\'t worry, it\'s a great opportunity to add a new task and start being productive!</string>
     <string name="delete_all_confirmation_message">Are you sure you want to delete all your tasks? This action cannot be undone</string>
+    <string name="notification_channel_name">General</string>
+    <string name="notification_channel_description">For delivering different priority notification.</string>
+    <string name="notification_channel_id">general_notification</string>
 
 </resources>

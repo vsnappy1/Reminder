@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.randos.reminder.ui.screen.*
 
 @Composable
@@ -28,7 +29,9 @@ fun NavGraph(
             )
         }
 
-        composable(route = TaskTodayDestination.route) {
+        composable(route = TaskTodayDestination.route,
+        deepLinks = listOf(navDeepLink { uriPattern = "reminder://today" })
+        ) {
             TodayTaskScreen(
                 onAddTaskClick = { navController.navigate(TaskAddDestination.route) },
                 onItemClick = { navController.navigate("${TaskEditDestination.route}/${it}") }

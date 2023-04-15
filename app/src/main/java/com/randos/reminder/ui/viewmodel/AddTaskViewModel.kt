@@ -15,15 +15,15 @@ import javax.inject.Inject
 @HiltViewModel
 class AddTaskViewModel @Inject constructor(
     private val taskRepository: TaskRepository
-) : ViewModel() {
+) : BaseViewModel(taskRepository) {
 
     private val _uiState: MutableLiveData<TaskUiState> = MutableLiveData<TaskUiState>(TaskUiState())
     val uiState: LiveData<TaskUiState> = _uiState
 
     fun addTask() {
         viewModelScope.launch {
-            uiState.value?.copy(addedOn = LocalDateTime.now())?.toTask()?.apply {
-                taskRepository.insertTask(this)
+            uiState.value?.copy(addedOn = LocalDateTime.now())?.toTask()?.let {
+                addTask(it)
             }
         }
     }

@@ -49,13 +49,15 @@ object TaskAddDestination : NavigationDestination {
     override val titleRes: Int = R.string.new_reminder
 }
 
-// TODO customize no task message for each of the screen
-// TODO add animations
-// TODO make BaseView accept box scope instead of column scope
 // TODO implement notification
+// TODO improve ui | add animation when repeat in task details is made visible and invisible
+// TODO when time is chosen date should be present there should not be time without a date
+// TODO proper MVI
 // TODO write test cases
 // TODO get the theme reviewed
 // TODO ask for a QA
+// TODO add firebase crash analytics
+// TODO upload to play store
 
 @Composable
 fun AddTaskScreen(
