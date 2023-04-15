@@ -15,11 +15,10 @@ import javax.inject.Inject
 class EditTaskViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val taskRepository: TaskRepository
-) : ViewModel() {
+) : BaseViewModel(taskRepository) {
 
     private val _uiState: MutableLiveData<TaskUiState> = MutableLiveData<TaskUiState>(TaskUiState())
     val uiState: LiveData<TaskUiState> = _uiState
-
 
     init {
         val taskId: Long = checkNotNull(savedStateHandle[TaskEditDestination.taskIdArg])
@@ -31,7 +30,7 @@ class EditTaskViewModel @Inject constructor(
     fun updateTask() {
         viewModelScope.launch {
             uiState.value?.toTask()?.apply {
-                taskRepository.updateTask(this)
+                updateTask(this)
             }
         }
     }

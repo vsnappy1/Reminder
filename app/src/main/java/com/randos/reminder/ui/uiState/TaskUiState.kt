@@ -21,8 +21,9 @@ data class TaskUiState(
     val isDateChecked: Boolean = date != null,
     val isTimeChecked: Boolean = time != null,
     val isRepeatChecked: Boolean = repeat != RepeatCycle.NO_REPEAT,
-    val isDue: Boolean = (!done && (date?.isBefore(LocalDate.now()) == true ||
-            (date?.isBefore(LocalDate.now()) == true && time?.isBefore(LocalTime.now()) == true)))
+    val isDue: Boolean =
+        (!done && date?.isBefore(LocalDate.now()) == true) ||
+                (!done && date?.isEqual(LocalDate.now()) == true && time?.isBefore(LocalTime.now()) == true)
 )
 
 fun Task.toTaskUiState(): TaskUiState {

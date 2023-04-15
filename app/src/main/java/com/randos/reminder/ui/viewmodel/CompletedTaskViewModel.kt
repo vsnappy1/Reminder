@@ -5,6 +5,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.randos.reminder.data.repository.TaskRepository
 import com.randos.reminder.ui.uiState.TaskUiState
+import com.randos.reminder.ui.uiState.toTask
 import com.randos.reminder.utils.toTaskUiStateList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.map
@@ -19,6 +20,12 @@ class CompletedTaskViewModel @Inject constructor(
     fun deleteAll() {
         viewModelScope.launch {
             taskRepository.deleteCompletedTasks()
+        }
+    }
+
+    fun updateTaskStatus(taskUiState: TaskUiState) {
+        viewModelScope.launch {
+            updateTaskStatus(taskUiState.toTask())
         }
     }
 

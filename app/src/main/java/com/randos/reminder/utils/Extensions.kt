@@ -45,3 +45,9 @@ fun Modifier.noRippleClickable( enabled: Boolean = true, onClick: () -> Unit): M
         onClick()
     }
 }
+
+fun LocalDate?.isNullOrInPast(): Boolean{
+    if(this == null) return true
+    if(this.isBefore(LocalDate.now())) return true
+    return false
+}

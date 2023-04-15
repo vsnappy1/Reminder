@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.randos.reminder.data.repository.TaskRepository
 import com.randos.reminder.ui.uiState.TaskUiState
+import com.randos.reminder.ui.uiState.toTask
 import com.randos.reminder.utils.toTaskUiStateList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.map
@@ -101,6 +102,11 @@ class HomeViewModel @Inject constructor(
                         }
                 }
             }
+        }
+    }
+    fun updateTaskStatus(taskUiState: TaskUiState) {
+        viewModelScope.launch {
+            updateTaskStatus(taskUiState.toTask())
         }
     }
 }

@@ -5,6 +5,8 @@ import com.randos.reminder.data.ReminderDatabase
 import com.randos.reminder.data.dao.TaskDao
 import com.randos.reminder.data.repository.TaskRepository
 import com.randos.reminder.data.repository.TaskRepositoryImpl
+import com.randos.reminder.notification.NotificationManager
+import com.randos.reminder.notification.NotificationManagerImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,5 +31,11 @@ class DatabaseModule {
     @Provides
     fun provideTaskRepository(taskDao: TaskDao): TaskRepository{
         return TaskRepositoryImpl(taskDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNotificationManager(@ApplicationContext context: Context): NotificationManager{
+        return NotificationManagerImpl(context)
     }
 }
