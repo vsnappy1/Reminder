@@ -8,7 +8,16 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -21,7 +30,13 @@ import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.rounded.AllInbox
+import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.Cancel
+import androidx.compose.material.icons.rounded.Done
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Today
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -37,13 +52,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseViewWithFAB
 import com.randos.reminder.ui.component.TaskCard
-import com.randos.reminder.ui.theme.*
+import com.randos.reminder.ui.theme.Gray300
+import com.randos.reminder.ui.theme.Gray500
+import com.randos.reminder.ui.theme.GrayLight
+import com.randos.reminder.ui.theme.Shapes
+import com.randos.reminder.ui.theme.Typography
+import com.randos.reminder.ui.theme.White
+import com.randos.reminder.ui.theme.medium
+import com.randos.reminder.ui.theme.small
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.viewmodel.HomeScreenUiState
 import com.randos.reminder.ui.viewmodel.HomeViewModel
@@ -126,7 +149,7 @@ fun HomeScreen(
                         viewModel.setSearchText("")
                         onSearchItemClick(it)
                     })
-            }else{
+            } else {
                 viewModel.setIsCompletedTasksVisible(false)
             }
         }
@@ -141,14 +164,14 @@ private fun SearchView(
     onDoneClick: (TaskUiState) -> Unit,
     onSearchItemClick: (Long) -> Unit
 ) {
-    val alpha by animateFloatAsState(targetValue = if(homeUiState.search.isNotBlank()) 1f else 0.1f)
-    val rotation by animateFloatAsState(targetValue = if(homeUiState.isFilteredCompletedTasksVisible) 180f else 0f)
+    val alpha by animateFloatAsState(targetValue = if (homeUiState.search.isNotBlank()) 1f else 0.1f)
+    val rotation by animateFloatAsState(targetValue = if (homeUiState.isFilteredCompletedTasksVisible) 180f else 0f)
     Box(modifier = Modifier
         .background(GrayLight.copy(alpha = alpha))
         .fillMaxSize()
         .noRippleClickable(enabled = homeUiState.search.isBlank()) { focusManager.clearFocus() }) {
 
-        FadeAnimatedVisibility (homeUiState.search.isNotBlank()) {
+        FadeAnimatedVisibility(homeUiState.search.isNotBlank()) {
             Column(modifier = Modifier.padding(medium)) {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
@@ -206,7 +229,7 @@ private fun ReminderTextField(
             .background(color = White, shape = Shapes.small)
             .border(width = 1.dp, color = Gray300, shape = Shapes.small)
             .fillMaxWidth()
-            .padding(6.dp),
+            .padding(medium),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -219,8 +242,9 @@ private fun ReminderTextField(
                 .weight(1f)
                 .padding(horizontal = small)
         ) {
-            if (value.isEmpty())
+            if (value.isEmpty()) {
                 Text(text = "Search", style = Typography.caption, color = Gray500)
+            }
             BasicTextField(
                 value = value, onValueChange = onValueChange, singleLine = true,
                 textStyle = Typography.caption,
@@ -282,12 +306,12 @@ fun TimeFrameCard(
         shape = Shapes.small,
         modifier = Modifier
             .padding(medium)
-            .height(62.dp)
+            .height(70.dp)
             .width(100.dp)
             .clip(Shapes.small)
             .clickable { onClick() }
     ) {
-        Column(modifier = Modifier.padding(medium)) {
+        Column(modifier = Modifier.padding(medium), verticalArrangement = Arrangement.Center) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Icon(
                     imageVector = icon,
@@ -301,7 +325,7 @@ fun TimeFrameCard(
             }
             Text(
                 text = stringResource(id = textRes),
-                style = Typography.caption.copy(fontWeight = FontWeight.Bold),
+                style = Typography.body2.copy(fontWeight = FontWeight.Bold, fontSize = 13.sp),
                 modifier = Modifier.padding(top = small, start = 2.dp)
             )
         }

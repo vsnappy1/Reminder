@@ -15,6 +15,7 @@ import com.randos.reminder.ui.component.BaseViewWithFAB
 import com.randos.reminder.ui.component.NoTaskMessage
 import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.theme.medium
+import com.randos.reminder.ui.viewmodel.AllTaskUiState
 import com.randos.reminder.ui.viewmodel.AllTaskViewModel
 
 object TaskAllDestination : NavigationDestination {
@@ -28,10 +29,10 @@ fun AllTaskScreen(
     onAddTaskClick: () -> Unit = {},
     onItemClick: (Long) -> Unit = {}
 ) {
-    val tasks by viewModel.tasks.observeAsState(listOf())
+    val uiState by viewModel.uiState.observeAsState(AllTaskUiState())
     BaseViewWithFAB(titleRes = R.string.all, onAddTaskClick = onAddTaskClick) {
         LazyColumn(modifier = Modifier.padding(medium)) {
-            items(tasks) {
+            items(uiState.tasks) {
                 TaskCard(
                     task = it,
                     onItemClick = onItemClick,
@@ -40,7 +41,7 @@ fun AllTaskScreen(
                 )
             }
         }
-        if (tasks.isEmpty()) {
+        FadeAnimatedVisibility (uiState.isAllEmpty) {
             NoTaskMessage()
         }
     }

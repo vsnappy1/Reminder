@@ -28,6 +28,7 @@ import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.component.TimeFrameHeader
 import com.randos.reminder.ui.theme.*
 import com.randos.reminder.ui.uiState.TaskUiState
+import com.randos.reminder.ui.viewmodel.CompletedTaskUiState
 import com.randos.reminder.ui.viewmodel.CompletedTaskViewModel
 import com.randos.reminder.utils.noRippleClickable
 
@@ -41,52 +42,48 @@ fun CompletedTaskScreen(
     viewModel: CompletedTaskViewModel = hiltViewModel(),
     onItemClick: (Long) -> Unit = {}
 ) {
-    val todayTasks by viewModel.todayTasks.observeAsState(listOf())
-    val yesterdayTasks by viewModel.yesterdayTasks.observeAsState(listOf())
-    val lastSevenDaysTasks by viewModel.lastSevenDaysTasks.observeAsState(listOf())
-    val previousTasks by viewModel.allOtherTasks.observeAsState(listOf())
-    val completeTaskCount by viewModel.completedTaskCount.observeAsState(0)
+    val uiState by viewModel.uiState.observeAsState(CompletedTaskUiState())
 
     // Creating flat list of views because nested lazy columns are not supported
     val list = mutableListOf<@Composable () -> Unit>()
 
-    if (todayTasks.isNotEmpty()) {
+    if (uiState.todayTasks.isNotEmpty()) {
         list.add { TimeFrameHeader(titleRes = R.string.today) }
     }
     list.addAll(
         getListOfTaskCards(
-            tasks = todayTasks,
+            tasks = uiState.todayTasks,
             onItemClick = onItemClick,
             onDoneClick = { state -> viewModel.updateTaskStatus(state) }
         )
     )
 
-    if (yesterdayTasks.isNotEmpty()) {
+    if (uiState.yesterdayTasks.isNotEmpty()) {
         list.add { TimeFrameHeader(titleRes = R.string.yesterday) }
     }
     list.addAll(
         getListOfTaskCards(
-            tasks = yesterdayTasks,
+            tasks = uiState.yesterdayTasks,
             onItemClick = onItemClick,
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
-    if (lastSevenDaysTasks.isNotEmpty()) {
+    if (uiState.lastSevenDaysTasks.isNotEmpty()) {
         list.add { TimeFrameHeader(titleRes = R.string.last_seven_days) }
     }
     list.addAll(
         getListOfTaskCards(
-            tasks = lastSevenDaysTasks,
+            tasks = uiState.lastSevenDaysTasks,
             onItemClick = onItemClick,
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
-    if (previousTasks.isNotEmpty()) {
+    if (uiState.previousTasks.isNotEmpty()) {
         list.add { TimeFrameHeader(titleRes = R.string.previous) }
     }
     list.addAll(
         getListOfTaskCards(
-            tasks = previousTasks,
+            tasks = uiState.previousTasks,
             onItemClick = onItemClick,
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
@@ -100,15 +97,15 @@ fun CompletedTaskScreen(
                         .padding(medium)
                 ) {
                     Text(
-                        text = "$completeTaskCount Completed.",
+                        text = "${uiState.completedTaskCount} Completed.",
                         style = Typography.body2.copy(fontWeight = FontWeight.Bold)
                     )
-                    if(completeTaskCount > 0) {
+                    if (uiState.completedTaskCount > 0) {
                         Icon(
                             imageVector = Icons.Rounded.Delete,
                             contentDescription = stringResource(id = R.string.delete),
                             modifier = Modifier
-                                .size(18.dp)
+                                .size(20.dp)
                                 .align(Alignment.CenterEnd)
                                 .noRippleClickable { isDialogVisible = true }
                         )
@@ -124,12 +121,7 @@ fun CompletedTaskScreen(
                         it()
                     }
                 }
-                if (
-                    todayTasks.isEmpty() &&
-                    yesterdayTasks.isEmpty() &&
-                    lastSevenDaysTasks.isEmpty() &&
-                    previousTasks.isEmpty()
-                ) {
+                FadeAnimatedVisibility (uiState.isAllEmpty) {
                     NoTaskMessage()
                 }
             }

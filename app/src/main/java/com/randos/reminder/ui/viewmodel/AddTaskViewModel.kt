@@ -2,7 +2,6 @@ package com.randos.reminder.ui.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.randos.reminder.data.repository.TaskRepository
 import com.randos.reminder.ui.uiState.TaskUiState
@@ -14,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddTaskViewModel @Inject constructor(
-    private val taskRepository: TaskRepository
+    taskRepository: TaskRepository
 ) : BaseViewModel(taskRepository) {
 
     private val _uiState: MutableLiveData<TaskUiState> = MutableLiveData<TaskUiState>(TaskUiState())
