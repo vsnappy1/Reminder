@@ -1,14 +1,5 @@
 package com.randos.reminder.ui.screen
 
-import android.Manifest
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.TaskStackBuilder
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.provider.Settings.Global.getString
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,21 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.randos.reminder.MainActivity
 import com.randos.reminder.R
-import com.randos.reminder.data.entity.Task
-import com.randos.reminder.enums.Priority
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseViewWithFAB
 import com.randos.reminder.ui.component.NoTaskMessage
 import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.theme.medium
+import com.randos.reminder.ui.viewmodel.TodayTaskUiState
 import com.randos.reminder.ui.viewmodel.TodayTaskViewModel
 
 object TaskTodayDestination : NavigationDestination {
@@ -44,11 +29,10 @@ fun TodayTaskScreen(
     onAddTaskClick: () -> Unit = {},
     onItemClick: (Long) -> Unit = {}
 ) {
-    val dueTasks by viewModel.dueTasks.observeAsState(listOf())
-    val todayTasks by viewModel.todayTasks.observeAsState(listOf())
+    val uiState by viewModel.uiState.observeAsState(TodayTaskUiState())
     BaseViewWithFAB(titleRes = R.string.today, onAddTaskClick = onAddTaskClick) {
         LazyColumn(modifier = Modifier.padding(medium)) {
-            items(dueTasks) {
+            items(uiState.dueTasks) {
                 TaskCard(
                     task = it,
                     onItemClick = onItemClick,
@@ -56,7 +40,7 @@ fun TodayTaskScreen(
                     visible = !it.done
                 )
             }
-            items(todayTasks) {
+            items(uiState.todayTasks) {
                 TaskCard(
                     task = it,
                     onItemClick = onItemClick,
@@ -66,7 +50,7 @@ fun TodayTaskScreen(
                 )
             }
         }
-        if (todayTasks.isEmpty() && dueTasks.isEmpty()) {
+        FadeAnimatedVisibility (uiState.isAllEmpty) {
             NoTaskMessage()
         }
     }

@@ -3,19 +3,36 @@ package com.randos.reminder.ui.screen
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.PriorityHigh
 import androidx.compose.material.icons.rounded.Repeat
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.randos.reminder.R
 import com.randos.reminder.enums.Priority
@@ -35,24 +53,31 @@ import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseView
 import com.randos.reminder.ui.component.ReminderDropDown
 import com.randos.reminder.ui.component.TransparentBackgroundTextField
-import com.randos.reminder.ui.theme.*
+import com.randos.reminder.ui.theme.Black
+import com.randos.reminder.ui.theme.Gray500
+import com.randos.reminder.ui.theme.GrayDark
+import com.randos.reminder.ui.theme.GrayLight
+import com.randos.reminder.ui.theme.Green
+import com.randos.reminder.ui.theme.Red
+import com.randos.reminder.ui.theme.Shapes
+import com.randos.reminder.ui.theme.Transparent
+import com.randos.reminder.ui.theme.Typography
+import com.randos.reminder.ui.theme.White
+import com.randos.reminder.ui.theme.medium
+import com.randos.reminder.ui.theme.small
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.uiState.isValid
 import com.randos.reminder.ui.viewmodel.AddTaskViewModel
 import com.randos.reminder.utils.format
 import java.time.LocalDate
 import java.time.LocalTime
-import java.util.*
+import java.util.Calendar
 
 object TaskAddDestination : NavigationDestination {
     override val route: String = ReminderScreen.ADD_TASK_SCREEN.name
     override val titleRes: Int = R.string.new_reminder
 }
 
-// TODO implement notification
-// TODO improve ui | add animation when repeat in task details is made visible and invisible
-// TODO when time is chosen date should be present there should not be time without a date
-// TODO proper MVI
 // TODO write test cases
 // TODO get the theme reviewed
 // TODO ask for a QA
@@ -159,8 +184,10 @@ fun DetailsCard(
             DateComponent(uiState, onUpdate)
             Divider()
             TimeComponent(uiState, onUpdate)
-            if (uiState.isDateChecked) {
+            AnimatedVisibility(uiState.isDateChecked) {
                 Divider()
+            }
+            AnimatedVisibility(uiState.isDateChecked) {
                 RepeatComponent(uiState, onUpdate)
             }
             Divider()
@@ -206,11 +233,12 @@ private fun DateComponent(
                         date = null,
                         isDateChecked = false,
                         repeat = RepeatCycle.NO_REPEAT,
-                        isRepeatChecked = false
+                        isRepeatChecked = false,
+                        time = null,
+                        isTimeChecked = false,
                     )
                 )
             }
-
         },
         detail = uiState.date?.format()
     )
@@ -261,53 +289,61 @@ private fun TimeComponent(
 private fun RepeatComponent(
     uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
 ) {
-    DetailSwitchRepeat(icon = Icons.Rounded.Repeat,
-        iconDescriptionId = R.string.repeat,
-        titleId = R.string.repeat,
-        checked = uiState.isRepeatChecked,
-        onCheckedChange = {
-            onUpdate(
-                uiState.copy(
-                    isRepeatChecked = it, repeat = if (it) uiState.repeat else RepeatCycle.NO_REPEAT
+    Column {
+        DetailSwitchRepeat(icon = Icons.Rounded.Repeat,
+            iconDescriptionId = R.string.repeat,
+            titleId = R.string.repeat,
+            checked = uiState.isRepeatChecked,
+            onCheckedChange = {
+                onUpdate(
+                    uiState.copy(
+                        isRepeatChecked = it,
+                        repeat = if (it) uiState.repeat else RepeatCycle.NO_REPEAT
+                    )
                 )
-            )
-        })
-    if (uiState.isRepeatChecked) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = small)
-        ) {
-            if (uiState.isTimeChecked) {
+            })
+        AnimatedVisibility(uiState.isRepeatChecked) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = small)
+            ) {
+                AnimatedVisibility(
+                    visible = uiState.isTimeChecked,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    RepeatCard(
+                        titleId = R.string.hourly, onClick = {
+                            onUpdate(uiState.copy(repeat = RepeatCycle.HOURLY))
+                        }, selected = uiState.repeat == RepeatCycle.HOURLY
+                    )
+                }
                 RepeatCard(
-                    titleId = R.string.hourly, onClick = {
-                        onUpdate(uiState.copy(repeat = RepeatCycle.HOURLY))
-                    }, selected = uiState.repeat == RepeatCycle.HOURLY
+                    titleId = R.string.daily, onClick = {
+                        onUpdate(uiState.copy(repeat = RepeatCycle.DAILY))
+                    }, selected = uiState.repeat == RepeatCycle.DAILY
+                )
+                RepeatCard(
+                    titleId = R.string.weekly, onClick = {
+                        onUpdate(uiState.copy(repeat = RepeatCycle.WEEKLY))
+                    }, selected = uiState.repeat == RepeatCycle.WEEKLY
+                )
+                RepeatCard(
+                    titleId = R.string.monthly, onClick = {
+                        onUpdate(uiState.copy(repeat = RepeatCycle.MONTHLY))
+                    }, selected = uiState.repeat == RepeatCycle.MONTHLY
+                )
+                RepeatCard(
+                    titleId = R.string.yearly, onClick = {
+                        onUpdate(uiState.copy(repeat = RepeatCycle.YEARLY))
+                    }, selected = uiState.repeat == RepeatCycle.YEARLY
                 )
             }
-            RepeatCard(
-                titleId = R.string.daily, onClick = {
-                    onUpdate(uiState.copy(repeat = RepeatCycle.DAILY))
-                }, selected = uiState.repeat == RepeatCycle.DAILY
-            )
-            RepeatCard(
-                titleId = R.string.weekly, onClick = {
-                    onUpdate(uiState.copy(repeat = RepeatCycle.WEEKLY))
-                }, selected = uiState.repeat == RepeatCycle.WEEKLY
-            )
-            RepeatCard(
-                titleId = R.string.monthly, onClick = {
-                    onUpdate(uiState.copy(repeat = RepeatCycle.MONTHLY))
-                }, selected = uiState.repeat == RepeatCycle.MONTHLY
-            )
-            RepeatCard(
-                titleId = R.string.yearly, onClick = {
-                    onUpdate(uiState.copy(repeat = RepeatCycle.YEARLY))
-                }, selected = uiState.repeat == RepeatCycle.YEARLY
-            )
         }
     }
+
 }
 
 @Composable
@@ -433,10 +469,12 @@ private fun DetailSwitch(
         iconDescriptionId = iconDescriptionId,
         titleId = titleId,
         contentColumn = {
-            if (checked) {
+            AnimatedVisibility(checked) {
                 detail?.let {
                     Text(
-                        text = it, style = Typography.caption, color = GrayDark
+                        text = it,
+                        style = Typography.caption.copy(fontSize = 11.sp),
+                        color = GrayDark
                     )
                 }
             }

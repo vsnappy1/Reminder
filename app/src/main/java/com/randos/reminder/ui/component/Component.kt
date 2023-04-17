@@ -98,8 +98,8 @@ fun BaseViewWithFAB(
             FloatingActionButton(
                 onClick = onAddTaskClick,
                 modifier = Modifier
-                    .padding(large)
-                    .size(50.dp)
+                    .padding(16.dp)
+//                    .size(50.dp)
                     .align(Alignment.BottomEnd),
                 backgroundColor = White
             ) {

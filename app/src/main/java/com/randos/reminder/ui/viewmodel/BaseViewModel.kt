@@ -9,7 +9,6 @@ import com.randos.reminder.data.repository.TaskRepository
 import com.randos.reminder.enums.RepeatCycle
 import com.randos.reminder.notification.NotificationManager
 import com.randos.reminder.notification.toNotificationData
-import com.randos.reminder.utils.isNullOrInPast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
