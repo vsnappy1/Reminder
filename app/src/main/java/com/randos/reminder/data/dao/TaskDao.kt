@@ -36,6 +36,9 @@ interface TaskDao {
     @Query("SELECT * FROM task WHERE date < :date AND completedOn IS NULL $orderBy")
     fun getTasksBefore(date: LocalDate): Flow<List<Task>>
 
+    @Query("SELECT * FROM task WHERE date <= :date AND completedOn IS NULL $orderBy")
+    fun getTasksTodayAndBackward(date: LocalDate): Flow<List<Task>>
+
     @Query("SELECT * FROM task WHERE completedOn IS NOT NULL $orderBy")
     fun getCompletedTasks(): Flow<List<Task>>
 

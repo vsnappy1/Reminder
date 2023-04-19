@@ -78,6 +78,7 @@ object TaskAddDestination : NavigationDestination {
     override val titleRes: Int = R.string.new_reminder
 }
 
+// TODO Preserve notification when device restart
 // TODO write test cases
 // TODO get the theme reviewed
 // TODO ask for a QA
@@ -89,6 +90,8 @@ fun AddTaskScreen(
     onAdd: () -> Unit = {}, onCancel: () -> Unit = {}, viewModel: AddTaskViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
+//    val listState = rememberLazyListState()
+//    listState.animateScrollToItem(1)
     BaseView(titleRes = R.string.new_reminder) {
         Column(modifier = Modifier.padding(medium)) {
             InputTitleAndNotesCard(uiState = uiState) { viewModel.updateUiState(it) }

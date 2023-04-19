@@ -2,7 +2,9 @@ package com.randos.reminder.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -16,6 +18,7 @@ import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material.icons.rounded.PriorityHigh
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -161,7 +164,8 @@ fun TaskCard(
     isDateVisible: Boolean = true,
     isTimeVisible: Boolean = true,
     isRepeatVisible: Boolean = true,
-    visible: Boolean
+    visible: Boolean,
+    indexed: Boolean = false
 ) {
     AnimatedVisibility(
         visible = visible,
@@ -173,13 +177,15 @@ fun TaskCard(
             )
         )
     ) {
+        val color by animateColorAsState(targetValue = if(indexed) Gray500 else White, animationSpec = tween(durationMillis = 1000))
         Card(
             shape = Shapes.small,
             modifier = modifier
                 .fillMaxWidth()
                 .padding(vertical = small)
                 .clip(Shapes.small)
-                .clickable { onItemClick(task.id) }
+                .clickable { onItemClick(task.id) },
+            backgroundColor = color
         ) {
             Row(
                 modifier = Modifier
@@ -313,6 +319,7 @@ private fun ReminderRadioButton(
     onClick: () -> Unit = {},
     selected: Boolean = false
 ) {
+    val color by animateColorAsState(targetValue = if (selected) Green else White)
     Card(
         shape = RoundedCornerShape(9.dp),
         modifier = modifier
@@ -321,9 +328,9 @@ private fun ReminderRadioButton(
             .clip(RoundedCornerShape(9.dp))
             .clickable { onClick() },
         border = BorderStroke(1.dp, Green),
-        backgroundColor = if (selected) Green else White
+        backgroundColor = color
     ) {
-        if (selected) {
+        AnimatedVisibility (visible = selected, enter = fadeIn(), exit = fadeOut()) {
             Icon(
                 imageVector = Icons.Rounded.Done,
                 contentDescription = stringResource(id = R.string.done),

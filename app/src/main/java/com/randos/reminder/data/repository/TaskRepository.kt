@@ -24,6 +24,8 @@ interface TaskRepository {
 
     fun getTasksBefore(date: LocalDate): Flow<List<Task>>
 
+    fun getTasksTodayAndBackward(date: LocalDate): Flow<List<Task>>
+
     fun getCompletedTasks(): Flow<List<Task>>
 
     fun getCompletedTasksOn(date: LocalDate): Flow<List<Task>>

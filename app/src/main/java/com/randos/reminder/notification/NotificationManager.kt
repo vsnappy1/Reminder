@@ -75,7 +75,7 @@ class NotificationManagerImpl @Inject constructor(val context: Context) : Notifi
 fun Context.showNotification(notificationData: NotificationData) {
     val deepLinkIntent = Intent(
         Intent.ACTION_VIEW,
-        notificationData.deepLinkPath?.toUri(),
+        "${notificationData.deepLinkPath}/${notificationData.id}".toUri(),
         this,
         MainActivity::class.java
     )

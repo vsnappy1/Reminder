@@ -37,6 +37,9 @@ class TaskRepositoryImpl @Inject constructor(private val taskDao: TaskDao) : Tas
     override fun getTasksBefore(date: LocalDate): Flow<List<Task>> =
         taskDao.getTasksBefore(date)
 
+    override fun getTasksTodayAndBackward(date: LocalDate): Flow<List<Task>> =
+        taskDao.getTasksTodayAndBackward(date)
+
     override fun getCompletedTasks() =
         taskDao.getCompletedTasks()
 

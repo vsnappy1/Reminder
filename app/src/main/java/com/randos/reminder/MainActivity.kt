@@ -3,6 +3,7 @@ package com.randos.reminder
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,10 +40,15 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     val navController = rememberNavController()
-                    NavGraph(navController = navController)
+                    NavGraph(navController = navController, this)
                 }
             }
         }
+
+        val taskIdLong = intent.getLongExtra("taskId", -1)
+        val taskIdInt = intent.getIntExtra("taskId", -1)
+        val taskIdString = intent.getStringExtra("taskId")
+        Log.d("--TAG", "onCreate: $taskIdLong | $taskIdInt | $taskIdString")
         requestNotificationPermission()
     }
 }

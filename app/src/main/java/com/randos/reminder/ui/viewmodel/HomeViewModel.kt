@@ -104,9 +104,14 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
     fun updateTaskStatus(taskUiState: TaskUiState) {
         viewModelScope.launch {
             updateTaskStatus(taskUiState.toTask())
         }
+    }
+
+    fun updateUiState(uiState: HomeScreenUiState) {
+        _homeUiState.value = uiState
     }
 }

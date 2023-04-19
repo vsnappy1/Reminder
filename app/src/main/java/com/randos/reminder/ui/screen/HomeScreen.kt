@@ -1,5 +1,6 @@
 package com.randos.reminder.ui.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.core.animateFloatAsState
@@ -85,10 +86,22 @@ fun HomeScreen(
     onCompletedClick: () -> Unit = {},
     onAddTaskClick: () -> Unit = {},
     onSearchItemClick: (Long) -> Unit = {},
+    onBackPress: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
 
     val homeUiState by viewModel.homeUiState.observeAsState(HomeScreenUiState())
+    val focusManager = LocalFocusManager.current
+
+    BackHandler() {
+        if (homeUiState.doesSearchHasFocus) {
+            viewModel.setSearchText("")
+            focusManager.clearFocus()
+            viewModel.setDoesSearchHasFocus(false)
+        } else {
+            onBackPress()
+        }
+    }
 
     val timeFrames = mutableListOf(
         TimeFrame(
@@ -120,7 +133,6 @@ fun HomeScreen(
             onClick = onCompletedClick
         ),
     )
-    val focusManager = LocalFocusManager.current
     BaseViewWithFAB(titleRes = R.string.app_name, onAddTaskClick = onAddTaskClick) {
         ReminderTextField(
             value = homeUiState.search,
