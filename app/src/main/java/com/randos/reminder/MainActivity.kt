@@ -13,8 +13,10 @@ import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.randos.reminder.navigation.NavGraph
+import com.randos.reminder.notification.NotificationManager
 import com.randos.reminder.ui.theme.ReminderTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -31,6 +33,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Inject
+    lateinit var notificationManager: NotificationManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -44,11 +49,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-        val taskIdLong = intent.getLongExtra("taskId", -1)
-        val taskIdInt = intent.getIntExtra("taskId", -1)
-        val taskIdString = intent.getStringExtra("taskId")
-        Log.d("--TAG", "onCreate: $taskIdLong | $taskIdInt | $taskIdString")
         requestNotificationPermission()
+        notificationManager.setDailyNotification()
     }
 }

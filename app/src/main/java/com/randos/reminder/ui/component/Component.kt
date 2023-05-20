@@ -6,6 +6,8 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -153,7 +155,7 @@ fun TimeFrameHeader(titleRes: Int, modifier: Modifier = Modifier) {
     }
 }
 
-const val defaultAnimationDuration = 250
+const val defaultAnimationDuration = 500
 
 @Composable
 fun TaskCard(
@@ -173,11 +175,14 @@ fun TaskCard(
         exit = fadeOut(
             tween(
                 durationMillis = defaultAnimationDuration,
-                delayMillis = (DELAY - 2 * defaultAnimationDuration).toInt()
+                delayMillis = (DELAY - defaultAnimationDuration).toInt()
             )
         )
     ) {
-        val color by animateColorAsState(targetValue = if(indexed) Gray500 else White, animationSpec = tween(durationMillis = 1000))
+        val cardBackground by animateColorAsState(
+            targetValue = if (indexed) Gray500 else White,
+            animationSpec = tween(durationMillis = 1000)
+        )
         Card(
             shape = Shapes.small,
             modifier = modifier
@@ -185,7 +190,7 @@ fun TaskCard(
                 .padding(vertical = small)
                 .clip(Shapes.small)
                 .clickable { onItemClick(task.id) },
-            backgroundColor = color
+            backgroundColor = cardBackground
         ) {
             Row(
                 modifier = Modifier
@@ -200,39 +205,8 @@ fun TaskCard(
                         .weight(1f, true)
                         .padding(start = small)
                 ) {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = task.title,
-                            fontWeight = FontWeight.Bold,
-                            style = Typography.body1,
-                            color = if (task.done) GrayDark else Black
-                        )
-
-                        if (task.priority != Priority.NONE) {
-                            Row(
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .padding(end = medium),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                val color =
-                                    if (task.priority == Priority.HIGH) Red else if (task.priority == Priority.MEDIUM) Green else Blue
-
-                                Text(
-                                    text = task.priority.value,
-                                    style = Typography.body2,
-                                    color = if (task.done) GrayDark else color
-                                )
-                                Icon(
-                                    imageVector = Icons.Rounded.PriorityHigh,
-                                    contentDescription = stringResource(id = R.string.priority),
-                                    tint = if (task.done) GrayDark else color,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                            }
-                        }
-                    }
-
+                    TitleAndPriority(task)
+                    Spacer(modifier = Modifier.height(2.dp))
                     task.notes?.let {
                         if (it.isNotBlank()) {
                             Text(
@@ -243,60 +217,7 @@ fun TaskCard(
                         }
                     }
                     Spacer(modifier = Modifier.height(2.dp))
-                    Row {
-                        val color = if (task.isDue) Red else GrayDark
-
-                        if (isDateVisible) {
-                            task.date?.let {
-                                Text(
-                                    text = it.format(),
-                                    fontWeight = FontWeight.SemiBold,
-                                    style = Typography.caption,
-                                    color = if (task.done) GrayDark else color
-                                )
-                            }
-                        }
-
-                        if (isDateVisible && task.isDateChecked && isTimeVisible && task.isTimeChecked) {
-                            Text(
-                                text = ", ",
-                                style = Typography.caption,
-                                fontWeight = FontWeight.SemiBold,
-                                color = if (task.done) GrayDark else color
-                            )
-                        }
-
-                        if (isTimeVisible) {
-                            task.time?.let {
-                                Text(
-                                    text = it.format(),
-                                    style = Typography.caption,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = if (task.done) GrayDark else color
-                                )
-                            }
-                        }
-
-                        if ((isDateVisible && task.isDateChecked || isTimeVisible && task.isTimeChecked) && isRepeatVisible && task.isRepeatChecked) {
-                            Text(
-                                text = ", ",
-                                style = Typography.caption,
-                                fontWeight = FontWeight.SemiBold,
-                                color = if (task.done) GrayDark else color
-                            )
-                        }
-
-                        if (isRepeatVisible) {
-                            if (task.repeat != RepeatCycle.NO_REPEAT) {
-                                Text(
-                                    text = task.repeat.value,
-                                    style = Typography.caption,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = if (task.done) GrayDark else color
-                                )
-                            }
-                        }
-                    }
+                    DateTimeRepeat(task, isDateVisible, isTimeVisible, isRepeatVisible)
                     Spacer(modifier = Modifier.height(2.dp))
                     task.completedOn?.let {
                         Text(
@@ -310,7 +231,89 @@ fun TaskCard(
             }
         }
     }
+}
 
+@Composable
+private fun DateTimeRepeat(
+    task: TaskUiState,
+    isDateVisible: Boolean,
+    isTimeVisible: Boolean,
+    isRepeatVisible: Boolean
+) {
+    Row {
+        val color = if (task.isDue) Red else GrayDark
+        if (isDateVisible) {
+            task.date?.let {
+                Text(
+                    text = it.format(),
+                    fontWeight = FontWeight.SemiBold,
+                    style = Typography.caption,
+                    color = if (task.done) GrayDark else color
+                )
+            }
+        }
+
+        var shouldAddComma = isDateVisible && task.isDateChecked
+        if (isTimeVisible) {
+            task.time?.let {
+                Text(
+                    text = "${if (shouldAddComma) ", " else ""}${it.format()}",
+                    style = Typography.caption,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (task.done) GrayDark else color
+                )
+            }
+        }
+
+        shouldAddComma =
+            isDateVisible && task.isDateChecked || isTimeVisible && task.isTimeChecked
+        if (isRepeatVisible) {
+            if (task.repeat != RepeatCycle.NO_REPEAT) {
+                Text(
+                    text = "${if (shouldAddComma) ", " else ""}${task.repeat.value}",
+                    style = Typography.caption,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (task.done) GrayDark else color
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TitleAndPriority(task: TaskUiState) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = task.title,
+            fontWeight = FontWeight.Bold,
+            style = Typography.body1,
+            color = if (task.done) GrayDark else Black
+        )
+
+        if (task.priority != Priority.NONE) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = medium),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val color =
+                    if (task.priority == Priority.HIGH) Red else if (task.priority == Priority.MEDIUM) Green else Blue
+
+                Text(
+                    text = task.priority.value,
+                    style = Typography.body2,
+                    color = if (task.done) GrayDark else color
+                )
+                Icon(
+                    imageVector = Icons.Rounded.PriorityHigh,
+                    contentDescription = stringResource(id = R.string.priority),
+                    tint = if (task.done) GrayDark else color,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -319,7 +322,6 @@ private fun ReminderRadioButton(
     onClick: () -> Unit = {},
     selected: Boolean = false
 ) {
-    val color by animateColorAsState(targetValue = if (selected) Green else White)
     Card(
         shape = RoundedCornerShape(9.dp),
         modifier = modifier
@@ -328,9 +330,9 @@ private fun ReminderRadioButton(
             .clip(RoundedCornerShape(9.dp))
             .clickable { onClick() },
         border = BorderStroke(1.dp, Green),
-        backgroundColor = color
+        backgroundColor = if (selected) Green else White
     ) {
-        AnimatedVisibility (visible = selected, enter = fadeIn(), exit = fadeOut()) {
+        if(selected) {
             Icon(
                 imageVector = Icons.Rounded.Done,
                 contentDescription = stringResource(id = R.string.done),

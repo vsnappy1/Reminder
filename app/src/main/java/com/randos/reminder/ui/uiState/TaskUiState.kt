@@ -19,7 +19,9 @@ data class TaskUiState(
     val addedOn: LocalDateTime = LocalDateTime.now(),
     val completedOn: LocalDateTime? = null,
     val isDateChecked: Boolean = date != null,
+    val isDatePickerVisible: Boolean = false,
     val isTimeChecked: Boolean = time != null,
+    val isTimePickerVisible: Boolean = false,
     val isRepeatChecked: Boolean = repeat != RepeatCycle.NO_REPEAT,
     val isDue: Boolean =
         (!done && date?.isBefore(LocalDate.now()) == true) ||

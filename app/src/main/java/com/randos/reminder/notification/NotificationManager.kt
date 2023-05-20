@@ -13,11 +13,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.randos.reminder.MainActivity
 import com.randos.reminder.R
-import java.time.LocalDate
-import java.time.LocalDateTime
+import com.randos.reminder.notification.worker.TodayTaskNotificationWorker
 import java.util.Calendar
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 private const val TAG = "NotificationManager"
@@ -26,6 +29,7 @@ interface NotificationManager {
     fun scheduleNotification(notificationData: NotificationData)
     fun updateScheduledNotification(notificationData: NotificationData)
     fun removeScheduledNotification(notificationId: Int)
+    fun setDailyNotification()
 }
 
 
@@ -69,6 +73,33 @@ class NotificationManagerImpl @Inject constructor(val context: Context) : Notifi
             PendingIntent.FLAG_IMMUTABLE
         )
         alarmManager.cancel(pendingIntent)
+    }
+
+    override fun setDailyNotification() {
+        //TODO set work manager
+//        val dailyMorningNotification =
+//            PeriodicWorkRequestBuilder<TodayTaskNotificationWorker>(5, TimeUnit.MINUTES)
+////                .setInitialDelay(getInitialDelay(), TimeUnit.MILLISECONDS)
+//                .build()
+//
+//        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+//            "DailyNotification",
+//            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+//            dailyMorningNotification
+//        )
+//        Log.d(TAG, "setDailyNotification: setup")
+    }
+
+    private fun getInitialDelay(): Long {
+        val now = Calendar.getInstance()
+        val due = Calendar.getInstance()
+        due.set(Calendar.HOUR_OF_DAY, 9)
+        due.set(Calendar.MINUTE, 0)
+        due.set(Calendar.SECOND, 0)
+        if (now.after(due)) {
+            due.add(Calendar.DAY_OF_MONTH, 1)
+        }
+        return due.timeInMillis - now.timeInMillis
     }
 }
 

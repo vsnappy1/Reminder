@@ -1,13 +1,16 @@
 package com.randos.reminder.ui.screen
 
-import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -69,16 +71,23 @@ import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.uiState.isValid
 import com.randos.reminder.ui.viewmodel.AddTaskViewModel
 import com.randos.reminder.utils.format
+import com.vsnappy1.datepicker.DatePicker
+import com.vsnappy1.datepicker.data.model.ComposeDatePickerDate
+import com.vsnappy1.timepicker.TimePicker
+import com.vsnappy1.timepicker.data.model.ComposeTimePickerTime
+import com.vsnappy1.timepicker.enums.MinuteGap
+import com.vsnappy1.timepicker.enums.TimeOfDay
 import java.time.LocalDate
 import java.time.LocalTime
-import java.util.Calendar
 
 object TaskAddDestination : NavigationDestination {
     override val route: String = ReminderScreen.ADD_TASK_SCREEN.name
     override val titleRes: Int = R.string.new_reminder
 }
-
+// TODO send a notification at 9:00 AM to let user know tasks for today, exclude tasks with time
 // TODO Preserve notification when device restart
+// TODO Optimize scrolling
+// TODO add a view to explain permission for notification
 // TODO write test cases
 // TODO get the theme reviewed
 // TODO ask for a QA
@@ -90,8 +99,6 @@ fun AddTaskScreen(
     onAdd: () -> Unit = {}, onCancel: () -> Unit = {}, viewModel: AddTaskViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
-//    val listState = rememberLazyListState()
-//    listState.animateScrollToItem(1)
     BaseView(titleRes = R.string.new_reminder) {
         Column(modifier = Modifier.padding(medium)) {
             InputTitleAndNotesCard(uiState = uiState) { viewModel.updateUiState(it) }
@@ -213,7 +220,6 @@ private fun DateComponent(
     uiState: TaskUiState,
     onUpdate: (TaskUiState) -> Unit,
 ) {
-    val context = LocalContext.current
     DetailSwitch(
         icon = Icons.Rounded.CalendarMonth,
         iconDescriptionId = R.string.date,
@@ -221,14 +227,13 @@ private fun DateComponent(
         checked = uiState.isDateChecked,
         onCheckedChange = {
             if (it) {
-                showDatePicker(
-                    onDateSetListener = { year, month, day ->
-                        onUpdate(
-                            uiState.copy(
-                                date = LocalDate.of(year, month, day), isDateChecked = true
-                            )
-                        )
-                    }, context = context
+                onUpdate(
+                    uiState.copy(
+                        date = LocalDate.now(),
+                        isDatePickerVisible = true,
+                        isTimePickerVisible = false,
+                        isDateChecked = true
+                    )
                 )
             } else {
                 onUpdate(
@@ -238,13 +243,46 @@ private fun DateComponent(
                         repeat = RepeatCycle.NO_REPEAT,
                         isRepeatChecked = false,
                         time = null,
+                        isDatePickerVisible = false,
+                        isTimePickerVisible = false,
                         isTimeChecked = false,
                     )
                 )
             }
         },
-        detail = uiState.date?.format()
+        detail = uiState.date?.format(),
+        onClick = {
+            if (uiState.isDateChecked) {
+                onUpdate(
+                    uiState.copy(
+                        isDatePickerVisible = !uiState.isDatePickerVisible,
+                        isTimePickerVisible = false,
+                    )
+                )
+            }
+        }
     )
+    AnimatedVisibility(
+        visible = uiState.isDatePickerVisible,
+        enter = expandVertically(animationSpec = tween(durationMillis = 400, delayMillis = 100)),
+        exit = shrinkVertically(animationSpec = tween(durationMillis = 250))
+    ) {
+        DatePicker(
+            onDateSelected = { year, month, day ->
+                onUpdate(
+                    uiState.copy(
+                        date = LocalDate.of(year, month + 1, day), isDateChecked = true
+                    )
+                )
+            },
+            date = ComposeDatePickerDate(
+                year = uiState.date?.year ?: LocalDate.now().year,
+                month = (uiState.date?.monthValue ?: LocalDate.now().monthValue) - 1,
+                day = uiState.date?.dayOfMonth ?: LocalDate.now().dayOfMonth
+            )
+        )
+    }
+
 }
 
 @Composable
@@ -252,7 +290,6 @@ private fun TimeComponent(
     uiState: TaskUiState,
     onUpdate: (TaskUiState) -> Unit,
 ) {
-    val context = LocalContext.current
     DetailSwitch(
         icon = Icons.Rounded.AccessTime,
         iconDescriptionId = R.string.time,
@@ -260,32 +297,59 @@ private fun TimeComponent(
         checked = uiState.isTimeChecked,
         onCheckedChange = {
             if (it) {
-                showTimePicker(
-                    onTimeSetListener = { hour, minute, is24 ->
-                        onUpdate(
-                            uiState.copy(
-                                time = LocalTime.of(
-                                    (hour + if (is24) 12 else 0) % 24, minute
-                                ),
-                                isTimeChecked = true,
-                                date = uiState.date ?: LocalDate.now(),
-                                isDateChecked = true
-                            )
-                        )
-                    }, context = context
+                onUpdate(
+                    uiState.copy(
+                        isTimePickerVisible = true,
+                        isDatePickerVisible = false,
+                        time = LocalTime.now(),
+                        isTimeChecked = true,
+                        date = uiState.date ?: LocalDate.now(),
+                        isDateChecked = true
+                    )
                 )
             } else {
                 onUpdate(
                     uiState.copy(
                         time = null,
+                        isTimePickerVisible = false,
                         isTimeChecked = false,
                         repeat = if (uiState.repeat == RepeatCycle.HOURLY) RepeatCycle.NO_REPEAT else uiState.repeat
                     )
                 )
             }
         },
-        detail = uiState.time?.format() ?: ""
+        detail = uiState.time?.format() ?: "",
+        onClick = {
+            if (uiState.isTimeChecked) {
+                onUpdate(
+                    uiState.copy(
+                        isTimePickerVisible = !uiState.isTimePickerVisible,
+                        isDatePickerVisible = false
+                    )
+                )
+            }
+        }
     )
+    AnimatedVisibility(
+        visible = uiState.isTimePickerVisible,
+        enter = expandVertically(animationSpec = tween(durationMillis = 400, delayMillis = 100)),
+        exit = shrinkVertically(animationSpec = tween(durationMillis = 250))
+    ) {
+        TimePicker(
+            onTimeSelected = { hour, minute ->
+                onUpdate(
+                    uiState.copy(
+                        time = LocalTime.of(hour, minute)
+                    )
+                )
+            },
+            time = ComposeTimePickerTime(
+                hour = uiState.time?.hour ?: LocalTime.now().hour,
+                minute = uiState.time?.minute ?: LocalTime.now().minute
+            ),
+            minuteGap = MinuteGap.FIVE
+        )
+    }
 }
 
 @Composable
@@ -382,52 +446,18 @@ private fun Divider() {
     )
 }
 
-fun showDatePicker(
-    onDateSetListener: (Int, Int, Int) -> Unit, context: Context
-) {
-    val calender = Calendar.getInstance()
-
-    val presentYear = calender.get(Calendar.YEAR)
-    val presentMonth = calender.get(Calendar.MONTH)
-    val presentDay = calender.get(Calendar.DAY_OF_MONTH)
-
-    val datePicker = DatePickerDialog(
-        context, { _, selectedYear, selectedMonth, selectedDay ->
-            onDateSetListener(
-                selectedYear, selectedMonth + 1, selectedDay
-            )
-        }, presentYear, presentMonth, presentDay
-    )
-    datePicker.show()
-}
-
-fun showTimePicker(onTimeSetListener: (Int, Int, Boolean) -> Unit, context: Context) {
-    val calendar = Calendar.getInstance()
-
-    val is24HourFormat = android.text.format.DateFormat.is24HourFormat(context)
-    // Advance hour by 1 to create better user experience
-    val presentHour = (calendar.get(Calendar.HOUR_OF_DAY) + 1) % 24
-
-    val timePicker = TimePickerDialog(
-        context, { _, selectedHour, selectedMinute ->
-            onTimeSetListener(
-                selectedHour, selectedMinute, is24HourFormat
-            )
-        }, presentHour, 0, is24HourFormat
-    )
-    timePicker.show()
-}
-
 @Composable
 private fun DetailItem(
     icon: ImageVector,
     iconDescriptionId: Int,
     titleId: Int,
+    onClick: () -> Unit = {},
     contentColumn: @Composable (ColumnScope.() -> Unit) = {},
     trailingComposable: @Composable (BoxScope.() -> Unit) = {},
 ) {
     Box(
         modifier = Modifier
+            .clickable { onClick() }
             .fillMaxWidth()
             .height(35.dp)
     ) {
@@ -465,7 +495,8 @@ private fun DetailSwitch(
     titleId: Int,
     checked: Boolean = false,
     onCheckedChange: (Boolean) -> Unit = {},
-    detail: String?
+    detail: String?,
+    onClick: () -> Unit
 ) {
     DetailItem(
         icon = icon,
@@ -481,7 +512,8 @@ private fun DetailSwitch(
                     )
                 }
             }
-        }
+        },
+        onClick = { onClick() }
     ) {
         Switch(
             checked = checked, onCheckedChange = onCheckedChange

@@ -1,5 +1,6 @@
 package com.randos.reminder.ui.screen
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -39,8 +40,12 @@ import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,6 +77,7 @@ import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.viewmodel.HomeScreenUiState
 import com.randos.reminder.ui.viewmodel.HomeViewModel
 import com.randos.reminder.utils.noRippleClickable
+import kotlinx.coroutines.delay
 
 object HomeDestination : NavigationDestination {
     override val route: String = ReminderScreen.HOME_SCREEN.name
@@ -89,7 +95,11 @@ fun HomeScreen(
     onBackPress: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-
+    var visible by remember{ mutableStateOf(false) }
+    LaunchedEffect(key1 = Unit){
+        delay(2000)
+        visible = true
+    }
     val homeUiState by viewModel.homeUiState.observeAsState(HomeScreenUiState())
     val focusManager = LocalFocusManager.current
 
@@ -133,7 +143,9 @@ fun HomeScreen(
             onClick = onCompletedClick
         ),
     )
+
     BaseViewWithFAB(titleRes = R.string.app_name, onAddTaskClick = onAddTaskClick) {
+
         ReminderTextField(
             value = homeUiState.search,
             onValueChange = { viewModel.setSearchText(it) },
