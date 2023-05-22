@@ -2,14 +2,12 @@ package com.randos.reminder.navigation
 
 import android.app.Activity
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import com.randos.reminder.MainActivity
 import com.randos.reminder.ui.screen.*
 
 @Composable

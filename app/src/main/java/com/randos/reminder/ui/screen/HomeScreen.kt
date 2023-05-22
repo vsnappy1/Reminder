@@ -1,10 +1,10 @@
 package com.randos.reminder.ui.screen
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -28,9 +28,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AllInbox
 import androidx.compose.material.icons.rounded.CalendarMonth
@@ -39,6 +36,11 @@ import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Today
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,10 +67,11 @@ import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseViewWithFAB
 import com.randos.reminder.ui.component.TaskCard
+import com.randos.reminder.ui.theme.Black
 import com.randos.reminder.ui.theme.Gray300
 import com.randos.reminder.ui.theme.Gray500
 import com.randos.reminder.ui.theme.GrayLight
-import com.randos.reminder.ui.theme.Shapes
+import com.randos.reminder.ui.theme.shapes
 import com.randos.reminder.ui.theme.Typography
 import com.randos.reminder.ui.theme.White
 import com.randos.reminder.ui.theme.medium
@@ -189,7 +192,8 @@ private fun SearchView(
     onSearchItemClick: (Long) -> Unit
 ) {
     val alpha by animateFloatAsState(targetValue = if (homeUiState.search.isNotBlank()) 1f else 0.1f)
-    val rotation by animateFloatAsState(targetValue = if (homeUiState.isFilteredCompletedTasksVisible) 180f else 0f)
+    val rotation by animateFloatAsState(targetValue = if (homeUiState.isFilteredCompletedTasksVisible) 180f else 0f,
+        animationSpec = tween(durationMillis = 900))
     Box(modifier = Modifier
         .background(GrayLight.copy(alpha = alpha))
         .fillMaxSize()
@@ -200,7 +204,7 @@ private fun SearchView(
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = "${homeUiState.filteredCompletedTasksCount} Completed.",
-                        style = Typography.caption.copy(fontWeight = FontWeight.Bold)
+                        style = Typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                     )
                     Icon(
                         imageVector = Icons.Rounded.KeyboardArrowDown,
@@ -250,8 +254,8 @@ private fun ReminderTextField(
     Row(
         modifier = Modifier
             .padding(medium)
-            .background(color = White, shape = Shapes.small)
-            .border(width = 1.dp, color = Gray300, shape = Shapes.small)
+            .background(color = White, shape = shapes.small)
+            .border(width = 1.dp, color = Gray300, shape = shapes.small)
             .fillMaxWidth()
             .padding(medium),
         verticalAlignment = Alignment.CenterVertically
@@ -267,11 +271,11 @@ private fun ReminderTextField(
                 .padding(horizontal = small)
         ) {
             if (value.isEmpty()) {
-                Text(text = "Search", style = Typography.caption, color = Gray500)
+                Text(text = "Search", style = Typography.labelLarge, color = Gray500)
             }
             BasicTextField(
                 value = value, onValueChange = onValueChange, singleLine = true,
-                textStyle = Typography.caption,
+                textStyle = Typography.labelLarge,
                 modifier = Modifier
                     .fillMaxWidth()
                     .onFocusChanged { onFocusChange(it.hasFocus) },
@@ -303,8 +307,8 @@ fun FadeAnimatedVisibility(
 ) {
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn(),
-        exit = fadeOut()
+        enter = fadeIn(animationSpec = tween(durationMillis = 900, delayMillis = 100)),
+        exit = fadeOut(animationSpec = tween(durationMillis = 900, delayMillis = 100))
     ) {
         content()
     }
@@ -327,13 +331,14 @@ fun TimeFrameCard(
     onClick: () -> Unit = {}
 ) {
     Card(
-        shape = Shapes.small,
+        shape = shapes.small,
         modifier = Modifier
             .padding(medium)
             .height(70.dp)
             .width(100.dp)
-            .clip(Shapes.small)
-            .clickable { onClick() }
+            .clip(shapes.small)
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(containerColor = White, contentColor = Black)
     ) {
         Column(modifier = Modifier.padding(medium), verticalArrangement = Arrangement.Center) {
             Box(modifier = Modifier.fillMaxWidth()) {
@@ -344,12 +349,12 @@ fun TimeFrameCard(
                 Text(
                     text = "$count",
                     modifier = Modifier.align(Alignment.CenterEnd),
-                    style = Typography.h6.copy(fontWeight = FontWeight.Bold)
+                    style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
                 )
             }
             Text(
                 text = stringResource(id = textRes),
-                style = Typography.body2.copy(fontWeight = FontWeight.Bold, fontSize = 13.sp),
+                style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold, fontSize = 13.sp),
                 modifier = Modifier.padding(top = small, start = 2.dp)
             )
         }

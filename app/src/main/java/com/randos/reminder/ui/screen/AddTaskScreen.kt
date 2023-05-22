@@ -1,8 +1,5 @@
 package com.randos.reminder.ui.screen
 
-import android.app.TimePickerDialog
-import android.content.Context
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -12,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +28,14 @@ import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.PriorityHigh
 import androidx.compose.material.icons.rounded.Repeat
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -61,7 +67,7 @@ import com.randos.reminder.ui.theme.GrayDark
 import com.randos.reminder.ui.theme.GrayLight
 import com.randos.reminder.ui.theme.Green
 import com.randos.reminder.ui.theme.Red
-import com.randos.reminder.ui.theme.Shapes
+import com.randos.reminder.ui.theme.shapes
 import com.randos.reminder.ui.theme.Transparent
 import com.randos.reminder.ui.theme.Typography
 import com.randos.reminder.ui.theme.White
@@ -76,7 +82,6 @@ import com.vsnappy1.datepicker.data.model.ComposeDatePickerDate
 import com.vsnappy1.timepicker.TimePicker
 import com.vsnappy1.timepicker.data.model.ComposeTimePickerTime
 import com.vsnappy1.timepicker.enums.MinuteGap
-import com.vsnappy1.timepicker.enums.TimeOfDay
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -151,10 +156,10 @@ fun ActionButton(
 @Composable
 fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit) {
     Card(
-        shape = Shapes.small,
-        elevation = 0.dp,
-        backgroundColor = White,
-        modifier = Modifier.fillMaxWidth()
+        shape = shapes.small,
+        modifier = Modifier
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(White, contentColor = Black),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             TransparentBackgroundTextField(
@@ -162,9 +167,12 @@ fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
                     onUpdate(uiState.copy(title = it))
                 }, placeHolderId = R.string.title, isSingleLine = true
             )
-            Divider(
-                thickness = 1.dp, color = Green, modifier = Modifier.padding(horizontal = 8.dp)
+            androidx.compose.material3.Divider(
+                thickness = 1.dp,
+                color = Green,
+                modifier = Modifier.padding(horizontal = 8.dp)
             )
+
             TransparentBackgroundTextField(
                 value = uiState.notes ?: "",
                 onValueChange = { onUpdate(uiState.copy(notes = it)) },
@@ -180,16 +188,15 @@ fun DetailsCard(
     uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
 ) {
     Card(
-        shape = Shapes.small,
-        elevation = 0.dp,
-        backgroundColor = White,
+        shape = shapes.small,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = medium)
-    ) {
+            .padding(top = medium),
+        colors = CardDefaults.cardColors(White, contentColor = Black),
+        ) {
         Column(modifier = Modifier.padding(medium)) {
             Text(
-                text = stringResource(id = R.string.details), style = Typography.body2
+                text = stringResource(id = R.string.details), style = Typography.bodyMedium
             )
             DateComponent(uiState, onUpdate)
             Divider()
@@ -343,10 +350,11 @@ private fun TimeComponent(
                     )
                 )
             },
-            time = ComposeTimePickerTime(
-                hour = uiState.time?.hour ?: LocalTime.now().hour,
-                minute = uiState.time?.minute ?: LocalTime.now().minute
-            ),
+            time = ComposeTimePickerTime(5, 5),
+//            time = ComposeTimePickerTime(
+//                hour = uiState.time?.hour ?: LocalTime.now().hour,
+//                minute = uiState.time?.minute ?: LocalTime.now().minute
+//            ),
             minuteGap = MinuteGap.FIVE
         )
     }
@@ -418,18 +426,18 @@ private fun RepeatCard(titleId: Int, onClick: () -> Unit, selected: Boolean = fa
     val borderWidth by animateDpAsState(targetValue = if (selected) 1.dp else 0.dp)
     val color by animateColorAsState(targetValue = if (selected) Green else Transparent)
     Card(
-        shape = Shapes.small,
-        elevation = 0.dp,
+        shape = shapes.small,
         modifier = Modifier
-            .clip(Shapes.small)
+            .clip(shapes.small)
             .clickable { onClick() },
+        colors = CardDefaults.cardColors(containerColor = White),
         border = BorderStroke(width = borderWidth, color = color)
     ) {
         Text(
             text = stringResource(id = titleId),
             modifier = Modifier.padding(vertical = small, horizontal = medium),
             color = if (selected) Green else Black,
-            style = Typography.caption
+            style = Typography.labelLarge
         )
     }
 }
@@ -437,7 +445,7 @@ private fun RepeatCard(titleId: Int, onClick: () -> Unit, selected: Boolean = fa
 
 @Composable
 private fun Divider() {
-    Divider(
+    androidx.compose.material3.Divider(
         thickness = 1.dp,
         color = Green,
         modifier = Modifier
@@ -474,7 +482,7 @@ private fun DetailItem(
                 .align(Alignment.CenterStart)
         ) {
             Text(
-                text = stringResource(id = titleId), style = Typography.body2
+                text = stringResource(id = titleId), style = Typography.bodyMedium
             )
             contentColumn()
         }
@@ -507,7 +515,7 @@ private fun DetailSwitch(
                 detail?.let {
                     Text(
                         text = it,
-                        style = Typography.caption.copy(fontSize = 11.sp),
+                        style = Typography.labelLarge.copy(fontSize = 11.sp),
                         color = GrayDark
                     )
                 }
@@ -590,9 +598,7 @@ private fun PriorityDropDown(
 
 @Composable
 private fun PriorityDropdownMenuItem(onClick: () -> Unit, value: String) {
-    DropdownMenuItem(onClick = onClick) {
-        Text(text = value)
-    }
+    DropdownMenuItem(onClick = onClick, text = { Text(text = value) })
 }
 
 @Preview
@@ -614,16 +620,16 @@ fun ReminderButton(
             .width(100.dp),
         onClick = onClick,
         enabled = enabled,
-        shape = Shapes.small,
+        shape = shapes.small,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = color,
-            disabledBackgroundColor = color
+            containerColor = color,
+            disabledContainerColor = color
         ),
         border = BorderStroke(1.dp, color = border)
     ) {
         Text(
             text = text,
-            style = Typography.body2.copy(fontWeight = FontWeight.Bold),
+            style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
             color = if (enabled) textColor else GrayLight
         )
     }

@@ -4,10 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +16,15 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material.icons.rounded.PriorityHigh
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,6 +44,7 @@ import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.viewmodel.DELAY
 import com.randos.reminder.utils.format
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransparentBackgroundTextField(
     modifier: Modifier = Modifier,
@@ -55,16 +62,16 @@ fun TransparentBackgroundTextField(
         placeholder = {
             Text(
                 text = stringResource(id = placeHolderId),
-                style = Typography.body1
+                style = Typography.bodyLarge
             )
         },
         colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Transparent,
+            containerColor = Transparent,
             unfocusedIndicatorColor = Transparent,
             focusedIndicatorColor = Transparent
         ),
         singleLine = isSingleLine,
-        textStyle = Typography.body1
+        textStyle = Typography.bodyLarge
     )
 }
 
@@ -104,9 +111,8 @@ fun BaseViewWithFAB(
                 onClick = onAddTaskClick,
                 modifier = Modifier
                     .padding(16.dp)
-//                    .size(50.dp)
                     .align(Alignment.BottomEnd),
-                backgroundColor = White
+                containerColor = White
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Add,
@@ -133,7 +139,7 @@ fun Header(modifier: Modifier = Modifier, titleRes: Int) {
             text = stringResource(id = titleRes),
             fontSize = 24.sp,
             fontWeight = FontWeight.ExtraBold,
-            style = Typography.body2
+            style = Typography.bodyMedium
         )
     }
 }
@@ -150,7 +156,7 @@ fun TimeFrameHeader(titleRes: Int, modifier: Modifier = Modifier) {
             modifier = Modifier.align(Alignment.CenterStart),
             fontWeight = FontWeight.Bold,
             color = Green,
-            style = Typography.h6.copy(fontSize = 18.sp)
+            style = Typography.headlineSmall.copy(fontSize = 18.sp)
         )
     }
 }
@@ -184,13 +190,13 @@ fun TaskCard(
             animationSpec = tween(durationMillis = 1000)
         )
         Card(
-            shape = Shapes.small,
+            shape = shapes.small,
             modifier = modifier
                 .fillMaxWidth()
                 .padding(vertical = small)
-                .clip(Shapes.small)
+                .clip(shapes.small)
                 .clickable { onItemClick(task.id) },
-            backgroundColor = cardBackground
+            colors = CardDefaults.cardColors(containerColor = cardBackground),
         ) {
             Row(
                 modifier = Modifier
@@ -211,7 +217,7 @@ fun TaskCard(
                         if (it.isNotBlank()) {
                             Text(
                                 text = it,
-                                style = Typography.caption,
+                                style = Typography.labelLarge,
                                 color = GrayDark
                             )
                         }
@@ -222,7 +228,7 @@ fun TaskCard(
                     task.completedOn?.let {
                         Text(
                             text = "Completed: ${it.format()}",
-                            style = Typography.caption,
+                            style = Typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = GrayDark
                         )
@@ -247,7 +253,7 @@ private fun DateTimeRepeat(
                 Text(
                     text = it.format(),
                     fontWeight = FontWeight.SemiBold,
-                    style = Typography.caption,
+                    style = Typography.labelLarge,
                     color = if (task.done) GrayDark else color
                 )
             }
@@ -258,7 +264,7 @@ private fun DateTimeRepeat(
             task.time?.let {
                 Text(
                     text = "${if (shouldAddComma) ", " else ""}${it.format()}",
-                    style = Typography.caption,
+                    style = Typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = if (task.done) GrayDark else color
                 )
@@ -271,7 +277,7 @@ private fun DateTimeRepeat(
             if (task.repeat != RepeatCycle.NO_REPEAT) {
                 Text(
                     text = "${if (shouldAddComma) ", " else ""}${task.repeat.value}",
-                    style = Typography.caption,
+                    style = Typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = if (task.done) GrayDark else color
                 )
@@ -286,7 +292,7 @@ private fun TitleAndPriority(task: TaskUiState) {
         Text(
             text = task.title,
             fontWeight = FontWeight.Bold,
-            style = Typography.body1,
+            style = Typography.bodyLarge,
             color = if (task.done) GrayDark else Black
         )
 
@@ -302,7 +308,7 @@ private fun TitleAndPriority(task: TaskUiState) {
 
                 Text(
                     text = task.priority.value,
-                    style = Typography.body2,
+                    style = Typography.bodyMedium,
                     color = if (task.done) GrayDark else color
                 )
                 Icon(
@@ -329,10 +335,10 @@ private fun ReminderRadioButton(
             .size(18.dp)
             .clip(RoundedCornerShape(9.dp))
             .clickable { onClick() },
+        colors = CardDefaults.cardColors(containerColor = if (selected) Green else White),
         border = BorderStroke(1.dp, Green),
-        backgroundColor = if (selected) Green else White
     ) {
-        if(selected) {
+        if (selected) {
             Icon(
                 imageVector = Icons.Rounded.Done,
                 contentDescription = stringResource(id = R.string.done),
@@ -354,14 +360,14 @@ fun ReminderDropDown(
     Box {
         Row(modifier = Modifier
             .padding(vertical = small)
-            .clip(Shapes.small)
+            .clip(shapes.small)
             .clickable { onClick() }) {
             Text(
                 text = value,
                 modifier = Modifier
                     .height(20.dp)
                     .padding(start = medium),
-                style = Typography.body2,
+                style = Typography.bodyMedium,
                 textAlign = TextAlign.Center
             )
             Icon(
@@ -384,7 +390,7 @@ fun NoTaskMessage() {
             text = stringResource(id = R.string.no_task_message),
             modifier = Modifier
                 .padding(large),
-            style = Typography.body1,
+            style = Typography.bodyLarge,
             textAlign = TextAlign.Center
         )
     }

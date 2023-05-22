@@ -3,12 +3,12 @@ package com.randos.reminder.ui.screen
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -98,7 +98,7 @@ fun CompletedTaskScreen(
                 ) {
                     Text(
                         text = "${uiState.completedTaskCount} Completed.",
-                        style = Typography.body2.copy(fontWeight = FontWeight.Bold)
+                        style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     if (uiState.completedTaskCount > 0) {
                         Icon(
@@ -173,11 +173,11 @@ private fun DialogView(
     onDeleteClick: () -> Unit = {},
     onCancelClick: () -> Unit = {},
 ) {
-    Card(modifier = Modifier.padding(large), shape = Shapes.small) {
+    Card(modifier = Modifier.padding(large), shape = shapes.small) {
         Column(modifier = Modifier.padding(large)) {
             Text(
                 text = stringResource(id = messageRes),
-                style = Typography.body2
+                style = Typography.bodyMedium
             )
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -187,13 +187,13 @@ private fun DialogView(
             ) {
                 Text(
                     text = stringResource(id = R.string.cancel),
-                    style = Typography.body2,
+                    style = Typography.bodyMedium,
                     color = Gray500,
                     modifier = Modifier.noRippleClickable { onCancelClick() }
                 )
                 Text(
                     text = stringResource(id = R.string.delete),
-                    style = Typography.body2,
+                    style = Typography.bodyMedium,
                     color = Red,
                     modifier = Modifier.noRippleClickable { onDeleteClick() }
                 )
