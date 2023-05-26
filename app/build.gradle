@@ -108,7 +108,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:4.4.0'
 
     // Date Picker
-    implementation 'com.github.vsnappy1:ComposeDatePicker:2.0.0'
+    implementation 'com.github.vsnappy1:ComposeDatePicker:2.2.0'
 }
 
 // Allow references to generated code

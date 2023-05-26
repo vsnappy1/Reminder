@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -121,7 +122,7 @@ fun CompletedTaskScreen(
                         it()
                     }
                 }
-                FadeAnimatedVisibility (uiState.isAllEmpty) {
+                FadeAnimatedVisibility(uiState.isAllEmpty) {
                     NoTaskMessage()
                 }
             }
@@ -173,7 +174,11 @@ private fun DialogView(
     onDeleteClick: () -> Unit = {},
     onCancelClick: () -> Unit = {},
 ) {
-    Card(modifier = Modifier.padding(large), shape = shapes.small) {
+    Card(
+        modifier = Modifier.padding(large),
+        shape = shapes.large,
+        colors = CardDefaults.cardColors(containerColor = White, contentColor = Black)
+    ) {
         Column(modifier = Modifier.padding(large)) {
             Text(
                 text = stringResource(id = messageRes),
@@ -182,7 +187,7 @@ private fun DialogView(
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
-                    .padding(top = medium)
+                    .padding(top = large)
                     .fillMaxWidth()
             ) {
                 Text(

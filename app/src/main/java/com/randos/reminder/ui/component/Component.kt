@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -51,7 +52,8 @@ fun TransparentBackgroundTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeHolderId: Int,
-    isSingleLine: Boolean = false
+    isSingleLine: Boolean = false,
+    textStyle: TextStyle = Typography.bodyLarge
 ) {
     TextField(
         value = value,
@@ -71,7 +73,7 @@ fun TransparentBackgroundTextField(
             focusedIndicatorColor = Transparent
         ),
         singleLine = isSingleLine,
-        textStyle = Typography.bodyLarge
+        textStyle = textStyle
     )
 }
 
@@ -190,11 +192,11 @@ fun TaskCard(
             animationSpec = tween(durationMillis = 1000)
         )
         Card(
-            shape = shapes.small,
+            shape = shapes.large,
             modifier = modifier
                 .fillMaxWidth()
                 .padding(vertical = small)
-                .clip(shapes.small)
+                .clip(shapes.large)
                 .clickable { onItemClick(task.id) },
             colors = CardDefaults.cardColors(containerColor = cardBackground),
         ) {
@@ -360,7 +362,7 @@ fun ReminderDropDown(
     Box {
         Row(modifier = Modifier
             .padding(vertical = small)
-            .clip(shapes.small)
+            .clip(shapes.large)
             .clickable { onClick() }) {
             Text(
                 text = value,

@@ -34,6 +34,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -78,9 +79,9 @@ import com.randos.reminder.ui.uiState.isValid
 import com.randos.reminder.ui.viewmodel.AddTaskViewModel
 import com.randos.reminder.utils.format
 import com.vsnappy1.datepicker.DatePicker
-import com.vsnappy1.datepicker.data.model.ComposeDatePickerDate
+import com.vsnappy1.datepicker.data.model.DatePickerDate
 import com.vsnappy1.timepicker.TimePicker
-import com.vsnappy1.timepicker.data.model.ComposeTimePickerTime
+import com.vsnappy1.timepicker.data.model.TimePickerTime
 import com.vsnappy1.timepicker.enums.MinuteGap
 import java.time.LocalDate
 import java.time.LocalTime
@@ -156,16 +157,20 @@ fun ActionButton(
 @Composable
 fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit) {
     Card(
-        shape = shapes.small,
+        shape = shapes.large,
         modifier = Modifier
             .fillMaxWidth(),
         colors = CardDefaults.cardColors(White, contentColor = Black),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             TransparentBackgroundTextField(
-                value = uiState.title, onValueChange = {
+                value = uiState.title,
+                placeHolderId = R.string.title,
+                isSingleLine = true,
+                textStyle = Typography.headlineSmall,
+                onValueChange = {
                     onUpdate(uiState.copy(title = it))
-                }, placeHolderId = R.string.title, isSingleLine = true
+                }
             )
             androidx.compose.material3.Divider(
                 thickness = 1.dp,
@@ -188,12 +193,12 @@ fun DetailsCard(
     uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
 ) {
     Card(
-        shape = shapes.small,
+        shape = shapes.large,
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = medium),
         colors = CardDefaults.cardColors(White, contentColor = Black),
-        ) {
+    ) {
         Column(modifier = Modifier.padding(medium)) {
             Text(
                 text = stringResource(id = R.string.details), style = Typography.bodyMedium
@@ -258,15 +263,14 @@ private fun DateComponent(
             }
         },
         detail = uiState.date?.format(),
+        onClickEnabled = uiState.isDateChecked,
         onClick = {
-            if (uiState.isDateChecked) {
-                onUpdate(
-                    uiState.copy(
-                        isDatePickerVisible = !uiState.isDatePickerVisible,
-                        isTimePickerVisible = false,
-                    )
+            onUpdate(
+                uiState.copy(
+                    isDatePickerVisible = !uiState.isDatePickerVisible,
+                    isTimePickerVisible = false,
                 )
-            }
+            )
         }
     )
     AnimatedVisibility(
@@ -282,7 +286,7 @@ private fun DateComponent(
                     )
                 )
             },
-            date = ComposeDatePickerDate(
+            date = DatePickerDate(
                 year = uiState.date?.year ?: LocalDate.now().year,
                 month = (uiState.date?.monthValue ?: LocalDate.now().monthValue) - 1,
                 day = uiState.date?.dayOfMonth ?: LocalDate.now().dayOfMonth
@@ -326,15 +330,14 @@ private fun TimeComponent(
             }
         },
         detail = uiState.time?.format() ?: "",
+        onClickEnabled = uiState.isTimeChecked,
         onClick = {
-            if (uiState.isTimeChecked) {
-                onUpdate(
-                    uiState.copy(
-                        isTimePickerVisible = !uiState.isTimePickerVisible,
-                        isDatePickerVisible = false
-                    )
+            onUpdate(
+                uiState.copy(
+                    isTimePickerVisible = !uiState.isTimePickerVisible,
+                    isDatePickerVisible = false
                 )
-            }
+            )
         }
     )
     AnimatedVisibility(
@@ -350,12 +353,11 @@ private fun TimeComponent(
                     )
                 )
             },
-            time = ComposeTimePickerTime(5, 5),
-//            time = ComposeTimePickerTime(
-//                hour = uiState.time?.hour ?: LocalTime.now().hour,
-//                minute = uiState.time?.minute ?: LocalTime.now().minute
-//            ),
-            minuteGap = MinuteGap.FIVE
+            minuteGap = MinuteGap.FIVE,
+            time = TimePickerTime(
+                hour = uiState.time?.hour ?: LocalTime.now().hour,
+                minute = uiState.time?.minute ?: LocalTime.now().minute
+            ),
         )
     }
 }
@@ -426,9 +428,9 @@ private fun RepeatCard(titleId: Int, onClick: () -> Unit, selected: Boolean = fa
     val borderWidth by animateDpAsState(targetValue = if (selected) 1.dp else 0.dp)
     val color by animateColorAsState(targetValue = if (selected) Green else Transparent)
     Card(
-        shape = shapes.small,
+        shape = shapes.large,
         modifier = Modifier
-            .clip(shapes.small)
+            .clip(shapes.large)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = White),
         border = BorderStroke(width = borderWidth, color = color)
@@ -460,12 +462,14 @@ private fun DetailItem(
     iconDescriptionId: Int,
     titleId: Int,
     onClick: () -> Unit = {},
+    onClickEnabled: Boolean = false,
     contentColumn: @Composable (ColumnScope.() -> Unit) = {},
     trailingComposable: @Composable (BoxScope.() -> Unit) = {},
 ) {
     Box(
         modifier = Modifier
-            .clickable { onClick() }
+            .clip(ShapeDefaults.Large)
+            .clickable(enabled = onClickEnabled) { onClick() }
             .fillMaxWidth()
             .height(35.dp)
     ) {
@@ -504,6 +508,7 @@ private fun DetailSwitch(
     checked: Boolean = false,
     onCheckedChange: (Boolean) -> Unit = {},
     detail: String?,
+    onClickEnabled: Boolean,
     onClick: () -> Unit
 ) {
     DetailItem(
@@ -521,6 +526,7 @@ private fun DetailSwitch(
                 }
             }
         },
+        onClickEnabled = onClickEnabled,
         onClick = { onClick() }
     ) {
         Switch(
@@ -620,7 +626,7 @@ fun ReminderButton(
             .width(100.dp),
         onClick = onClick,
         enabled = enabled,
-        shape = shapes.small,
+        shape = shapes.large,
         colors = ButtonDefaults.buttonColors(
             containerColor = color,
             disabledContainerColor = color

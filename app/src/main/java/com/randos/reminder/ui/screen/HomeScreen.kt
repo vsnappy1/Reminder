@@ -254,8 +254,8 @@ private fun ReminderTextField(
     Row(
         modifier = Modifier
             .padding(medium)
-            .background(color = White, shape = shapes.small)
-            .border(width = 1.dp, color = Gray300, shape = shapes.small)
+            .background(color = White, shape = shapes.large)
+            .border(width = 1.dp, color = Gray300, shape = shapes.large)
             .fillMaxWidth()
             .padding(medium),
         verticalAlignment = Alignment.CenterVertically
@@ -331,12 +331,12 @@ fun TimeFrameCard(
     onClick: () -> Unit = {}
 ) {
     Card(
-        shape = shapes.small,
+        shape = shapes.large,
         modifier = Modifier
             .padding(medium)
             .height(70.dp)
             .width(100.dp)
-            .clip(shapes.small)
+            .clip(shapes.large)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = White, contentColor = Black)
     ) {
