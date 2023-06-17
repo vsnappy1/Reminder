@@ -36,13 +36,16 @@ fun AllTaskScreen(
     val uiState by viewModel.uiState.observeAsState(AllTaskUiState())
     BaseViewWithFAB(
         titleRes = R.string.all,
-        animationEnabled = true,
+        animationEnabled = uiState.enterAnimationEnabled,
         onAddTaskClick = onAddTaskClick) {
         LazyColumn(modifier = Modifier.padding(medium)) {
             items(uiState.tasks) {
                 TaskCard(
                     task = it,
-                    onItemClick = onItemClick,
+                    onItemClick = { id ->
+                        onItemClick(id)
+                        viewModel.updateEnterAnimationEnabled(false)
+                    },
                     onDoneClick = { state -> viewModel.updateTaskStatus(state) },
                     visible = !it.done
                 )

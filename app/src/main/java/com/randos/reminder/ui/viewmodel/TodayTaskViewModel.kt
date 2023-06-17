@@ -24,7 +24,8 @@ data class TodayTaskUiState(
     val todayTasks: List<TaskUiState> = listOf(),
     val isAllEmpty: Boolean = false,
     val indexTaskId: Int? = null,
-    val scrollToPosition: Int? = null
+    val scrollToPosition: Int? = null,
+    val enterAnimationEnabled: Boolean = true
 )
 
 private const val TAG = "TodayTaskViewModel"
@@ -95,5 +96,9 @@ class TodayTaskViewModel @Inject constructor(
         viewModelScope.launch {
             updateTaskStatus(taskUiState.toTask())
         }
+    }
+
+    fun updateEnterAnimationEnabled(enabled: Boolean){
+        _uiState.value = _uiState.value?.copy(enterAnimationEnabled = enabled)
     }
 }

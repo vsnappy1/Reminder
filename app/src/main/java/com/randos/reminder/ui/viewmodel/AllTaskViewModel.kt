@@ -15,7 +15,8 @@ import javax.inject.Inject
 
 data class AllTaskUiState(
     val tasks: List<TaskUiState> = listOf(),
-    val isAllEmpty: Boolean = false
+    val isAllEmpty: Boolean = false,
+    val enterAnimationEnabled: Boolean = true
 )
 
 @HiltViewModel
@@ -38,5 +39,8 @@ class AllTaskViewModel @Inject constructor(
         viewModelScope.launch {
             updateTaskStatus(taskUiState.toTask())
         }
+    }
+    fun updateEnterAnimationEnabled(enabled: Boolean){
+        _uiState.value = _uiState.value?.copy(enterAnimationEnabled = enabled)
     }
 }

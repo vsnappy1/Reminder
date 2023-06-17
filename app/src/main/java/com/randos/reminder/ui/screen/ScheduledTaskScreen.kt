@@ -46,7 +46,10 @@ fun ScheduledTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.pastDueTasks,
-            onItemClick = onItemClick,
+            onItemClick = {
+                onItemClick(it)
+                viewModel.updateEnterAnimationEnabled(false)
+            },
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
@@ -56,7 +59,10 @@ fun ScheduledTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.todayTasks,
-            onItemClick = onItemClick,
+            onItemClick = {
+                onItemClick(it)
+                viewModel.updateEnterAnimationEnabled(false)
+            },
             onDoneClick = { state -> viewModel.updateTaskStatus(state) },
             isDateVisible = false
         )
@@ -68,7 +74,10 @@ fun ScheduledTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.tomorrowTasks,
-            onItemClick = onItemClick,
+            onItemClick = {
+                onItemClick(it)
+                viewModel.updateEnterAnimationEnabled(false)
+            },
             onDoneClick = { state -> viewModel.updateTaskStatus(state) },
             isDateVisible = false
         )
@@ -80,7 +89,10 @@ fun ScheduledTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.thisWeekTasks,
-            onItemClick = onItemClick,
+            onItemClick = {
+                onItemClick(it)
+                viewModel.updateEnterAnimationEnabled(false)
+            },
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
@@ -90,13 +102,16 @@ fun ScheduledTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.upcomingTasks,
-            onItemClick = onItemClick,
+            onItemClick = {
+                onItemClick(it)
+                viewModel.updateEnterAnimationEnabled(false)
+            },
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
     BaseViewWithFAB(
         titleRes = R.string.scheduled,
-        animationEnabled = true,
+        animationEnabled = uiState.enterAnimationEnabled,
         onAddTaskClick = onAddTaskClick
     ) {
         LazyColumn(modifier = Modifier.padding(horizontal = medium)) {

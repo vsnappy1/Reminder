@@ -55,7 +55,10 @@ fun CompletedTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.todayTasks,
-            onItemClick = onItemClick,
+            onItemClick = {
+                onItemClick(it)
+                viewModel.updateEnterAnimationEnabled(false)
+            },
             onDoneClick = { state -> viewModel.updateTaskStatus(state) }
         )
     )
@@ -66,7 +69,10 @@ fun CompletedTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.yesterdayTasks,
-            onItemClick = onItemClick,
+            onItemClick = {
+                onItemClick(it)
+                viewModel.updateEnterAnimationEnabled(false)
+            },
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
@@ -76,7 +82,10 @@ fun CompletedTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.lastSevenDaysTasks,
-            onItemClick = onItemClick,
+            onItemClick = {
+                onItemClick(it)
+                viewModel.updateEnterAnimationEnabled(false)
+            },
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
@@ -86,11 +95,14 @@ fun CompletedTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.previousTasks,
-            onItemClick = onItemClick,
+            onItemClick = {
+                onItemClick(it)
+                viewModel.updateEnterAnimationEnabled(false)
+            },
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
     var isDialogVisible by remember { mutableStateOf(false) }
-    BaseView(titleRes = R.string.completed, animationEnabled = true) {
+    BaseView(titleRes = R.string.completed, animationEnabled = uiState.enterAnimationEnabled) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column {
                 Box(

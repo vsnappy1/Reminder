@@ -1,7 +1,5 @@
 package com.randos.reminder.ui.screen
 
-import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -47,13 +45,17 @@ fun TodayTaskScreen(
 
     BaseViewWithFAB(
         titleRes = R.string.today,
-        animationEnabled = true,
-        onAddTaskClick = onAddTaskClick) {
+        animationEnabled = uiState.enterAnimationEnabled,
+        onAddTaskClick = onAddTaskClick
+    ) {
         LazyColumn(modifier = Modifier.padding(medium), state = listState) {
             items(uiState.dueTasks) {
                 TaskCard(
                     task = it,
-                    onItemClick = onItemClick,
+                    onItemClick = { id ->
+                        onItemClick(id)
+                        viewModel.updateEnterAnimationEnabled(false)
+                    },
                     onDoneClick = { state -> viewModel.updateTaskStatus(state) },
                     visible = !it.done,
                     indexed = it.id.toInt() == indexedId
