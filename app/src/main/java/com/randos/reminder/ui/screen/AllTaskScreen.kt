@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -37,15 +38,13 @@ fun AllTaskScreen(
     BaseViewWithFAB(
         titleRes = R.string.all,
         animationEnabled = uiState.enterAnimationEnabled,
-        onAddTaskClick = onAddTaskClick) {
+        onAddTaskClick = onAddTaskClick
+    ) {
         LazyColumn(modifier = Modifier.padding(medium)) {
             items(uiState.tasks) {
                 TaskCard(
                     task = it,
-                    onItemClick = { id ->
-                        onItemClick(id)
-                        viewModel.updateEnterAnimationEnabled(false)
-                    },
+                    onItemClick = onItemClick,
                     onDoneClick = { state -> viewModel.updateTaskStatus(state) },
                     visible = !it.done
                 )
@@ -54,8 +53,13 @@ fun AllTaskScreen(
                 Box(modifier = Modifier.height(75.dp))
             }
         }
-        FadeAnimatedVisibility (uiState.isAllEmpty) {
+        FadeAnimatedVisibility(uiState.isAllEmpty) {
             NoTaskMessage()
+        }
+        DisposableEffect(key1 = Unit) {
+            onDispose {
+                viewModel.updateEnterAnimationEnabled(false)
+            }
         }
     }
 }

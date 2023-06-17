@@ -10,6 +10,8 @@ import com.randos.reminder.enums.RepeatCycle
 import com.randos.reminder.notification.NotificationManager
 import com.randos.reminder.notification.toNotificationData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -29,17 +31,23 @@ open class BaseViewModel @Inject constructor(
 
     private val jobMap = mutableMapOf<Long, Job>()
 
-    suspend fun addTask(task: Task) {
-        val id = taskRepository.insertTask(task)
-        notificationManager.scheduleNotification(task.copy(id = id).toNotificationData())
+    @OptIn(DelicateCoroutinesApi::class)
+    fun addTask(task: Task) {
+        GlobalScope.launch {// Added some delay to make app feel more user friendly
+            delay(500)
+            val id = taskRepository.insertTask(task)
+            notificationManager.scheduleNotification(task.copy(id = id).toNotificationData())
+        }
     }
 
-    suspend fun updateTask(task: Task) {
-        taskRepository.updateTask(task)
-        notificationManager.updateScheduledNotification(task.toNotificationData())
+    fun updateTask(task: Task) {
+        viewModelScope.launch {
+            taskRepository.updateTask(task)
+            notificationManager.updateScheduledNotification(task.toNotificationData())
+        }
     }
 
-    suspend fun updateTaskStatus(task: Task) {
+    fun updateTaskStatus(task: Task) {
         if (task.done) {
             markAsNotDone(task)
         } else {
@@ -47,7 +55,7 @@ open class BaseViewModel @Inject constructor(
         }
     }
 
-    private suspend fun markAsDone(task: Task) {
+    private fun markAsDone(task: Task) {
         val job = viewModelScope.launch {
             taskRepository.updateTask(task.copy(done = true))
             delay(DELAY)
@@ -71,7 +79,7 @@ open class BaseViewModel @Inject constructor(
         jobMap[task.id] = job
     }
 
-    private suspend fun markAsNotDone(task: Task) {
+    private fun markAsNotDone(task: Task) {
         val job = viewModelScope.launch {
             taskRepository.updateTask(task.copy(done = false))
             delay(DELAY)

@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -68,7 +69,7 @@ fun TransparentBackgroundTextField(
     onValueChange: (String) -> Unit,
     placeHolderId: Int,
     isSingleLine: Boolean = false,
-    textStyle: TextStyle = Typography.bodyLarge
+    textStyle: TextStyle = Typography.titleLarge
 ) {
     TextField(
         value = value,
@@ -79,7 +80,7 @@ fun TransparentBackgroundTextField(
         placeholder = {
             Text(
                 text = stringResource(id = placeHolderId),
-                style = Typography.bodyLarge
+                style = textStyle
             )
         },
         colors = TextFieldDefaults.textFieldColors(
@@ -290,7 +291,7 @@ fun TaskCard(
                     Spacer(modifier = Modifier.height(2.dp))
                     task.completedOn?.let {
                         Text(
-                            text = "Completed: ${it.format()}",
+                            text = "Completed: ${it.format(LocalContext.current)}",
                             style = Typography.titleMedium,
                             color = GrayDark
                         )
@@ -340,7 +341,7 @@ private fun DateTimeRepeat(
         if (isTimeVisible) {
             task.time?.let {
                 Text(
-                    text = "${if (shouldAddComma) ", " else ""}${it.format()}",
+                    text = "${if (shouldAddComma) ", " else ""}${it.format(LocalContext.current)}",
                     style = Typography.titleMedium,
                     color = if (task.done) GrayDark else color
                 )

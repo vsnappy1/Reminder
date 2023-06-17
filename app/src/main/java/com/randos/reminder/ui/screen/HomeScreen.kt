@@ -2,12 +2,9 @@ package com.randos.reminder.ui.screen
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -39,7 +36,6 @@ import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -75,11 +71,10 @@ import com.randos.reminder.ui.theme.Gray200
 import com.randos.reminder.ui.theme.Gray300
 import com.randos.reminder.ui.theme.Gray500
 import com.randos.reminder.ui.theme.GrayLight
-import com.randos.reminder.ui.theme.shapes
 import com.randos.reminder.ui.theme.Typography
 import com.randos.reminder.ui.theme.White
-import com.randos.reminder.ui.theme.large
 import com.randos.reminder.ui.theme.medium
+import com.randos.reminder.ui.theme.shapes
 import com.randos.reminder.ui.theme.small
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.viewmodel.HomeScreenUiState
@@ -189,6 +184,7 @@ fun HomeScreen(
 }
 
 val animDuration = 500
+
 @Composable
 private fun SearchView(
     homeUiState: HomeScreenUiState,
@@ -203,13 +199,15 @@ private fun SearchView(
         animationSpec = tween(durationMillis = animDuration)
     )
     Box(modifier = Modifier
-        .background(GrayLight.copy(alpha = alpha))
+        .background(Gray200.copy(alpha = alpha))
         .fillMaxSize()
         .noRippleClickable(enabled = homeUiState.search.isBlank()) { focusManager.clearFocus() }) {
 
         FadeAnimatedVisibility(homeUiState.search.isNotBlank(), exitDuration = 0, exitDelay = 0) {
             Column(modifier = Modifier.padding(medium)) {
-                Box(modifier = Modifier.fillMaxWidth().padding(horizontal = medium)) {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = medium)) {
                     Text(
                         text = "${homeUiState.filteredCompletedTasksCount} Completed",
                         style = Typography.labelLarge.copy(fontWeight = FontWeight.Bold)
@@ -337,7 +335,7 @@ fun TimeFrameCard(
             .width(100.dp)
             .clip(shapes.large)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = Gray300, contentColor = Black)
+        colors = CardDefaults.cardColors(containerColor = Gray200, contentColor = Black)
     ) {
         Column(modifier = Modifier.padding(medium), verticalArrangement = Arrangement.Center) {
             Box(modifier = Modifier.fillMaxWidth()) {

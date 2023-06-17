@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -46,10 +47,7 @@ fun ScheduledTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.pastDueTasks,
-            onItemClick = {
-                onItemClick(it)
-                viewModel.updateEnterAnimationEnabled(false)
-            },
+            onItemClick = onItemClick,
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
@@ -59,10 +57,7 @@ fun ScheduledTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.todayTasks,
-            onItemClick = {
-                onItemClick(it)
-                viewModel.updateEnterAnimationEnabled(false)
-            },
+            onItemClick = onItemClick,
             onDoneClick = { state -> viewModel.updateTaskStatus(state) },
             isDateVisible = false
         )
@@ -74,10 +69,7 @@ fun ScheduledTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.tomorrowTasks,
-            onItemClick = {
-                onItemClick(it)
-                viewModel.updateEnterAnimationEnabled(false)
-            },
+            onItemClick = onItemClick,
             onDoneClick = { state -> viewModel.updateTaskStatus(state) },
             isDateVisible = false
         )
@@ -89,10 +81,7 @@ fun ScheduledTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.thisWeekTasks,
-            onItemClick = {
-                onItemClick(it)
-                viewModel.updateEnterAnimationEnabled(false)
-            },
+            onItemClick = onItemClick,
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
@@ -102,10 +91,7 @@ fun ScheduledTaskScreen(
     list.addAll(
         getListOfTaskCards(
             tasks = uiState.upcomingTasks,
-            onItemClick = {
-                onItemClick(it)
-                viewModel.updateEnterAnimationEnabled(false)
-            },
+            onItemClick = onItemClick,
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
@@ -124,6 +110,11 @@ fun ScheduledTaskScreen(
         }
         FadeAnimatedVisibility(uiState.isAllEmpty) {
             NoTaskMessage()
+        }
+        DisposableEffect(key1 = Unit) {
+            onDispose {
+                viewModel.updateEnterAnimationEnabled(false)
+            }
         }
     }
 }

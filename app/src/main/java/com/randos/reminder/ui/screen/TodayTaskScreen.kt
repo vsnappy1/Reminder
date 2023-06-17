@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -52,10 +53,7 @@ fun TodayTaskScreen(
             items(uiState.dueTasks) {
                 TaskCard(
                     task = it,
-                    onItemClick = { id ->
-                        onItemClick(id)
-                        viewModel.updateEnterAnimationEnabled(false)
-                    },
+                    onItemClick = onItemClick,
                     onDoneClick = { state -> viewModel.updateTaskStatus(state) },
                     visible = !it.done,
                     indexed = it.id.toInt() == indexedId
@@ -77,6 +75,12 @@ fun TodayTaskScreen(
         }
         FadeAnimatedVisibility(uiState.isAllEmpty) {
             NoTaskMessage()
+        }
+
+        DisposableEffect(key1 = Unit) {
+            onDispose {
+                viewModel.updateEnterAnimationEnabled(false)
+            }
         }
     }
     // If user comes to this screen when user taps on notification following code scroll to that particular task
