@@ -24,6 +24,7 @@ import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseView
+import com.randos.reminder.ui.component.FadeAnimatedVisibility
 import com.randos.reminder.ui.component.NoTaskMessage
 import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.component.TimeFrameHeader
@@ -89,16 +90,16 @@ fun CompletedTaskScreen(
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
     var isDialogVisible by remember { mutableStateOf(false) }
-    BaseView(titleRes = R.string.completed) {
+    BaseView(titleRes = R.string.completed, animationEnabled = true) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(medium)
+                        .padding(vertical = medium, horizontal = large)
                 ) {
                     Text(
-                        text = "${uiState.completedTaskCount} Completed.",
+                        text = "${uiState.completedTaskCount} Completed",
                         style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     if (uiState.completedTaskCount > 0) {
@@ -197,7 +198,7 @@ private fun DialogView(
                     modifier = Modifier.noRippleClickable { onCancelClick() }
                 )
                 Text(
-                    text = stringResource(id = R.string.delete),
+                    text = stringResource(id = R.string.delete_all),
                     style = Typography.bodyMedium,
                     color = Red,
                     modifier = Modifier.noRippleClickable { onDeleteClick() }

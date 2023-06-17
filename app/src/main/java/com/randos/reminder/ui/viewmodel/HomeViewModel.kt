@@ -1,5 +1,6 @@
 package com.randos.reminder.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -8,9 +9,12 @@ import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.uiState.toTask
 import com.randos.reminder.utils.toTaskUiStateList
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 data class HomeScreenUiState(
@@ -61,10 +65,18 @@ class HomeViewModel @Inject constructor(
         _homeUiState.value = _homeUiState.value?.copy(doesSearchHasFocus = hasFocus)
     }
 
+    private lateinit var job: Job
     fun setSearchText(text: String) {
         _homeUiState.value = _homeUiState.value?.copy(search = text)
-        updateSearchResult()
+        if (this::job.isInitialized && job.isActive) {
+            job.cancel()
+        }
+        job = viewModelScope.launch {// This will create a debounce for searching
+            delay(500)
+            updateSearchResult()
+        }
     }
+
 
     fun setIsCompletedTasksVisible(isVisible: Boolean) {
         _homeUiState.value = _homeUiState.value?.copy(isFilteredCompletedTasksVisible = isVisible)

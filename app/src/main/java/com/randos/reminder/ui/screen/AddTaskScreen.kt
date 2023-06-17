@@ -63,6 +63,9 @@ import com.randos.reminder.ui.component.BaseView
 import com.randos.reminder.ui.component.ReminderDropDown
 import com.randos.reminder.ui.component.TransparentBackgroundTextField
 import com.randos.reminder.ui.theme.Black
+import com.randos.reminder.ui.theme.Gray100
+import com.randos.reminder.ui.theme.Gray200
+import com.randos.reminder.ui.theme.Gray300
 import com.randos.reminder.ui.theme.Gray500
 import com.randos.reminder.ui.theme.GrayDark
 import com.randos.reminder.ui.theme.GrayLight
@@ -160,7 +163,7 @@ fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
         shape = shapes.large,
         modifier = Modifier
             .fillMaxWidth(),
-        colors = CardDefaults.cardColors(White, contentColor = Black),
+        colors = CardDefaults.cardColors(Gray200, contentColor = Black),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             TransparentBackgroundTextField(
@@ -197,7 +200,7 @@ fun DetailsCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = medium),
-        colors = CardDefaults.cardColors(White, contentColor = Black),
+        colors = CardDefaults.cardColors(Gray200, contentColor = Black),
     ) {
         Column(modifier = Modifier.padding(medium)) {
             Text(

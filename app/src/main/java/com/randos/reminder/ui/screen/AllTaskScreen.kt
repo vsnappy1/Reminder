@@ -15,6 +15,7 @@ import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseViewWithFAB
+import com.randos.reminder.ui.component.FadeAnimatedVisibility
 import com.randos.reminder.ui.component.NoTaskMessage
 import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.theme.medium
@@ -33,7 +34,10 @@ fun AllTaskScreen(
     onItemClick: (Long) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.observeAsState(AllTaskUiState())
-    BaseViewWithFAB(titleRes = R.string.all, onAddTaskClick = onAddTaskClick) {
+    BaseViewWithFAB(
+        titleRes = R.string.all,
+        animationEnabled = true,
+        onAddTaskClick = onAddTaskClick) {
         LazyColumn(modifier = Modifier.padding(medium)) {
             items(uiState.tasks) {
                 TaskCard(

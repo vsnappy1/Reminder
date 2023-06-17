@@ -1,5 +1,9 @@
 package com.randos.reminder.ui.screen
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,11 +16,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseViewWithFAB
+import com.randos.reminder.ui.component.FadeAnimatedVisibility
 import com.randos.reminder.ui.component.NoTaskMessage
 import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.theme.medium
@@ -38,7 +44,11 @@ fun TodayTaskScreen(
     val uiState by viewModel.uiState.observeAsState(TodayTaskUiState())
     var indexedId by remember { mutableStateOf(-1) }
     val listState = rememberLazyListState()
-    BaseViewWithFAB(titleRes = R.string.today, onAddTaskClick = onAddTaskClick) {
+
+    BaseViewWithFAB(
+        titleRes = R.string.today,
+        animationEnabled = true,
+        onAddTaskClick = onAddTaskClick) {
         LazyColumn(modifier = Modifier.padding(medium), state = listState) {
             items(uiState.dueTasks) {
                 TaskCard(
@@ -58,6 +68,9 @@ fun TodayTaskScreen(
                     visible = !it.done,
                     indexed = it.id.toInt() == indexedId
                 )
+            }
+            items(1) {
+                Box(modifier = Modifier.height(75.dp))
             }
         }
         FadeAnimatedVisibility(uiState.isAllEmpty) {

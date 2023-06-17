@@ -1,5 +1,7 @@
 package com.randos.reminder.ui.screen
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,12 +10,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseViewWithFAB
+import com.randos.reminder.ui.component.FadeAnimatedVisibility
 import com.randos.reminder.ui.component.NoTaskMessage
 import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.component.TimeFrameHeader
@@ -90,13 +94,20 @@ fun ScheduledTaskScreen(
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
 
-    BaseViewWithFAB(titleRes = R.string.scheduled, onAddTaskClick = onAddTaskClick) {
+    BaseViewWithFAB(
+        titleRes = R.string.scheduled,
+        animationEnabled = true,
+        onAddTaskClick = onAddTaskClick
+    ) {
         LazyColumn(modifier = Modifier.padding(horizontal = medium)) {
             items(list) {
                 it()
             }
+            items(1) {
+                Box(modifier = Modifier.height(80.dp))
+            }
         }
-        FadeAnimatedVisibility (uiState.isAllEmpty) {
+        FadeAnimatedVisibility(uiState.isAllEmpty) {
             NoTaskMessage()
         }
     }

@@ -1,14 +1,22 @@
 package com.randos.reminder.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -26,15 +34,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.randos.reminder.R
@@ -44,6 +58,7 @@ import com.randos.reminder.ui.theme.*
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.viewmodel.DELAY
 import com.randos.reminder.utils.format
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,20 +96,35 @@ fun TransparentBackgroundTextField(
 fun BaseView(
     modifier: Modifier = Modifier,
     titleRes: Int,
+    animationEnabled: Boolean = false,
     contentBox: @Composable (BoxScope.() -> Unit) = {},
     contentColumn: @Composable (ColumnScope.() -> Unit)
 ) {
+    var isContentVisible by remember { mutableStateOf(false) }
     Box {
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .background(GrayLight)
+                .background(White)
         ) {
             Header(titleRes = titleRes)
-            contentColumn()
-
+            if (animationEnabled) {
+                AnimatedVisibility(visible = isContentVisible,
+                enter = expandHorizontally()
+                ) {
+                    contentColumn()
+                }
+            } else {
+                contentColumn()
+            }
         }
         contentBox()
+    }
+    if(animationEnabled){
+        LaunchedEffect(key1 = Unit, block = {
+            delay(250)
+            isContentVisible = true
+        })
     }
 }
 
@@ -102,12 +132,14 @@ fun BaseView(
 fun BaseViewWithFAB(
     modifier: Modifier = Modifier,
     titleRes: Int,
+    animationEnabled: Boolean = false,
     onAddTaskClick: () -> Unit = {},
     content: @Composable (ColumnScope.() -> Unit)
 ) {
     BaseView(
         modifier = modifier,
         titleRes = titleRes,
+        animationEnabled = animationEnabled,
         contentBox = {
             FloatingActionButton(
                 onClick = onAddTaskClick,
@@ -124,6 +156,34 @@ fun BaseViewWithFAB(
                 )
             }
         }) {
+        content()
+    }
+}
+
+@Composable
+fun FadeAnimatedVisibility(
+    visible: Boolean,
+    enterDuration: Int = 400,
+    enterDelay: Int = 100,
+    exitDuration: Int = 400,
+    exitDelay: Int = 100,
+    content: @Composable AnimatedVisibilityScope.() -> Unit
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(
+            animationSpec = tween(
+                durationMillis = enterDuration,
+                delayMillis = enterDelay
+            )
+        ),
+        exit = fadeOut(
+            animationSpec = tween(
+                durationMillis = exitDuration,
+                delayMillis = exitDelay
+            )
+        )
+    ) {
         content()
     }
 }
@@ -188,21 +248,22 @@ fun TaskCard(
         )
     ) {
         val cardBackground by animateColorAsState(
-            targetValue = if (indexed) Gray500 else White,
+            targetValue = if (indexed) Gray500 else Transparent,
             animationSpec = tween(durationMillis = 1000)
         )
-        Card(
-            shape = shapes.large,
+        Box(
+//            shape = shapes.large,
             modifier = modifier
                 .fillMaxWidth()
-                .padding(vertical = small)
-                .clip(shapes.large)
+                .padding(top = small)
+//                .clip(shapes.large)
+                .background(cardBackground)
                 .clickable { onItemClick(task.id) },
-            colors = CardDefaults.cardColors(containerColor = cardBackground),
+//            colors = CardDefaults.cardColors(containerColor = cardBackground),
         ) {
             Row(
                 modifier = Modifier
-                    .padding(small)
+                    .padding(start = small)
             ) {
                 ReminderRadioButton(
                     selected = task.done, onClick = { onDoneClick(task) },
@@ -214,12 +275,12 @@ fun TaskCard(
                         .padding(start = small)
                 ) {
                     TitleAndPriority(task)
-                    Spacer(modifier = Modifier.height(2.dp))
                     task.notes?.let {
+                        Spacer(modifier = Modifier.height(2.dp))
                         if (it.isNotBlank()) {
                             Text(
                                 text = it,
-                                style = Typography.labelLarge,
+                                style = Typography.titleMedium,
                                 color = GrayDark
                             )
                         }
@@ -230,15 +291,30 @@ fun TaskCard(
                     task.completedOn?.let {
                         Text(
                             text = "Completed: ${it.format()}",
-                            style = Typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
+                            style = Typography.titleMedium,
                             color = GrayDark
                         )
                     }
+                    Box(
+                        modifier = Modifier
+                            .padding(top = small)
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(Gray300)
+                    )
                 }
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun previewTaskCard() {
+    TaskCard(
+        visible = true,
+        task = TaskUiState(id = 1, title = "Title", notes = "These are the notes")
+    )
 }
 
 @Composable
@@ -254,8 +330,7 @@ private fun DateTimeRepeat(
             task.date?.let {
                 Text(
                     text = it.format(),
-                    fontWeight = FontWeight.SemiBold,
-                    style = Typography.labelLarge,
+                    style = Typography.titleMedium,
                     color = if (task.done) GrayDark else color
                 )
             }
@@ -266,8 +341,7 @@ private fun DateTimeRepeat(
             task.time?.let {
                 Text(
                     text = "${if (shouldAddComma) ", " else ""}${it.format()}",
-                    style = Typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
+                    style = Typography.titleMedium,
                     color = if (task.done) GrayDark else color
                 )
             }
@@ -279,8 +353,7 @@ private fun DateTimeRepeat(
             if (task.repeat != RepeatCycle.NO_REPEAT) {
                 Text(
                     text = "${if (shouldAddComma) ", " else ""}${task.repeat.value}",
-                    style = Typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
+                    style = Typography.titleMedium,
                     color = if (task.done) GrayDark else color
                 )
             }
@@ -293,8 +366,7 @@ private fun TitleAndPriority(task: TaskUiState) {
     Box(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = task.title,
-            fontWeight = FontWeight.Bold,
-            style = Typography.bodyLarge,
+            style = Typography.titleLarge,
             color = if (task.done) GrayDark else Black
         )
 
@@ -334,8 +406,8 @@ private fun ReminderRadioButton(
         shape = RoundedCornerShape(9.dp),
         modifier = modifier
             .padding(small)
-            .size(18.dp)
-            .clip(RoundedCornerShape(9.dp))
+            .size(20.dp)
+            .clip(CircleShape)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = if (selected) Green else White),
         border = BorderStroke(1.dp, Green),
