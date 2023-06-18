@@ -92,13 +92,11 @@ object TaskAddDestination : NavigationDestination {
 }
 // TODO send a notification at 9:00 AM to let user know tasks for today, exclude tasks with time
 // TODO Preserve notification when device restart
-// TODO Optimize scrolling
 // TODO add a view to explain permission for notification
 // TODO write test cases
 // TODO get the theme reviewed
 // TODO ask for a QA
 // TODO add firebase crash analytics
-// TODO upload to play store
 
 @Composable
 fun AddTaskScreen(
@@ -351,8 +349,8 @@ private fun TimeComponent(
                         time = LocalTime.of(hour, minute)
                     )
                 )
-            },
-            minuteGap = MinuteGap.FIVE,
+            },//TODO uncomment bellow
+//            minuteGap = MinuteGap.FIVE,
             time = TimePickerTime(
                 hour = uiState.time?.hour ?: LocalTime.now().hour,
                 minute = uiState.time?.minute ?: LocalTime.now().minute

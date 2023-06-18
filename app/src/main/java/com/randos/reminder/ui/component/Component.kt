@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
@@ -42,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -110,8 +112,9 @@ fun BaseView(
         ) {
             Header(titleRes = titleRes)
             if (animationEnabled) {
-                AnimatedVisibility(visible = isContentVisible,
-                enter = expandHorizontally()
+                AnimatedVisibility(
+                    visible = isContentVisible,
+                    enter = expandHorizontally()
                 ) {
                     contentColumn()
                 }
@@ -121,7 +124,7 @@ fun BaseView(
         }
         contentBox()
     }
-    if(animationEnabled){
+    if (animationEnabled) {
         LaunchedEffect(key1 = Unit, block = {
             delay(250)
             isContentVisible = true
@@ -249,17 +252,17 @@ fun TaskCard(
         )
     ) {
         val cardBackground by animateColorAsState(
-            targetValue = if (indexed) Gray500 else Transparent,
+            targetValue = if (indexed) Gray300 else Transparent,
             animationSpec = tween(durationMillis = 1000)
         )
         Box(
 //            shape = shapes.large,
             modifier = modifier
                 .fillMaxWidth()
-                .padding(top = small)
-//                .clip(shapes.large)
                 .background(cardBackground)
-                .clickable { onItemClick(task.id) },
+                .clip(RoundedCornerShape(large))
+                .clickable { onItemClick(task.id) }
+                .padding(top = small),
 //            colors = CardDefaults.cardColors(containerColor = cardBackground),
         ) {
             Row(
