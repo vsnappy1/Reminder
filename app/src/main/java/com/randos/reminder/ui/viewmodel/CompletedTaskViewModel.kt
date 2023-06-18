@@ -19,7 +19,8 @@ data class CompletedTaskUiState(
     val lastSevenDaysTasks: List<TaskUiState> = listOf(),
     val previousTasks: List<TaskUiState> = listOf(),
     val completedTaskCount: Int = 0,
-    val isAllEmpty: Boolean = false
+    val isAllEmpty: Boolean = false,
+    val enterAnimationEnabled: Boolean = true
 )
 
 @HiltViewModel
@@ -102,5 +103,9 @@ class CompletedTaskViewModel @Inject constructor(
         viewModelScope.launch {
             updateTaskStatus(taskUiState.toTask())
         }
+    }
+
+    fun updateEnterAnimationEnabled(enabled: Boolean){
+        _uiState.value = _uiState.value?.copy(enterAnimationEnabled = enabled)
     }
 }

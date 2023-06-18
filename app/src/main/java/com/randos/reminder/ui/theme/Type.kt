@@ -40,18 +40,18 @@ val Typography = Typography(
     ),
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.W500,
+        fontWeight = FontWeight.W400,
         fontSize = 16.sp
     ),
     titleMedium = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.W600,
-        fontSize = 14.sp
+        fontWeight = FontWeight.W400,
+        fontSize = 13.sp
     ),
     titleSmall = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.W600,
-        fontSize = 16.sp
+        fontWeight = FontWeight.W400,
+        fontSize = 12.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,

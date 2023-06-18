@@ -19,7 +19,8 @@ data class ScheduledTaskUiState(
     val tomorrowTasks: List<TaskUiState> = listOf(),
     val thisWeekTasks: List<TaskUiState> = listOf(),
     val upcomingTasks: List<TaskUiState> = listOf(),
-    val isAllEmpty: Boolean = false
+    val isAllEmpty: Boolean = false,
+    val enterAnimationEnabled: Boolean = true
 )
 
 @HiltViewModel
@@ -98,5 +99,9 @@ class ScheduledTaskViewModel @Inject constructor(taskRepository: TaskRepository)
         viewModelScope.launch {
             updateTaskStatus(taskUiState.toTask())
         }
+    }
+
+    fun updateEnterAnimationEnabled(enabled: Boolean){
+        _uiState.value = _uiState.value?.copy(enterAnimationEnabled = enabled)
     }
 }

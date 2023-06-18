@@ -1,6 +1,13 @@
 package com.randos.reminder.ui.screen
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -10,8 +17,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,10 +36,18 @@ import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseView
+import com.randos.reminder.ui.component.FadeAnimatedVisibility
 import com.randos.reminder.ui.component.NoTaskMessage
 import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.component.TimeFrameHeader
-import com.randos.reminder.ui.theme.*
+import com.randos.reminder.ui.theme.Black
+import com.randos.reminder.ui.theme.Gray500
+import com.randos.reminder.ui.theme.Red
+import com.randos.reminder.ui.theme.Typography
+import com.randos.reminder.ui.theme.White
+import com.randos.reminder.ui.theme.large
+import com.randos.reminder.ui.theme.medium
+import com.randos.reminder.ui.theme.shapes
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.viewmodel.CompletedTaskUiState
 import com.randos.reminder.ui.viewmodel.CompletedTaskViewModel
@@ -89,16 +109,16 @@ fun CompletedTaskScreen(
             onDoneClick = { state -> viewModel.updateTaskStatus(state) })
     )
     var isDialogVisible by remember { mutableStateOf(false) }
-    BaseView(titleRes = R.string.completed) {
+    BaseView(titleRes = R.string.completed, animationEnabled = uiState.enterAnimationEnabled) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(medium)
+                        .padding(vertical = medium, horizontal = large)
                 ) {
                     Text(
-                        text = "${uiState.completedTaskCount} Completed.",
+                        text = "${uiState.completedTaskCount} Completed",
                         style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     if (uiState.completedTaskCount > 0) {
@@ -122,9 +142,6 @@ fun CompletedTaskScreen(
                         it()
                     }
                 }
-                FadeAnimatedVisibility(uiState.isAllEmpty) {
-                    NoTaskMessage()
-                }
             }
             if (isDialogVisible) {
                 Dialog(onDismissRequest = { isDialogVisible = false }) {
@@ -137,6 +154,11 @@ fun CompletedTaskScreen(
                         onCancelClick = { isDialogVisible = false }
                     )
                 }
+            }
+        }
+        DisposableEffect(key1 = Unit) {
+            onDispose {
+                viewModel.updateEnterAnimationEnabled(false)
             }
         }
     }
@@ -197,7 +219,7 @@ private fun DialogView(
                     modifier = Modifier.noRippleClickable { onCancelClick() }
                 )
                 Text(
-                    text = stringResource(id = R.string.delete),
+                    text = stringResource(id = R.string.delete_all),
                     style = Typography.bodyMedium,
                     color = Red,
                     modifier = Modifier.noRippleClickable { onDeleteClick() }

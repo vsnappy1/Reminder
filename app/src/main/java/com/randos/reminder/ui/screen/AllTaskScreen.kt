@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -15,6 +16,7 @@ import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseViewWithFAB
+import com.randos.reminder.ui.component.FadeAnimatedVisibility
 import com.randos.reminder.ui.component.NoTaskMessage
 import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.theme.medium
@@ -33,7 +35,11 @@ fun AllTaskScreen(
     onItemClick: (Long) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.observeAsState(AllTaskUiState())
-    BaseViewWithFAB(titleRes = R.string.all, onAddTaskClick = onAddTaskClick) {
+    BaseViewWithFAB(
+        titleRes = R.string.all,
+        animationEnabled = uiState.enterAnimationEnabled,
+        onAddTaskClick = onAddTaskClick
+    ) {
         LazyColumn(modifier = Modifier.padding(medium)) {
             items(uiState.tasks) {
                 TaskCard(
@@ -47,8 +53,13 @@ fun AllTaskScreen(
                 Box(modifier = Modifier.height(75.dp))
             }
         }
-        FadeAnimatedVisibility (uiState.isAllEmpty) {
+        FadeAnimatedVisibility(uiState.isAllEmpty) {
             NoTaskMessage()
+        }
+        DisposableEffect(key1 = Unit) {
+            onDispose {
+                viewModel.updateEnterAnimationEnabled(false)
+            }
         }
     }
 }

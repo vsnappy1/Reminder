@@ -9,7 +9,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarMonth
@@ -48,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,16 +62,17 @@ import com.randos.reminder.ui.component.BaseView
 import com.randos.reminder.ui.component.ReminderDropDown
 import com.randos.reminder.ui.component.TransparentBackgroundTextField
 import com.randos.reminder.ui.theme.Black
+import com.randos.reminder.ui.theme.Gray200
 import com.randos.reminder.ui.theme.Gray500
 import com.randos.reminder.ui.theme.GrayDark
 import com.randos.reminder.ui.theme.GrayLight
 import com.randos.reminder.ui.theme.Green
 import com.randos.reminder.ui.theme.Red
-import com.randos.reminder.ui.theme.shapes
 import com.randos.reminder.ui.theme.Transparent
 import com.randos.reminder.ui.theme.Typography
 import com.randos.reminder.ui.theme.White
 import com.randos.reminder.ui.theme.medium
+import com.randos.reminder.ui.theme.shapes
 import com.randos.reminder.ui.theme.small
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.uiState.isValid
@@ -92,13 +92,11 @@ object TaskAddDestination : NavigationDestination {
 }
 // TODO send a notification at 9:00 AM to let user know tasks for today, exclude tasks with time
 // TODO Preserve notification when device restart
-// TODO Optimize scrolling
 // TODO add a view to explain permission for notification
 // TODO write test cases
 // TODO get the theme reviewed
 // TODO ask for a QA
 // TODO add firebase crash analytics
-// TODO upload to play store
 
 @Composable
 fun AddTaskScreen(
@@ -160,14 +158,13 @@ fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
         shape = shapes.large,
         modifier = Modifier
             .fillMaxWidth(),
-        colors = CardDefaults.cardColors(White, contentColor = Black),
+        colors = CardDefaults.cardColors(Gray200, contentColor = Black),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             TransparentBackgroundTextField(
                 value = uiState.title,
                 placeHolderId = R.string.title,
                 isSingleLine = true,
-                textStyle = Typography.headlineSmall,
                 onValueChange = {
                     onUpdate(uiState.copy(title = it))
                 }
@@ -197,7 +194,7 @@ fun DetailsCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = medium),
-        colors = CardDefaults.cardColors(White, contentColor = Black),
+        colors = CardDefaults.cardColors(Gray200, contentColor = Black),
     ) {
         Column(modifier = Modifier.padding(medium)) {
             Text(
@@ -329,7 +326,7 @@ private fun TimeComponent(
                 )
             }
         },
-        detail = uiState.time?.format() ?: "",
+        detail = uiState.time?.format(LocalContext.current) ?: "",
         onClickEnabled = uiState.isTimeChecked,
         onClick = {
             onUpdate(
@@ -352,8 +349,8 @@ private fun TimeComponent(
                         time = LocalTime.of(hour, minute)
                     )
                 )
-            },
-            minuteGap = MinuteGap.FIVE,
+            },//TODO uncomment bellow
+//            minuteGap = MinuteGap.FIVE,
             time = TimePickerTime(
                 hour = uiState.time?.hour ?: LocalTime.now().hour,
                 minute = uiState.time?.minute ?: LocalTime.now().minute
