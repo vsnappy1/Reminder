@@ -1,6 +1,10 @@
 package com.randos.reminder
 
 import android.Manifest
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.randos.reminder.navigation.NavGraph
 import com.randos.reminder.notification.NotificationManager
 import com.randos.reminder.ui.theme.ReminderTheme
+import com.randos.reminder.widget.ReminderAppWidgetProvider
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -50,5 +55,22 @@ class MainActivity : ComponentActivity() {
         }
         requestNotificationPermission()
         notificationManager.setDailyNotification()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        updateWidget(this)
+    }
+
+    fun updateWidget(context: Context) {
+        //TODO data in widget is not updating, fix this
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        val appWidgetIds: IntArray =
+            appWidgetManager.getAppWidgetIds(ComponentName(context, ReminderAppWidgetProvider::class.java))
+
+        val intent = Intent(this@MainActivity, ReminderAppWidgetProvider::class.java)
+        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
+        sendBroadcast(intent)
     }
 }

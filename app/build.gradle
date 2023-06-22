@@ -38,6 +38,7 @@ android {
     }
     buildFeatures {
         compose true
+        viewBinding true
     }
     composeOptions {
         kotlinCompilerExtensionVersion '1.4.0'
@@ -109,6 +110,9 @@ dependencies {
 
     // Date Picker
     implementation 'com.github.vsnappy1:ComposeDatePicker:2.2.0'
+
+    // Data Store
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 }
 
 // Allow references to generated code
