@@ -3,36 +3,40 @@
     style="@style/Widget.Reminder.AppWidget.Container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:backgroundTint="@color/white"
     android:theme="@style/Theme.Reminder.AppWidgetContainer">
 
     <LinearLayout
         android:id="@+id/linearLayout"
-        android:gravity="center_vertical"
         android:layout_width="match_parent"
-        android:layout_marginVertical="8dp"
-        android:layout_marginHorizontal="16dp"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginVertical="8dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/textViewAllReminder"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="All Reminders"
-            android:gravity="center_vertical"
-            android:textColor="#121212"
             android:layout_weight="1"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center_vertical"
+            android:singleLine="true"
+            android:text="@string/all_reminders"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
 
         <ImageView
             android:id="@+id/imageViewAdd"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_weight="0"
+            android:contentDescription="@string/add_task"
             android:src="@drawable/round_add_24" />
     </LinearLayout>
 
@@ -43,8 +47,10 @@
         android:layout_below="@+id/linearLayout"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginHorizontal="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/rounded_corner_shape"
-        android:padding="8dp" />
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/app_widget_background"
+        android:backgroundTint="@color/gray_100"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp" />
 </RelativeLayout>

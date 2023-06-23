@@ -18,7 +18,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import com.randos.reminder.MainActivity
 import com.randos.reminder.R
-import com.randos.reminder.notification.showNotification
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
@@ -99,6 +98,8 @@ internal fun updateAppWidget(
     intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
     val remoteViews = RemoteViews(context.packageName, R.layout.reminder_widget)
     remoteViews.setRemoteAdapter(R.id.recyclerView, intent)
+
+    // Set on click listener for "All reminder" text
     remoteViews.setOnClickPendingIntent(
         R.id.textViewAllReminder,
         PendingIntent.getActivity(
@@ -109,19 +110,36 @@ internal fun updateAppWidget(
         )
     )
 
-    val deepLinkIntent = Intent(
+    // Set on click listener for add button
+    val addTaskScreenIntent = Intent(
         Intent.ACTION_VIEW,
         "reminder://add".toUri(),
         context,
         MainActivity::class.java
     )
-    val deepLinkPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
-        addNextIntentWithParentStack(deepLinkIntent)
+    // This makes the deep link work
+    val addTaskScreenPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
+        addNextIntentWithParentStack(addTaskScreenIntent)
         getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
     }
 
-    remoteViews.setOnClickPendingIntent(R.id.imageViewAdd, deepLinkPendingIntent)
+    remoteViews.setOnClickPendingIntent(R.id.imageViewAdd, addTaskScreenPendingIntent)
 
+    // Template to handle the click listener for each item
+    val templateIntent = Intent(
+        Intent.ACTION_VIEW,
+        "reminder://all".toUri(),
+        context,
+        MainActivity::class.java
+    )
+    val templateIntentPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
+        addNextIntentWithParentStack(templateIntent)
+        getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
+    }
+
+    remoteViews.setPendingIntentTemplate(R.id.recyclerView, templateIntentPendingIntent)
+
+    // Set padding
     remoteViews.setViewPadding(R.id.container, 0,0,0,0)
 
     // Instruct the widget manager to update the widget

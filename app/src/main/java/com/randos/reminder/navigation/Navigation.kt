@@ -41,7 +41,10 @@ fun NavGraph(
                 onItemClick = { navController.navigate("${TaskEditDestination.route}/${it}") }
             )
         }
-        composable(route = TaskAllDestination.route) {
+        composable(
+            route = TaskAllDestination.route,
+            deepLinks = listOf(navDeepLink { uriPattern = "reminder://all" })
+        ) {
             AllTaskScreen(
                 onAddTaskClick = { navController.navigate(TaskAddDestination.route) },
                 onItemClick = { navController.navigate("${TaskEditDestination.route}/${it}") }

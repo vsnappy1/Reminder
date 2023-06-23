@@ -57,6 +57,7 @@ class ReminderWidgetService : RemoteViewsService() {
 
             val remoteViews = RemoteViews(context.packageName, R.layout.widget_item)
             remoteViews.setTextViewText(R.id.textView, item)
+            remoteViews.setOnClickFillInIntent(R.id.textView, Intent())
 
             return remoteViews
         }
