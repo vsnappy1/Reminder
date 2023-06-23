@@ -1,5 +1,8 @@
 package com.randos.reminder.ui.screen
 
+import android.content.Context
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -21,6 +24,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarMonth
@@ -42,11 +46,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -82,7 +89,6 @@ import com.vsnappy1.datepicker.DatePicker
 import com.vsnappy1.datepicker.data.model.DatePickerDate
 import com.vsnappy1.timepicker.TimePicker
 import com.vsnappy1.timepicker.data.model.TimePickerTime
-import com.vsnappy1.timepicker.enums.MinuteGap
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -104,6 +110,9 @@ fun AddTaskScreen(
 ) {
     val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
     BaseView(titleRes = R.string.new_reminder) {
+        LazyColumn(modifier = Modifier.padding(medium)){
+            //TODO add items in here
+        }
         Column(modifier = Modifier.padding(medium)) {
             InputTitleAndNotesCard(uiState = uiState) { viewModel.updateUiState(it) }
             DetailsCard(uiState = uiState) { viewModel.updateUiState(it) }
@@ -114,6 +123,7 @@ fun AddTaskScreen(
         }
     }
 }
+
 
 @Composable
 fun ActionButton(
@@ -185,6 +195,11 @@ fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
     }
 }
 
+fun hideKeyboard(context: Context){
+    val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+    inputMethodManager?.hideSoftInputFromWindow(View(context).windowToken, 0)
+}
+
 @Composable
 fun DetailsCard(
     uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
@@ -224,11 +239,14 @@ private fun PriorityComponent(uiState: TaskUiState, onUpdate: (TaskUiState) -> U
         onSelect = { onUpdate(uiState.copy(priority = it)) })
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun DateComponent(
     uiState: TaskUiState,
     onUpdate: (TaskUiState) -> Unit,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     DetailSwitch(
         icon = Icons.Rounded.CalendarMonth,
         iconDescriptionId = R.string.date,
@@ -258,6 +276,8 @@ private fun DateComponent(
                     )
                 )
             }
+            keyboardController?.hide()
+            focusManager.clearFocus()
         },
         detail = uiState.date?.format(),
         onClickEnabled = uiState.isDateChecked,
@@ -293,11 +313,14 @@ private fun DateComponent(
 
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun TimeComponent(
     uiState: TaskUiState,
     onUpdate: (TaskUiState) -> Unit,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     DetailSwitch(
         icon = Icons.Rounded.AccessTime,
         iconDescriptionId = R.string.time,
@@ -325,6 +348,8 @@ private fun TimeComponent(
                     )
                 )
             }
+            keyboardController?.hide()
+            focusManager.clearFocus()
         },
         detail = uiState.time?.format(LocalContext.current) ?: "",
         onClickEnabled = uiState.isTimeChecked,
