@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.randos.reminder.navigation.NavGraph
 import com.randos.reminder.notification.NotificationManager
 import com.randos.reminder.ui.theme.ReminderTheme
+import com.randos.reminder.ui.viewmodel.BaseViewModel
 import com.randos.reminder.widget.ReminderAppWidgetProvider
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -59,11 +60,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
-        updateWidget(this)
+        if(BaseViewModel.isDataModified){
+            updateWidget(this)
+        }
     }
 
-    fun updateWidget(context: Context) {
-        //TODO data in widget is not updating, fix this
+    private fun updateWidget(context: Context) {
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val appWidgetIds: IntArray =
             appWidgetManager.getAppWidgetIds(ComponentName(context, ReminderAppWidgetProvider::class.java))

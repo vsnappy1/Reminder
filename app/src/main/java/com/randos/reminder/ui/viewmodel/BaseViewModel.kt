@@ -26,6 +26,10 @@ open class BaseViewModel @Inject constructor(
     private val taskRepository: TaskRepository
 ) : ViewModel() {
 
+    companion object{
+        var isDataModified = false
+    }
+
     @Inject
     lateinit var notificationManager: NotificationManager
 
@@ -38,6 +42,7 @@ open class BaseViewModel @Inject constructor(
             val id = taskRepository.insertTask(task)
             notificationManager.scheduleNotification(task.copy(id = id).toNotificationData())
         }
+        isDataModified = true
     }
 
     fun updateTask(task: Task) {
@@ -45,6 +50,7 @@ open class BaseViewModel @Inject constructor(
             taskRepository.updateTask(task)
             notificationManager.updateScheduledNotification(task.toNotificationData())
         }
+        isDataModified = true
     }
 
     fun updateTaskStatus(task: Task) {
@@ -53,6 +59,7 @@ open class BaseViewModel @Inject constructor(
         } else {
             markAsDone(task)
         }
+        isDataModified = true
     }
 
     private fun markAsDone(task: Task) {
