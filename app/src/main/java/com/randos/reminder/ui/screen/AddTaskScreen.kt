@@ -40,6 +40,7 @@ import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +50,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -89,6 +92,7 @@ import com.vsnappy1.datepicker.DatePicker
 import com.vsnappy1.datepicker.data.model.DatePickerDate
 import com.vsnappy1.timepicker.TimePicker
 import com.vsnappy1.timepicker.data.model.TimePickerTime
+import com.vsnappy1.timepicker.enums.MinuteGap
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -110,11 +114,11 @@ fun AddTaskScreen(
 ) {
     val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
     BaseView(titleRes = R.string.new_reminder) {
-        LazyColumn(modifier = Modifier.padding(medium)){
+        LazyColumn(modifier = Modifier.padding(medium)) {
             //TODO add items in here
         }
         Column(modifier = Modifier.padding(medium)) {
-            InputTitleAndNotesCard(uiState = uiState) { viewModel.updateUiState(it) }
+            InputTitleAndNotesCard(uiState = uiState, shouldFocus = true) { viewModel.updateUiState(it) }
             DetailsCard(uiState = uiState) { viewModel.updateUiState(it) }
             ActionButton(uiState = uiState, onCancel = onCancel, textRes = R.string.add) {
                 viewModel.addTask()
@@ -163,7 +167,12 @@ fun ActionButton(
 }
 
 @Composable
-fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit) {
+fun InputTitleAndNotesCard(
+    uiState: TaskUiState,
+    shouldFocus: Boolean = false,
+    onUpdate: (TaskUiState) -> Unit
+) {
+    val titleTextFieldFocus = remember { FocusRequester() }
     Card(
         shape = shapes.large,
         modifier = Modifier
@@ -172,6 +181,7 @@ fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             TransparentBackgroundTextField(
+                modifier = Modifier.focusRequester(titleTextFieldFocus),
                 value = uiState.title,
                 placeHolderId = R.string.title,
                 isSingleLine = true,
@@ -193,10 +203,16 @@ fun InputTitleAndNotesCard(uiState: TaskUiState, onUpdate: (TaskUiState) -> Unit
             )
         }
     }
+    LaunchedEffect(Unit) {
+        if (shouldFocus) {
+            titleTextFieldFocus.requestFocus()
+        }
+    }
 }
 
-fun hideKeyboard(context: Context){
-    val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+fun hideKeyboard(context: Context) {
+    val inputMethodManager =
+        context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
     inputMethodManager?.hideSoftInputFromWindow(View(context).windowToken, 0)
 }
 
@@ -374,8 +390,8 @@ private fun TimeComponent(
                         time = LocalTime.of(hour, minute)
                     )
                 )
-            },//TODO uncomment bellow
-//            minuteGap = MinuteGap.FIVE,
+            },
+            minuteGap = MinuteGap.FIVE,
             time = TimePickerTime(
                 hour = uiState.time?.hour ?: LocalTime.now().hour,
                 minute = uiState.time?.minute ?: LocalTime.now().minute

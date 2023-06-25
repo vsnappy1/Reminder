@@ -6,13 +6,12 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.randos.reminder.R
-import com.randos.reminder.data.repository.TaskRepository
+import com.randos.reminder.data.ReminderDatabase
 import com.randos.reminder.notification.NotificationData
 import com.randos.reminder.notification.showNotification
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
 import java.time.LocalDate
 import java.util.Calendar
-import javax.inject.Inject
 
 private const val TAG = "TodayTaskNotification"
 
@@ -21,18 +20,17 @@ class TodayTaskNotificationWorker(
     workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
 
-    @Inject
-    lateinit var taskRepository: TaskRepository
-
     override suspend fun doWork(): Result {
         Log.d(TAG, "doWork: ")
+        val tasks =
+            ReminderDatabase.getDatabase(context).taskDao().getTasks(LocalDate.now()).toList()[0]
+        Log.d(TAG, "Number of tasks ${tasks.size}")
         try {
-            val list = taskRepository.getTasksOn(LocalDate.now()).first().filter { it.time == null }
-            if (list.isNotEmpty()) {
+            if (tasks.isNotEmpty()) {
                 val notificationData = NotificationData(
-                    id = -1,
+                    id = 0,
                     title = "Today Tasks",
-                    description = "You have ${list.size} today.",
+                    description = "You have ${tasks.size} today.",
                     priority = NotificationCompat.PRIORITY_DEFAULT,
                     calender = Calendar.getInstance(),
                     iconRes = R.drawable.ic_launcher_foreground,

@@ -266,9 +266,9 @@ fun TaskCard(
 //            shape = shapes.large,
             modifier = modifier
                 .fillMaxWidth()
-                .background(cardBackground)
                 .clip(RoundedCornerShape(large))
                 .clickable { onItemClick(task.id) }
+                .background(cardBackground)
                 .padding(top = small),
 //            colors = CardDefaults.cardColors(containerColor = cardBackground),
         ) {

@@ -24,6 +24,9 @@ interface TaskDao {
     @Query("SELECT * FROM task WHERE completedOn IS NULL $orderBy")
     fun getTasks(): Flow<List<Task>>
 
+    @Query("SELECT * FROM task WHERE date = :date AND time IS NOT NULL AND completedOn IS NULL $orderBy")
+    fun getTasksScheduled(date: LocalDate): Flow<List<Task>>
+
     @Query("SELECT * FROM task WHERE date = :date AND completedOn IS NULL $orderBy")
     fun getTasks(date: LocalDate): Flow<List<Task>>
 

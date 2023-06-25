@@ -13,11 +13,15 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
+import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.randos.reminder.MainActivity
 import com.randos.reminder.R
+import com.randos.reminder.notification.worker.DeferredNotificationWorker
 import com.randos.reminder.notification.worker.TodayTaskNotificationWorker
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
@@ -32,30 +36,49 @@ interface NotificationManager {
     fun setDailyNotification()
 }
 
-
 class NotificationManagerImpl @Inject constructor(val context: Context) : NotificationManager {
     override fun scheduleNotification(notificationData: NotificationData) {
-        if (notificationData.calender?.before(Calendar.getInstance()) == true) {
-            Log.d(TAG, "scheduleNotification: Alarm not scheduled for past.")
-            return
+        notificationData.calender?.let { calendar ->
+            if (calendar.before(Calendar.getInstance())) {
+                Log.d(TAG, "Alarm not scheduled for past time, id = ${notificationData.id}.")
+                return
+            }
+
+            // If task is scheduled in next 24 hours use the Alarm Manager for notification.
+            if (getHourDifference(calendar) <= 24) {
+                context.scheduleNotificationUsingAlarmManager(notificationData)
+            } else { // Else use Work Manager to schedule the Alarm Manager, doing this to be easy on battery.
+                scheduleDeferredNotification(notificationData)
+            }
         }
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, NotificationReceiver::class.java).apply {
-            putExtra("notificationData", notificationData)
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            notificationData.id,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE
+
+    }
+
+    private fun scheduleDeferredNotification(notificationData: NotificationData) {
+        val data = Data.Builder()
+        data.putInt("id", notificationData.id)
+
+        val delay =
+            notificationData.calender?.timeInMillis?.minus(Calendar.getInstance().timeInMillis)
+                ?.minus(24 * 60 * 60 * 1000) ?: 0
+
+        val oneTimeWorkRequest =
+            OneTimeWorkRequestBuilder<DeferredNotificationWorker>()
+                .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                .setInputData(data.build())
+                .build()
+
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            "${notificationData.id}",
+            ExistingWorkPolicy.REPLACE,
+            oneTimeWorkRequest
         )
-        notificationData.calender?.let {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                notificationData.calender.timeInMillis,
-                pendingIntent
-            )
-        }
+        Log.d(TAG, "Scheduled alarm manager worker, id = ${notificationData.id}.")
+    }
+
+    private fun getHourDifference(calender: Calendar): Long {
+        val difference = calender.timeInMillis.minus(Calendar.getInstance().timeInMillis)
+        return difference.div(60 * 60 * 1000)
     }
 
     override fun updateScheduledNotification(notificationData: NotificationData) {
@@ -72,35 +95,63 @@ class NotificationManagerImpl @Inject constructor(val context: Context) : Notifi
             intent,
             PendingIntent.FLAG_IMMUTABLE
         )
+
+        // Cancel the alarm if present
         alarmManager.cancel(pendingIntent)
+
+        // Cancel the worker if present
+        WorkManager.getInstance(context).cancelUniqueWork("$notificationId")
+        Log.d(TAG, "Scheduled notification removed, id = $notificationId")
     }
 
     override fun setDailyNotification() {
-        //TODO set work manager
-//        val dailyMorningNotification =
-//            PeriodicWorkRequestBuilder<TodayTaskNotificationWorker>(5, TimeUnit.MINUTES)
-////                .setInitialDelay(getInitialDelay(), TimeUnit.MILLISECONDS)
-//                .build()
-//
-//        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-//            "DailyNotification",
-//            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-//            dailyMorningNotification
-//        )
-//        Log.d(TAG, "setDailyNotification: setup")
+        val dailyMorningNotification =
+            PeriodicWorkRequestBuilder<TodayTaskNotificationWorker>(1, TimeUnit.DAYS)
+                .setInitialDelay(getInitialDelay(), TimeUnit.MILLISECONDS)
+                .build()
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "DailyNotification",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            dailyMorningNotification
+        )
+        Log.d(TAG, "setDailyNotification: setup")
     }
 
     private fun getInitialDelay(): Long {
         val now = Calendar.getInstance()
         val due = Calendar.getInstance()
-        due.set(Calendar.HOUR_OF_DAY, 9)
-        due.set(Calendar.MINUTE, 0)
-        due.set(Calendar.SECOND, 0)
+        due[Calendar.HOUR_OF_DAY] = 9
+        due[Calendar.MINUTE] = 0
+        due[Calendar.SECOND] = 0
         if (now.after(due)) {
             due.add(Calendar.DAY_OF_MONTH, 1)
         }
         return due.timeInMillis - now.timeInMillis
     }
+}
+
+fun Context.scheduleNotificationUsingAlarmManager(
+    notificationData: NotificationData
+) {
+    val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    val intent = Intent(this, NotificationReceiver::class.java).apply {
+        putExtra("notificationData", notificationData)
+    }
+    val pendingIntent = PendingIntent.getBroadcast(
+        this,
+        notificationData.id,
+        intent,
+        PendingIntent.FLAG_IMMUTABLE
+    )
+    notificationData.calender?.let {
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            notificationData.calender.timeInMillis,
+            pendingIntent
+        )
+    }
+    Log.d(TAG, "Scheduled notification using alarm manager, id = ${notificationData.id}.")
 }
 
 fun Context.showNotification(notificationData: NotificationData) {
