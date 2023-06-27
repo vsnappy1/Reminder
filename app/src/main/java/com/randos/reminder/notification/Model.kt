@@ -22,7 +22,7 @@ data class NotificationData(
 
 fun Task.toNotificationData(): NotificationData {
     return NotificationData(
-        id = id.toInt(),
+        id = id,
         title = title,
         description = notes ?: "",
         priority = getPriority(priority),

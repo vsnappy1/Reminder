@@ -240,7 +240,7 @@ const val defaultAnimationDuration = 500
 fun TaskCard(
     modifier: Modifier = Modifier,
     task: TaskUiState = TaskUiState(),
-    onItemClick: (Long) -> Unit = {},
+    onItemClick: (Int) -> Unit = {},
     onDoneClick: (TaskUiState) -> Unit = {},
     isDateVisible: Boolean = true,
     isTimeVisible: Boolean = true,

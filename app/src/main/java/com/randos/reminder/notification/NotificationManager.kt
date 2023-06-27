@@ -51,7 +51,6 @@ class NotificationManagerImpl @Inject constructor(val context: Context) : Notifi
                 scheduleDeferredNotification(notificationData)
             }
         }
-
     }
 
     private fun scheduleDeferredNotification(notificationData: NotificationData) {
@@ -112,7 +111,7 @@ class NotificationManagerImpl @Inject constructor(val context: Context) : Notifi
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "DailyNotification",
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingPeriodicWorkPolicy.KEEP,
             dailyMorningNotification
         )
         Log.d(TAG, "setDailyNotification: setup")

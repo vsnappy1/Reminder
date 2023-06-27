@@ -9,6 +9,11 @@ import com.randos.reminder.R
 import com.randos.reminder.data.ReminderDatabase
 import com.randos.reminder.notification.NotificationData
 import com.randos.reminder.notification.showNotification
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
 import java.time.LocalDate
 import java.util.Calendar
@@ -21,28 +26,25 @@ class TodayTaskNotificationWorker(
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
-        Log.d(TAG, "doWork: ")
+        Log.d(TAG, "doWork initiated.")
         val tasks =
-            ReminderDatabase.getDatabase(context).taskDao().getTasks(LocalDate.now()).toList()[0]
-        Log.d(TAG, "Number of tasks ${tasks.size}")
-        try {
-            if (tasks.isNotEmpty()) {
-                val notificationData = NotificationData(
-                    id = 0,
-                    title = "Today Tasks",
-                    description = "You have ${tasks.size} today.",
-                    priority = NotificationCompat.PRIORITY_DEFAULT,
-                    calender = Calendar.getInstance(),
-                    iconRes = R.drawable.ic_launcher_foreground,
-                    chanelIdRes = R.string.notification_channel_id,
-                    deepLinkPath = "reminder://today"
-                )
-                context.showNotification(notificationData)
-            }
-            return Result.success()
-        } catch (e: Exception) {
-            Log.e(TAG, "doWork: ", e.cause)
-            return Result.failure()
+            ReminderDatabase.getDatabase(context).taskDao().getTasks(LocalDate.now()).first()
+        Log.d(TAG, "Task count ${tasks.size}.")
+        if (tasks.isNotEmpty()) {
+            val notificationData = NotificationData(
+                id = 0,
+                title = "Reminder",
+                description = "You have ${tasks.size} ${if (tasks.size == 1) "reminder" else "reminders"} for today.",
+                priority = NotificationCompat.PRIORITY_DEFAULT,
+                calender = Calendar.getInstance(),
+                iconRes = R.drawable.ic_launcher_foreground,
+                chanelIdRes = R.string.notification_channel_id,
+                deepLinkPath = "reminder://today"
+            )
+            context.showNotification(notificationData)
         }
+
+        Log.d(TAG, "doWork finished.")
+        return Result.success()
     }
 }

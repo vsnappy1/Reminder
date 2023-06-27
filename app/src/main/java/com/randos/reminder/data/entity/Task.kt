@@ -12,7 +12,7 @@ import java.time.LocalTime
 @Entity
 data class Task(
     @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
+    val id: Int = 0,
     val title: String,
     val notes: String? = null,
     val date: LocalDate? = null,
@@ -21,7 +21,8 @@ data class Task(
     val priority: Priority = Priority.NONE,
     val done: Boolean = false,
     val addedOn: LocalDateTime,
-    val completedOn: LocalDateTime? = null
+    val completedOn: LocalDateTime? = null,
+    val notificationTriggered: Boolean = false
 )
 
 class Converters {

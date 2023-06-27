@@ -32,7 +32,7 @@ object TaskAllDestination : NavigationDestination {
 fun AllTaskScreen(
     viewModel: AllTaskViewModel = hiltViewModel(),
     onAddTaskClick: () -> Unit = {},
-    onItemClick: (Long) -> Unit = {}
+    onItemClick: (Int) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.observeAsState(AllTaskUiState())
     BaseViewWithFAB(

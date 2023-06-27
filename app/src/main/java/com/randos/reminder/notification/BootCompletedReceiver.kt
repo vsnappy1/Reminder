@@ -6,22 +6,28 @@ import android.content.Intent
 import com.randos.reminder.data.ReminderDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class BootCompletedReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent?) {
+    override fun onReceive(context: Context, intent: Intent) {
         CoroutineScope(Dispatchers.Main).launch {
+
             // Schedule all notification for today
-            ReminderDatabase.getDatabase(context).taskDao()
-                .getTasksScheduled(LocalDate.now()).collect { tasks ->
-                    tasks.forEach { context.scheduleNotificationUsingAlarmManager(it.toNotificationData()) }
-                }
+            val tasksToday =
+                ReminderDatabase.getDatabase(context).taskDao()
+                    .getTasksScheduled(LocalDate.now()).first()
+            tasksToday
+                .filter { !it.notificationTriggered }
+                .forEach { context.scheduleNotificationUsingAlarmManager(it.toNotificationData()) }
+
             // Schedule all notification for tomorrow
-            ReminderDatabase.getDatabase(context).taskDao()
-                .getTasksScheduled(LocalDate.now().plusDays(1)).collect { tasks ->
-                    tasks.forEach { context.scheduleNotificationUsingAlarmManager(it.toNotificationData()) }
-                }
+            val tasksTomorrow = ReminderDatabase.getDatabase(context).taskDao()
+                .getTasksScheduled(LocalDate.now().plusDays(1)).first()
+            tasksTomorrow
+                .filter { !it.notificationTriggered }
+                .forEach { context.scheduleNotificationUsingAlarmManager(it.toNotificationData()) }
         }
     }
 }

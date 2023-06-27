@@ -23,7 +23,7 @@ class EditTaskViewModel @Inject constructor(
     init {
         val taskId: Long = checkNotNull(savedStateHandle[TaskEditDestination.taskIdArg])
         viewModelScope.launch {
-            _uiState.value = taskRepository.getTask(taskId).first().toTaskUiState()
+            _uiState.value = taskRepository.getTask(taskId.toInt()).first().toTaskUiState()
         }
     }
 
