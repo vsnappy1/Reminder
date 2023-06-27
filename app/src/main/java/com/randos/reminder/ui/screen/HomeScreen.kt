@@ -94,7 +94,7 @@ fun HomeScreen(
     onAllClick: () -> Unit = {},
     onCompletedClick: () -> Unit = {},
     onAddTaskClick: () -> Unit = {},
-    onSearchItemClick: (Long) -> Unit = {},
+    onSearchItemClick: (Int) -> Unit = {},
     onBackPress: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -191,7 +191,7 @@ private fun SearchView(
     focusManager: FocusManager,
     onShowCompletedTaskClick: () -> Unit,
     onDoneClick: (TaskUiState) -> Unit,
-    onSearchItemClick: (Long) -> Unit
+    onSearchItemClick: (Int) -> Unit
 ) {
     val alpha by animateFloatAsState(targetValue = if (homeUiState.search.isNotBlank()) 1f else 0.1f)
     val rotation by animateFloatAsState(

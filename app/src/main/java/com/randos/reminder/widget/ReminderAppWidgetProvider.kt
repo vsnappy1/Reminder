@@ -29,7 +29,6 @@ import kotlinx.coroutines.launch
  */
 private const val TAG = "ReminderWidget"
 
-// At the top level of your kotlin file:
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 class ReminderAppWidgetProvider : AppWidgetProvider() {

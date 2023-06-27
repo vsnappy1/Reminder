@@ -74,7 +74,7 @@ class ScheduledTaskViewModel @Inject constructor(taskRepository: TaskRepository)
         viewModelScope.launch {
             taskRepository
                 .getTasksAfter(
-                    LocalDate.now().plusDays((7 - LocalDate.now().dayOfWeek.value).toLong())
+                    LocalDate.now().plusDays((8 - LocalDate.now().dayOfWeek.value).toLong())
                 )
                 .map { it.toTaskUiStateList() }.collect {
                     _uiState.value =

@@ -14,6 +14,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -26,20 +27,21 @@ open class BaseViewModel @Inject constructor(
     private val taskRepository: TaskRepository
 ) : ViewModel() {
 
-    companion object{
+    companion object {
         var isDataModified = false
     }
 
     @Inject
     lateinit var notificationManager: NotificationManager
 
-    private val jobMap = mutableMapOf<Long, Job>()
+    // This job map helps to create delay when task is marked complete/incomplete
+    private val jobMap = mutableMapOf<Int, Job>()
 
     @OptIn(DelicateCoroutinesApi::class)
     fun addTask(task: Task) {
         GlobalScope.launch {// Added some delay to make app feel more user friendly
             delay(500)
-            val id = taskRepository.insertTask(task)
+            val id = taskRepository.insertTask(task).toInt()
             notificationManager.scheduleNotification(task.copy(id = id).toNotificationData())
         }
         isDataModified = true
@@ -47,10 +49,18 @@ open class BaseViewModel @Inject constructor(
 
     fun updateTask(task: Task) {
         viewModelScope.launch {
+            val oldTask = taskRepository.getTask(task.id).first()
+            if (hasTimeChanged(task, oldTask)) {
+                taskRepository.updateNotificationTriggeredStatus(task.id, false)
+            }
             taskRepository.updateTask(task)
             notificationManager.updateScheduledNotification(task.toNotificationData())
         }
         isDataModified = true
+    }
+
+    private fun hasTimeChanged(taskNew: Task, oldTask: Task): Boolean {
+        return taskNew.date != oldTask.date || taskNew.time != oldTask.time
     }
 
     fun updateTaskStatus(task: Task) {

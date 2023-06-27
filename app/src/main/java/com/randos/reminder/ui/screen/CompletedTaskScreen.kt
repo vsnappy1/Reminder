@@ -61,7 +61,7 @@ object TaskCompletedDestination : NavigationDestination {
 @Composable
 fun CompletedTaskScreen(
     viewModel: CompletedTaskViewModel = hiltViewModel(),
-    onItemClick: (Long) -> Unit = {}
+    onItemClick: (Int) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.observeAsState(CompletedTaskUiState())
 
@@ -166,7 +166,7 @@ fun CompletedTaskScreen(
 
 private fun getListOfTaskCards(
     tasks: List<TaskUiState>,
-    onItemClick: (Long) -> Unit,
+    onItemClick: (Int) -> Unit,
     onDoneClick: (TaskUiState) -> Unit,
     isDateVisible: Boolean = true,
     isTimeVisible: Boolean = true,

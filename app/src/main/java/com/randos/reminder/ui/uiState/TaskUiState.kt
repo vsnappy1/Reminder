@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 
 data class TaskUiState(
-    val id: Long = 0,
+    val id: Int = 0,
     val title: String = "",
     val notes: String? = null,
     val date: LocalDate? = null,

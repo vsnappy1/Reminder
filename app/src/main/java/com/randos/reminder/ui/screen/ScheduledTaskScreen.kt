@@ -36,7 +36,7 @@ object TaskScheduledDestination : NavigationDestination {
 fun ScheduledTaskScreen(
     viewModel: ScheduledTaskViewModel = hiltViewModel(),
     onAddTaskClick: () -> Unit = {},
-    onItemClick: (Long) -> Unit = {}
+    onItemClick: (Int) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.observeAsState(ScheduledTaskUiState())
     // Creating flat list of views because nested lazy columns are not supported
@@ -121,7 +121,7 @@ fun ScheduledTaskScreen(
 
 private fun getListOfTaskCards(
     tasks: List<TaskUiState>,
-    onItemClick: (Long) -> Unit,
+    onItemClick: (Int) -> Unit,
     onDoneClick: (TaskUiState) -> Unit,
     isDateVisible: Boolean = true,
     isTimeVisible: Boolean = true,

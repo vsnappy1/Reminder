@@ -240,7 +240,7 @@ const val defaultAnimationDuration = 500
 fun TaskCard(
     modifier: Modifier = Modifier,
     task: TaskUiState = TaskUiState(),
-    onItemClick: (Long) -> Unit = {},
+    onItemClick: (Int) -> Unit = {},
     onDoneClick: (TaskUiState) -> Unit = {},
     isDateVisible: Boolean = true,
     isTimeVisible: Boolean = true,
@@ -266,9 +266,9 @@ fun TaskCard(
 //            shape = shapes.large,
             modifier = modifier
                 .fillMaxWidth()
-                .background(cardBackground)
                 .clip(RoundedCornerShape(large))
                 .clickable { onItemClick(task.id) }
+                .background(cardBackground)
                 .padding(top = small),
 //            colors = CardDefaults.cardColors(containerColor = cardBackground),
         ) {

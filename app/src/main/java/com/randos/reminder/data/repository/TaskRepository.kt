@@ -12,7 +12,7 @@ interface TaskRepository {
 
     suspend fun deleteTask(task: Task)
 
-    fun getTask(id: Long): Flow<Task>
+    fun getTask(id: Int): Flow<Task>
 
     fun getTasks(): Flow<List<Task>>
 
@@ -43,4 +43,5 @@ interface TaskRepository {
     fun getCompletedTasksByKeyword(keyword: String): Flow<List<Task>>
     fun getCompletedTasksByKeywordCount(keyword: String): Flow<Int>
     suspend fun deleteCompletedTasks()
+    suspend fun updateNotificationTriggeredStatus(taskId: Int, notificationTriggered: Boolean)
 }

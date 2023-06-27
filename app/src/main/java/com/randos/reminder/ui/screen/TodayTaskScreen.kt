@@ -38,7 +38,7 @@ object TaskTodayDestination : NavigationDestination {
 fun TodayTaskScreen(
     viewModel: TodayTaskViewModel = hiltViewModel(),
     onAddTaskClick: () -> Unit = {},
-    onItemClick: (Long) -> Unit = {}
+    onItemClick: (Int) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.observeAsState(TodayTaskUiState())
     var indexedId by remember { mutableStateOf(-1) }

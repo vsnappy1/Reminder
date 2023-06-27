@@ -19,8 +19,8 @@ class TaskRepositoryImpl @Inject constructor(private val taskDao: TaskDao) : Tas
     override suspend fun deleteTask(task: Task) =
         taskDao.delete(task)
 
-    override fun getTask(id: Long): Flow<Task> =
-        taskDao.getTask(id)
+    override fun getTask(id: Int): Flow<Task> =
+        taskDao.getTask(id.toLong())
 
     override fun getTasks(): Flow<List<Task>> =
         taskDao.getTasks()
@@ -78,4 +78,9 @@ class TaskRepositoryImpl @Inject constructor(private val taskDao: TaskDao) : Tas
 
     override suspend fun deleteCompletedTasks() =
         taskDao.deleteCompletedTasks()
+
+    override suspend fun updateNotificationTriggeredStatus(
+        taskId: Int,
+        notificationTriggered: Boolean
+    ) = taskDao.updateNotificationTriggeredStatus(taskId, notificationTriggered)
 }

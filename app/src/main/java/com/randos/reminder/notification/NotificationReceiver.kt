@@ -3,6 +3,11 @@ package com.randos.reminder.notification
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.randos.reminder.data.ReminderDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class NotificationReceiver : BroadcastReceiver() {
 
@@ -14,7 +19,19 @@ class NotificationReceiver : BroadcastReceiver() {
                 } else {
                     intent.getSerializableExtra("notificationData") as NotificationData
                 }
-            notificationData?.let { context.showNotification(it) }
+
+            notificationData?.let {
+                CoroutineScope(Dispatchers.Main).launch {
+                    val task =
+                        ReminderDatabase.getDatabase(context).taskDao().getTask(it.id.toLong())
+                            .first()
+                    if (!task.notificationTriggered) {
+                        ReminderDatabase.getDatabase(context).taskDao()
+                            .updateNotificationTriggeredStatus(it.id, true)
+                        context.showNotification(it)
+                    }
+                }
+            }
         }
     }
 }

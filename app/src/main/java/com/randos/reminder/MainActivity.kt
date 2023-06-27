@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,12 +24,16 @@ import com.randos.reminder.widget.ReminderAppWidgetProvider
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+private const val TAG = "MainActivity"
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val notificationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) {}
+    ) {
+        val result = it[Manifest.permission.POST_NOTIFICATIONS]
+        Log.d(TAG, "is notification granted $result")
+    }
 
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
