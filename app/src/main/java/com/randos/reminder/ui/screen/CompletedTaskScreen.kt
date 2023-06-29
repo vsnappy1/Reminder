@@ -36,8 +36,6 @@ import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseView
-import com.randos.reminder.ui.component.FadeAnimatedVisibility
-import com.randos.reminder.ui.component.NoTaskMessage
 import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.component.TimeFrameHeader
 import com.randos.reminder.ui.theme.Black

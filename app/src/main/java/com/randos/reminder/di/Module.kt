@@ -29,13 +29,13 @@ class DatabaseModule {
     }
 
     @Provides
-    fun provideTaskRepository(taskDao: TaskDao): TaskRepository{
+    fun provideTaskRepository(taskDao: TaskDao): TaskRepository {
         return TaskRepositoryImpl(taskDao)
     }
 
     @Provides
     @Singleton
-    fun provideNotificationManager(@ApplicationContext context: Context): NotificationManager{
+    fun provideNotificationManager(@ApplicationContext context: Context): NotificationManager {
         return NotificationManagerImpl(context)
     }
 }

@@ -9,7 +9,7 @@ import com.randos.reminder.R
 import com.randos.reminder.data.ReminderDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 
@@ -31,12 +31,10 @@ class ReminderWidgetService : RemoteViewsService() {
         override fun onDataSetChanged() {
             Log.d(TAG, "onDataSetChanged: ")
             CoroutineScope(Dispatchers.Main).launch {
-                ReminderDatabase.getDatabase(context).taskDao().getTasks().collect {
-                    allTasks.clear()
-                    allTasks.addAll(it.map { task -> task.title })
-                    Log.d(TAG, "onDataSetChanged: ItemCount = ${allTasks.size}")
-                    cancel()
-                }
+                val tasks = ReminderDatabase.getDatabase(context).taskDao().getTasks().first()
+                allTasks.clear()
+                allTasks.addAll(tasks.map { task -> task.title })
+                Log.d(TAG, "onDataSetChanged: ItemCount = ${allTasks.size}")
             }
             // Adding some delay so that above coroutine finishes its task and then getCount method gets called
             Thread.sleep(1000)

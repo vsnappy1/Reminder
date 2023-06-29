@@ -101,7 +101,7 @@ class ScheduledTaskViewModel @Inject constructor(taskRepository: TaskRepository)
         }
     }
 
-    fun updateEnterAnimationEnabled(enabled: Boolean){
+    fun updateEnterAnimationEnabled(enabled: Boolean) {
         _uiState.value = _uiState.value?.copy(enterAnimationEnabled = enabled)
     }
 }

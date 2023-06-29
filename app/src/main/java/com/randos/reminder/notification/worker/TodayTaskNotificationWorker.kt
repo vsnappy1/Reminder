@@ -9,12 +9,7 @@ import com.randos.reminder.R
 import com.randos.reminder.data.ReminderDatabase
 import com.randos.reminder.notification.NotificationData
 import com.randos.reminder.notification.showNotification
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.toList
 import java.time.LocalDate
 import java.util.Calendar
 

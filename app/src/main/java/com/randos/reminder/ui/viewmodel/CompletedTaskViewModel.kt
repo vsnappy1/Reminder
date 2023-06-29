@@ -105,7 +105,7 @@ class CompletedTaskViewModel @Inject constructor(
         }
     }
 
-    fun updateEnterAnimationEnabled(enabled: Boolean){
+    fun updateEnterAnimationEnabled(enabled: Boolean) {
         _uiState.value = _uiState.value?.copy(enterAnimationEnabled = enabled)
     }
 }

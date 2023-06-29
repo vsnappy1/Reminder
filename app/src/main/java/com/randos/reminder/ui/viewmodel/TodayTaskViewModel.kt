@@ -14,7 +14,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -88,7 +87,7 @@ class TodayTaskViewModel @Inject constructor(
         return true
     }
 
-    fun endTaskIndexing(){
+    fun endTaskIndexing() {
         _uiState.value = _uiState.value?.copy(scrollToPosition = null, indexTaskId = null)
     }
 
@@ -98,7 +97,7 @@ class TodayTaskViewModel @Inject constructor(
         }
     }
 
-    fun updateEnterAnimationEnabled(enabled: Boolean){
+    fun updateEnterAnimationEnabled(enabled: Boolean) {
         _uiState.value = _uiState.value?.copy(enterAnimationEnabled = enabled)
     }
 }

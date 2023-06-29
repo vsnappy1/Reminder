@@ -70,7 +70,6 @@ import com.randos.reminder.ui.theme.Black
 import com.randos.reminder.ui.theme.Gray200
 import com.randos.reminder.ui.theme.Gray300
 import com.randos.reminder.ui.theme.Gray500
-import com.randos.reminder.ui.theme.GrayLight
 import com.randos.reminder.ui.theme.Typography
 import com.randos.reminder.ui.theme.White
 import com.randos.reminder.ui.theme.medium

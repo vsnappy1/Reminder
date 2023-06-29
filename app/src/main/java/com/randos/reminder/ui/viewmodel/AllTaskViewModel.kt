@@ -40,7 +40,8 @@ class AllTaskViewModel @Inject constructor(
             updateTaskStatus(taskUiState.toTask())
         }
     }
-    fun updateEnterAnimationEnabled(enabled: Boolean){
+
+    fun updateEnterAnimationEnabled(enabled: Boolean) {
         _uiState.value = _uiState.value?.copy(enterAnimationEnabled = enabled)
     }
 }

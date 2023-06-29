@@ -8,7 +8,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import com.randos.reminder.ui.screen.*
+import com.randos.reminder.ui.screen.AddTaskScreen
+import com.randos.reminder.ui.screen.AllTaskScreen
+import com.randos.reminder.ui.screen.CompletedTaskScreen
+import com.randos.reminder.ui.screen.EditTaskScreen
+import com.randos.reminder.ui.screen.HomeDestination
+import com.randos.reminder.ui.screen.HomeScreen
+import com.randos.reminder.ui.screen.ScheduledTaskScreen
+import com.randos.reminder.ui.screen.TaskAddDestination
+import com.randos.reminder.ui.screen.TaskAllDestination
+import com.randos.reminder.ui.screen.TaskCompletedDestination
+import com.randos.reminder.ui.screen.TaskEditDestination
+import com.randos.reminder.ui.screen.TaskScheduledDestination
+import com.randos.reminder.ui.screen.TaskTodayDestination
+import com.randos.reminder.ui.screen.TodayTaskScreen
 
 @Composable
 fun NavGraph(

@@ -1,8 +1,5 @@
 package com.randos.reminder.ui.screen
 
-import android.content.Context
-import android.view.View
-import android.view.inputmethod.InputMethodManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -100,8 +97,6 @@ object TaskAddDestination : NavigationDestination {
     override val route: String = ReminderScreen.ADD_TASK_SCREEN.name
     override val titleRes: Int = R.string.new_reminder
 }
-// TODO send a notification at 9:00 AM to let user know tasks for today, exclude tasks with time
-// TODO Preserve notification when device restart
 // TODO add a view to explain permission for notification
 // TODO write test cases
 // TODO get the theme reviewed
@@ -118,7 +113,11 @@ fun AddTaskScreen(
             //TODO add items in here
         }
         Column(modifier = Modifier.padding(medium)) {
-            InputTitleAndNotesCard(uiState = uiState, shouldFocus = true) { viewModel.updateUiState(it) }
+            InputTitleAndNotesCard(uiState = uiState, shouldFocus = true) {
+                viewModel.updateUiState(
+                    it
+                )
+            }
             DetailsCard(uiState = uiState) { viewModel.updateUiState(it) }
             ActionButton(uiState = uiState, onCancel = onCancel, textRes = R.string.add) {
                 viewModel.addTask()
@@ -157,12 +156,13 @@ fun ActionButton(
                 backgroundColor = Red,
                 borderColor = Red,
             )
+        } else {
+            ReminderButton(
+                text = stringResource(id = textRes),
+                onClick = onAdd,
+                enabled = uiState.isValid()
+            )
         }
-        ReminderButton(
-            text = stringResource(id = textRes),
-            onClick = onAdd,
-            enabled = uiState.isValid()
-        )
     }
 }
 
@@ -184,6 +184,7 @@ fun InputTitleAndNotesCard(
                 modifier = Modifier.focusRequester(titleTextFieldFocus),
                 value = uiState.title,
                 placeHolderId = R.string.title,
+                enabled = !uiState.done,
                 isSingleLine = true,
                 onValueChange = {
                     onUpdate(uiState.copy(title = it))
@@ -199,6 +200,7 @@ fun InputTitleAndNotesCard(
                 value = uiState.notes ?: "",
                 onValueChange = { onUpdate(uiState.copy(notes = it)) },
                 placeHolderId = R.string.notes,
+                enabled = !uiState.done,
                 modifier = Modifier.height(100.dp)
             )
         }
@@ -208,12 +210,6 @@ fun InputTitleAndNotesCard(
             titleTextFieldFocus.requestFocus()
         }
     }
-}
-
-fun hideKeyboard(context: Context) {
-    val inputMethodManager =
-        context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-    inputMethodManager?.hideSoftInputFromWindow(View(context).windowToken, 0)
 }
 
 @Composable
@@ -252,6 +248,7 @@ private fun PriorityComponent(uiState: TaskUiState, onUpdate: (TaskUiState) -> U
         iconDescriptionId = R.string.priority,
         titleId = R.string.priority,
         priority = uiState.priority,
+        enabled = !uiState.done,
         onSelect = { onUpdate(uiState.copy(priority = it)) })
 }
 
@@ -296,7 +293,8 @@ private fun DateComponent(
             focusManager.clearFocus()
         },
         detail = uiState.date?.format(),
-        onClickEnabled = uiState.isDateChecked,
+        onClickEnabled = uiState.isDateChecked && !uiState.done,
+        enabled = !uiState.done,
         onClick = {
             onUpdate(
                 uiState.copy(
@@ -368,7 +366,8 @@ private fun TimeComponent(
             focusManager.clearFocus()
         },
         detail = uiState.time?.format(LocalContext.current) ?: "",
-        onClickEnabled = uiState.isTimeChecked,
+        onClickEnabled = uiState.isTimeChecked && !uiState.done,
+        enabled = !uiState.done,
         onClick = {
             onUpdate(
                 uiState.copy(
@@ -408,7 +407,8 @@ private fun RepeatComponent(
         DetailSwitchRepeat(icon = Icons.Rounded.Repeat,
             iconDescriptionId = R.string.repeat,
             titleId = R.string.repeat,
-            checked = uiState.isRepeatChecked,
+            checked = uiState.isRepeatChecked && !uiState.done,
+            enabled = !uiState.done,
             onCheckedChange = {
                 onUpdate(
                     uiState.copy(
@@ -458,11 +458,14 @@ private fun RepeatComponent(
             }
         }
     }
-
 }
 
 @Composable
-private fun RepeatCard(titleId: Int, onClick: () -> Unit, selected: Boolean = false) {
+private fun RepeatCard(
+    titleId: Int,
+    onClick: () -> Unit,
+    selected: Boolean = false
+) {
     val borderWidth by animateDpAsState(targetValue = if (selected) 1.dp else 0.dp)
     val color by animateColorAsState(targetValue = if (selected) Green else Transparent)
     Card(
@@ -547,6 +550,7 @@ private fun DetailSwitch(
     onCheckedChange: (Boolean) -> Unit = {},
     detail: String?,
     onClickEnabled: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit
 ) {
     DetailItem(
@@ -568,7 +572,7 @@ private fun DetailSwitch(
         onClick = { onClick() }
     ) {
         Switch(
-            checked = checked, onCheckedChange = onCheckedChange
+            checked = checked, onCheckedChange = onCheckedChange, enabled = enabled
         )
     }
 }
@@ -579,6 +583,7 @@ private fun DetailSwitchRepeat(
     iconDescriptionId: Int,
     titleId: Int,
     checked: Boolean = false,
+    enabled: Boolean,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
     DetailItem(
@@ -587,7 +592,7 @@ private fun DetailSwitchRepeat(
         titleId = titleId
     ) {
         Switch(
-            checked = checked, onCheckedChange = onCheckedChange
+            checked = checked, onCheckedChange = onCheckedChange, enabled = enabled
         )
     }
 }
@@ -598,6 +603,7 @@ private fun DetailDropdown(
     iconDescriptionId: Int,
     titleId: Int,
     onSelect: (Priority) -> Unit = {},
+    enabled: Boolean,
     priority: Priority
 ) {
     DetailItem(
@@ -605,13 +611,14 @@ private fun DetailDropdown(
         iconDescriptionId = iconDescriptionId,
         titleId = titleId
     ) {
-        PriorityDropDown(priority, onSelect)
+        PriorityDropDown(priority, enabled, onSelect)
     }
 }
 
 @Composable
 private fun PriorityDropDown(
     priority: Priority,
+    enabled: Boolean,
     onSelect: (Priority) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -619,6 +626,7 @@ private fun PriorityDropDown(
         value = priority.value,
         onClick = { expanded = true },
         onDismiss = { expanded = false },
+        enabled = enabled,
         expanded = expanded
     ) {
         PriorityDropdownMenuItem({

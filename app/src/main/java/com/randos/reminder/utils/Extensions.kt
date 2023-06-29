@@ -7,7 +7,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.platform.LocalContext
 import com.randos.reminder.data.entity.Task
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.uiState.toTaskUiState

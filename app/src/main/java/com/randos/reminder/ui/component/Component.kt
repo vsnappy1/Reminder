@@ -4,15 +4,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,9 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -74,11 +67,13 @@ fun TransparentBackgroundTextField(
     onValueChange: (String) -> Unit,
     placeHolderId: Int,
     isSingleLine: Boolean = false,
-    textStyle: TextStyle = Typography.titleLarge
+    textStyle: TextStyle = Typography.titleLarge,
+    enabled: Boolean = true
 ) {
     TextField(
         value = value,
         onValueChange = onValueChange,
+        enabled = enabled,
         modifier = modifier
             .fillMaxWidth()
             .shadow(elevation = 0.dp),
@@ -439,6 +434,7 @@ fun ReminderDropDown(
     value: String = " None",
     onClick: () -> Unit = {},
     onDismiss: () -> Unit = {},
+    enabled: Boolean = true,
     expanded: Boolean = false,
     content: @Composable (ColumnScope.() -> Unit) = {}
 ) {
@@ -446,7 +442,7 @@ fun ReminderDropDown(
         Row(modifier = Modifier
             .padding(vertical = small)
             .clip(shapes.large)
-            .clickable { onClick() }) {
+            .clickable(enabled = enabled) { onClick() }) {
             Text(
                 text = value,
                 modifier = Modifier

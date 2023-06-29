@@ -1,9 +1,12 @@
 package com.randos.reminder.ui.viewmodel
 
-import androidx.lifecycle.*
-import com.randos.reminder.ui.uiState.TaskUiState
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.randos.reminder.data.repository.TaskRepository
 import com.randos.reminder.ui.screen.TaskEditDestination
+import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.uiState.toTask
 import com.randos.reminder.ui.uiState.toTaskUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,6 +37,7 @@ class EditTaskViewModel @Inject constructor(
             }
         }
     }
+
     fun deleteTask() {
         viewModelScope.launch {
             uiState.value?.toTask()?.apply {

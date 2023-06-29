@@ -25,6 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 private const val TAG = "MainActivity"
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -65,7 +66,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
-        if(BaseViewModel.isDataModified){
+        if (BaseViewModel.isDataModified) {
             updateWidget(this)
         }
     }
@@ -73,7 +74,12 @@ class MainActivity : ComponentActivity() {
     private fun updateWidget(context: Context) {
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val appWidgetIds: IntArray =
-            appWidgetManager.getAppWidgetIds(ComponentName(context, ReminderAppWidgetProvider::class.java))
+            appWidgetManager.getAppWidgetIds(
+                ComponentName(
+                    context,
+                    ReminderAppWidgetProvider::class.java
+                )
+            )
 
         val intent = Intent(this@MainActivity, ReminderAppWidgetProvider::class.java)
         intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE

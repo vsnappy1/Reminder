@@ -1,6 +1,5 @@
 package com.randos.reminder.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -14,7 +13,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 data class HomeScreenUiState(
