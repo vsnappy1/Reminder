@@ -33,6 +33,7 @@ import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material3.Card
@@ -53,12 +54,15 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
@@ -66,18 +70,11 @@ import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseViewWithFAB
 import com.randos.reminder.ui.component.FadeAnimatedVisibility
 import com.randos.reminder.ui.component.TaskCard
-import com.randos.reminder.ui.theme.Black
-import com.randos.reminder.ui.theme.Gray200
-import com.randos.reminder.ui.theme.Gray300
-import com.randos.reminder.ui.theme.Gray500
-import com.randos.reminder.ui.theme.Typography
-import com.randos.reminder.ui.theme.White
-import com.randos.reminder.ui.theme.medium
-import com.randos.reminder.ui.theme.shapes
-import com.randos.reminder.ui.theme.small
+import com.randos.reminder.ui.theme.*
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.viewmodel.HomeScreenUiState
 import com.randos.reminder.ui.viewmodel.HomeViewModel
+import com.randos.reminder.utils.isNotificationPermissionGranted
 import com.randos.reminder.utils.noRippleClickable
 import kotlinx.coroutines.delay
 
@@ -95,6 +92,7 @@ fun HomeScreen(
     onAddTaskClick: () -> Unit = {},
     onSearchItemClick: (Int) -> Unit = {},
     onBackPress: () -> Unit = {},
+    onRequestNotificationPermission: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     var visible by remember { mutableStateOf(false) }
@@ -180,6 +178,93 @@ fun HomeScreen(
             }
         }
     }
+
+    val context = LocalContext.current
+    var shouldShowDialog by remember { mutableStateOf(false) }
+    LaunchedEffect(key1 = Unit) {
+        shouldShowDialog =
+            !context.isNotificationPermissionGranted() &&
+                    viewModel.shouldShowNotificationRequestDialog(context)
+    }
+
+    if (shouldShowDialog) {
+        Dialog(onDismissRequest = { shouldShowDialog = false }) {
+            DialogView(onSkip = { shouldShowDialog = false },
+                onIamIn = {
+                    shouldShowDialog = false
+                    onRequestNotificationPermission()
+                })
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun DialogView(
+    onIamIn: () -> Unit = {},
+    onSkip: () -> Unit = {},
+) {
+    Card(
+        modifier = Modifier.padding(large),
+        shape = shapes.large,
+        colors = CardDefaults.cardColors(containerColor = White, contentColor = Black)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(large)
+        ) {
+
+            Icon(
+                imageVector = Icons.Rounded.Notifications,
+                contentDescription = "Notification",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .size(50.dp)
+            )
+
+            Text(
+                text = stringResource(id = R.string.get_notified),
+                style = Typography.headlineMedium,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = medium)
+            )
+
+            Text(
+                text = stringResource(id = R.string.permission_for_notification_message),
+                style = Typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = extraExtraLarge, vertical = medium),
+            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .padding(top = extraExtraLarge)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(id = R.string.skip),
+                    style = Typography.bodyLarge,
+                    color = Blue,
+                    modifier = Modifier
+                        .noRippleClickable { onSkip() }
+                        .padding(horizontal = medium)
+                )
+                Text(
+                    text = stringResource(id = R.string.i_am_in),
+                    style = Typography.bodyLarge,
+                    color = White,
+                    modifier = Modifier
+                        .noRippleClickable { onIamIn() }
+                        .padding(horizontal = medium)
+                        .background(Blue, RoundedCornerShape(medium))
+                        .padding(horizontal = extraExtraLarge, vertical = small)
+                )
+            }
+        }
+    }
 }
 
 val animDuration = 500
@@ -204,9 +289,11 @@ private fun SearchView(
 
         FadeAnimatedVisibility(homeUiState.search.isNotBlank(), exitDuration = 0, exitDelay = 0) {
             Column(modifier = Modifier.padding(medium)) {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = medium)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = medium)
+                ) {
                     Text(
                         text = "${homeUiState.filteredCompletedTasksCount} Completed",
                         style = Typography.labelLarge.copy(fontWeight = FontWeight.Bold)
@@ -253,7 +340,6 @@ private fun SearchView(
     }
 }
 
-@Preview
 @Composable
 private fun ReminderTextField(
     value: String = "Hello",

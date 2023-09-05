@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -15,16 +14,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.navigation.compose.rememberNavController
 import com.randos.reminder.navigation.NavGraph
 import com.randos.reminder.notification.NotificationManager
 import com.randos.reminder.ui.theme.ReminderTheme
 import com.randos.reminder.ui.viewmodel.BaseViewModel
+import com.randos.reminder.utils.isNotificationPermissionGranted
 import com.randos.reminder.widget.ReminderAppWidgetProvider
+import com.randos.reminder.widget.dataStore
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-private const val TAG = "MainActivity"
+private const val TAG = "MainActivity-"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -32,15 +40,27 @@ class MainActivity : ComponentActivity() {
     private val notificationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) {
-        val result = it[Manifest.permission.POST_NOTIFICATIONS]
-        Log.d(TAG, "is notification granted $result")
+        if (this.isNotificationPermissionGranted()) {
+            Log.d(TAG, "Notification permission granted.")
+            notificationManager.setDailyNotification(this@MainActivity)
+        } else {
+            Log.d(TAG, "Notification permission not granted.")
+        }
     }
 
     private fun requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            notificationPermissionRequest.launch(
-                arrayOf(Manifest.permission.POST_NOTIFICATIONS)
-            )
+        CoroutineScope(Dispatchers.Main).launch {
+            dataStore.edit { pref ->
+                val count = pref[intPreferencesKey("notification_permission_asked_count")] ?: 0
+                if (count < 2 || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.R) {
+                    notificationPermissionRequest.launch(
+                        arrayOf(Manifest.permission.POST_NOTIFICATIONS)
+                    )
+                } else {
+                    openAppInSettings()
+                }
+                pref[intPreferencesKey("notification_permission_asked_count")] = count + 1
+            }
         }
     }
 
@@ -56,12 +76,22 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    NavGraph(navController = navController, this)
+                    NavGraph(navController = navController, this) {
+                        requestNotificationPermission()
+//                        openAppInSettings()
+                    }
                 }
             }
         }
-        requestNotificationPermission()
-        notificationManager.setDailyNotification()
+        setupDailyNotification(this)
+    }
+
+    private fun setupDailyNotification(context: Context) {
+        if (isNotificationPermissionGranted()) {
+            notificationManager.setDailyNotification(context)
+        } else {
+            notificationManager.unsetDailyNotification(context)
+        }
     }
 
     override fun onStop() {
@@ -69,6 +99,21 @@ class MainActivity : ComponentActivity() {
         if (BaseViewModel.isDataModified) {
             updateWidget(this)
         }
+    }
+
+    fun openAppInSettings() {
+        val intent = Intent()
+        intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.N) {
+            intent.putExtra("app_package", packageName)
+            intent.putExtra("app_uid", applicationInfo.uid)
+        } else {
+            intent.putExtra("android.provider.extra.APP_PACKAGE", packageName)
+        }
+
+        startActivity(intent)
     }
 
     private fun updateWidget(context: Context) {

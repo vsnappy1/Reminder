@@ -1,5 +1,7 @@
 package com.randos.reminder.utils
 
+import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.text.format.DateFormat
 import androidx.compose.foundation.clickable
@@ -7,6 +9,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import com.randos.reminder.data.entity.Task
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.uiState.toTaskUiState
@@ -47,4 +52,15 @@ fun Modifier.noRippleClickable(enabled: Boolean = true, onClick: () -> Unit): Mo
     ) {
         onClick()
     }
+}
+
+fun Context.isNotificationPermissionGranted(): Boolean {
+    return NotificationManagerCompat.from(this).areNotificationsEnabled()
+}
+
+fun Activity.shouldShowRequestPermissionRationaleForNotification(): Boolean {
+    return ActivityCompat.shouldShowRequestPermissionRationale(
+        this,
+        Manifest.permission.POST_NOTIFICATIONS
+    )
 }

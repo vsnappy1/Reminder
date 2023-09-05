@@ -110,18 +110,19 @@ fun AddTaskScreen(
     val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
     BaseView(titleRes = R.string.new_reminder) {
         LazyColumn(modifier = Modifier.padding(medium)) {
-            //TODO add items in here
-        }
-        Column(modifier = Modifier.padding(medium)) {
-            InputTitleAndNotesCard(uiState = uiState, shouldFocus = true) {
-                viewModel.updateUiState(
-                    it
-                )
-            }
-            DetailsCard(uiState = uiState) { viewModel.updateUiState(it) }
-            ActionButton(uiState = uiState, onCancel = onCancel, textRes = R.string.add) {
-                viewModel.addTask()
-                onAdd()
+            items(1){
+                Column(modifier = Modifier.padding(medium)) {
+                    InputTitleAndNotesCard(uiState = uiState, shouldFocus = true) {
+                        viewModel.updateUiState(
+                            it
+                        )
+                    }
+                    DetailsCard(uiState = uiState) { viewModel.updateUiState(it) }
+                    ActionButton(uiState = uiState, onCancel = onCancel, textRes = R.string.add) {
+                        viewModel.addTask()
+                        onAdd()
+                    }
+                }
             }
         }
     }

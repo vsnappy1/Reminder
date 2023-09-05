@@ -1,6 +1,7 @@
 package com.randos.reminder.notification
 
 import android.Manifest
+import android.app.Activity
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.PendingIntent
@@ -10,6 +11,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
@@ -33,7 +35,8 @@ interface NotificationManager {
     fun scheduleNotification(notificationData: NotificationData)
     fun updateScheduledNotification(notificationData: NotificationData)
     fun removeScheduledNotification(notificationId: Int)
-    fun setDailyNotification()
+    fun setDailyNotification(context: Context)
+    fun unsetDailyNotification(context: Context)
 }
 
 class NotificationManagerImpl @Inject constructor(val context: Context) : NotificationManager {
@@ -103,18 +106,41 @@ class NotificationManagerImpl @Inject constructor(val context: Context) : Notifi
         Log.d(TAG, "Scheduled notification removed, id = $notificationId")
     }
 
-    override fun setDailyNotification() {
-        val dailyMorningNotification =
-            PeriodicWorkRequestBuilder<TodayTaskNotificationWorker>(1, TimeUnit.DAYS)
-                .setInitialDelay(getInitialDelay(), TimeUnit.MILLISECONDS)
-                .build()
-
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            "DailyNotification",
-            ExistingPeriodicWorkPolicy.KEEP,
-            dailyMorningNotification
+//    override fun setDailyNotification(context: Context) {
+//        val dailyMorningNotification =
+//            PeriodicWorkRequestBuilder<TodayTaskNotificationWorker>(1, TimeUnit.DAYS)
+//                .setInitialDelay(getInitialDelay(), TimeUnit.MILLISECONDS)
+//                .build()
+//
+//        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+//            "DailyNotification",
+//            ExistingPeriodicWorkPolicy.KEEP,
+//            dailyMorningNotification
+//        )
+//        Log.d(TAG, "setDailyNotification: setup")
+//    }
+    override fun setDailyNotification(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, DailyNotificationReceiver::class.java)
+        val pendingIntent =
+            PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_IMMUTABLE)
+        alarmManager.setRepeating(
+            AlarmManager.RTC_WAKEUP,
+            getInitialDelay(),
+            86400000, // A day
+            pendingIntent
         )
         Log.d(TAG, "setDailyNotification: setup")
+    }
+
+    override fun unsetDailyNotification(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, DailyNotificationReceiver::class.java)
+        val pendingIntent =
+            PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_IMMUTABLE)
+
+        // Cancel the alarm if present
+        alarmManager.cancel(pendingIntent)
     }
 
     private fun getInitialDelay(): Long {
@@ -123,6 +149,7 @@ class NotificationManagerImpl @Inject constructor(val context: Context) : Notifi
         due[Calendar.HOUR_OF_DAY] = 9
         due[Calendar.MINUTE] = 0
         due[Calendar.SECOND] = 0
+        due[Calendar.MILLISECOND] = 0
         if (now.after(due)) {
             due.add(Calendar.DAY_OF_MONTH, 1)
         }

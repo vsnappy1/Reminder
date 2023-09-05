@@ -26,7 +26,8 @@ import com.randos.reminder.ui.screen.TodayTaskScreen
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    activity: Activity
+    activity: Activity,
+    onRequestNotificationPermission: () -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -41,6 +42,7 @@ fun NavGraph(
                 onScheduledClick = { navController.navigate(TaskScheduledDestination.route) },
                 onAddTaskClick = { navController.navigate(TaskAddDestination.route) },
                 onSearchItemClick = { navController.navigate("${TaskEditDestination.route}/${it}") },
+                onRequestNotificationPermission = onRequestNotificationPermission,
                 onBackPress = { activity.finish() }
             )
         }

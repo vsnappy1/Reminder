@@ -1,5 +1,9 @@
 package com.randos.reminder.ui.viewmodel
 
+import android.content.Context
+import android.util.Log
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -7,9 +11,11 @@ import com.randos.reminder.data.repository.TaskRepository
 import com.randos.reminder.ui.uiState.TaskUiState
 import com.randos.reminder.ui.uiState.toTask
 import com.randos.reminder.utils.toTaskUiStateList
+import com.randos.reminder.widget.dataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -123,5 +129,28 @@ class HomeViewModel @Inject constructor(
 
     fun updateUiState(uiState: HomeScreenUiState) {
         _homeUiState.value = uiState
+    }
+
+    suspend fun shouldShowNotificationRequestDialog(context: Context): Boolean {
+        val count = 5
+
+        val appStartCount = context.dataStore.data.map { preferences ->
+            preferences[intPreferencesKey("app_start_count")] ?: 0
+        }
+        val result = appStartCount.first() == 0
+        Log.d("--TAG", "shouldShowNotificationRequestDialog: ${appStartCount.first()} ${result}")
+
+        context.dataStore.edit { settings ->
+            if(settings[intPreferencesKey("app_start_count")] == 0){
+                settings[intPreferencesKey("app_start_count")] = count
+            }else{
+                settings[intPreferencesKey("app_start_count")] =
+                    settings[intPreferencesKey("app_start_count")]?.minus(
+                        1
+                    ) ?: count
+            }
+        }
+
+        return result
     }
 }

@@ -58,7 +58,7 @@ class TaskDaoTest {
        val id = taskDao.insert(task)
 
         //When
-        taskDao.delete(task.copy(id = id))
+        taskDao.delete(task.copy(id = id.toInt()))
 
         //Then
         val tasks = taskDao.getTasks().first()
