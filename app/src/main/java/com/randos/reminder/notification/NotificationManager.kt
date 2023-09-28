@@ -1,8 +1,8 @@
 package com.randos.reminder.notification
 
 import android.Manifest
-import android.app.Activity
 import android.app.AlarmManager
+import android.app.AlarmManager.INTERVAL_DAY
 import android.app.NotificationChannel
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
@@ -11,20 +11,16 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.work.Data
-import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.randos.reminder.MainActivity
 import com.randos.reminder.R
 import com.randos.reminder.notification.worker.DeferredNotificationWorker
-import com.randos.reminder.notification.worker.TodayTaskNotificationWorker
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -106,28 +102,15 @@ class NotificationManagerImpl @Inject constructor(val context: Context) : Notifi
         Log.d(TAG, "Scheduled notification removed, id = $notificationId")
     }
 
-//    override fun setDailyNotification(context: Context) {
-//        val dailyMorningNotification =
-//            PeriodicWorkRequestBuilder<TodayTaskNotificationWorker>(1, TimeUnit.DAYS)
-//                .setInitialDelay(getInitialDelay(), TimeUnit.MILLISECONDS)
-//                .build()
-//
-//        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-//            "DailyNotification",
-//            ExistingPeriodicWorkPolicy.KEEP,
-//            dailyMorningNotification
-//        )
-//        Log.d(TAG, "setDailyNotification: setup")
-//    }
     override fun setDailyNotification(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, DailyNotificationReceiver::class.java)
         val pendingIntent =
-            PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_IMMUTABLE)
-        alarmManager.setRepeating(
+            PendingIntent.getBroadcast(context, 100, intent, PendingIntent.FLAG_IMMUTABLE)
+        alarmManager.setInexactRepeating(
             AlarmManager.RTC_WAKEUP,
-            getInitialDelay(),
-            86400000, // A day
+            getInitialDelay() + System.currentTimeMillis(),
+            INTERVAL_DAY,
             pendingIntent
         )
         Log.d(TAG, "setDailyNotification: setup")
@@ -137,7 +120,7 @@ class NotificationManagerImpl @Inject constructor(val context: Context) : Notifi
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, DailyNotificationReceiver::class.java)
         val pendingIntent =
-            PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getBroadcast(context, 100, intent, PendingIntent.FLAG_IMMUTABLE)
 
         // Cancel the alarm if present
         alarmManager.cancel(pendingIntent)

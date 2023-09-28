@@ -97,7 +97,7 @@ object TaskAddDestination : NavigationDestination {
     override val route: String = ReminderScreen.ADD_TASK_SCREEN.name
     override val titleRes: Int = R.string.new_reminder
 }
-// TODO add a view to explain permission for notification
+
 // TODO write test cases
 // TODO get the theme reviewed
 // TODO ask for a QA

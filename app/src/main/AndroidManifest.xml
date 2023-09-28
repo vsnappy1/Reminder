@@ -62,7 +62,23 @@
 
         <receiver
             android:name=".notification.NotificationReceiver"
-            android:enabled="true" />
+            android:exported="true"
+            android:enabled="true" >
+            <intent-filter>
+                <action android:name="com.randos.reminder" >
+                </action>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".notification.DailyNotificationReceiver"
+            android:exported="true"
+            android:enabled="true" >
+            <intent-filter>
+                <action android:name="com.randos.reminder" >
+                </action>
+            </intent-filter>
+        </receiver>
 
         <provider
             android:name="androidx.startup.InitializationProvider"
