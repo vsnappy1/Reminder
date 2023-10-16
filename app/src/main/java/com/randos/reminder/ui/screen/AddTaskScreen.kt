@@ -32,6 +32,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Switch
@@ -50,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -60,6 +62,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.compose.Gray200
+import com.example.compose.Gray300
+import com.example.compose.Gray500
+import com.example.compose.Red
 import com.randos.reminder.R
 import com.randos.reminder.enums.Priority
 import com.randos.reminder.enums.ReminderScreen
@@ -68,16 +74,7 @@ import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseView
 import com.randos.reminder.ui.component.ReminderDropDown
 import com.randos.reminder.ui.component.TransparentBackgroundTextField
-import com.randos.reminder.ui.theme.Black
-import com.randos.reminder.ui.theme.Gray200
-import com.randos.reminder.ui.theme.Gray500
-import com.randos.reminder.ui.theme.GrayDark
-import com.randos.reminder.ui.theme.GrayLight
-import com.randos.reminder.ui.theme.Green
-import com.randos.reminder.ui.theme.Red
-import com.randos.reminder.ui.theme.Transparent
 import com.randos.reminder.ui.theme.Typography
-import com.randos.reminder.ui.theme.White
 import com.randos.reminder.ui.theme.medium
 import com.randos.reminder.ui.theme.shapes
 import com.randos.reminder.ui.theme.small
@@ -110,7 +107,7 @@ fun AddTaskScreen(
     val uiState by viewModel.uiState.observeAsState(initial = TaskUiState())
     BaseView(titleRes = R.string.new_reminder) {
         LazyColumn(modifier = Modifier.padding(medium)) {
-            items(1){
+            items(1) {
                 Column(modifier = Modifier.padding(medium)) {
                     InputTitleAndNotesCard(uiState = uiState, shouldFocus = true) {
                         viewModel.updateUiState(
@@ -178,7 +175,10 @@ fun InputTitleAndNotesCard(
         shape = shapes.large,
         modifier = Modifier
             .fillMaxWidth(),
-        colors = CardDefaults.cardColors(Gray200, contentColor = Black),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             TransparentBackgroundTextField(
@@ -191,12 +191,7 @@ fun InputTitleAndNotesCard(
                     onUpdate(uiState.copy(title = it))
                 }
             )
-            androidx.compose.material3.Divider(
-                thickness = 1.dp,
-                color = Green,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-
+            Divider()
             TransparentBackgroundTextField(
                 value = uiState.notes ?: "",
                 onValueChange = { onUpdate(uiState.copy(notes = it)) },
@@ -222,7 +217,10 @@ fun DetailsCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = medium),
-        colors = CardDefaults.cardColors(Gray200, contentColor = Black),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
     ) {
         Column(modifier = Modifier.padding(medium)) {
             Text(
@@ -307,7 +305,7 @@ private fun DateComponent(
     )
     AnimatedVisibility(
         visible = uiState.isDatePickerVisible,
-        enter = expandVertically(animationSpec = tween(durationMillis = 400, delayMillis = 100)),
+        enter = expandVertically(animationSpec = tween(durationMillis = 400, delayMillis = 250)),
         exit = shrinkVertically(animationSpec = tween(durationMillis = 250))
     ) {
         DatePicker(
@@ -380,7 +378,7 @@ private fun TimeComponent(
     )
     AnimatedVisibility(
         visible = uiState.isTimePickerVisible,
-        enter = expandVertically(animationSpec = tween(durationMillis = 400, delayMillis = 100)),
+        enter = expandVertically(animationSpec = tween(durationMillis = 400, delayMillis = 250)),
         exit = shrinkVertically(animationSpec = tween(durationMillis = 250))
     ) {
         TimePicker(
@@ -468,19 +466,19 @@ private fun RepeatCard(
     selected: Boolean = false
 ) {
     val borderWidth by animateDpAsState(targetValue = if (selected) 1.dp else 0.dp)
-    val color by animateColorAsState(targetValue = if (selected) Green else Transparent)
+    val color by animateColorAsState(targetValue = if (selected) MaterialTheme.colorScheme.secondary else Transparent)
     Card(
         shape = shapes.large,
         modifier = Modifier
             .clip(shapes.large)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
         border = BorderStroke(width = borderWidth, color = color)
     ) {
         Text(
             text = stringResource(id = titleId),
             modifier = Modifier.padding(vertical = small, horizontal = medium),
-            color = if (selected) Green else Black,
+            color = if (selected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onBackground,
             style = Typography.labelLarge
         )
     }
@@ -491,7 +489,7 @@ private fun RepeatCard(
 private fun Divider() {
     androidx.compose.material3.Divider(
         thickness = 1.dp,
-        color = Green,
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier
             .padding(horizontal = medium)
             .padding(vertical = small)
@@ -564,7 +562,7 @@ private fun DetailSwitch(
                     Text(
                         text = it,
                         style = Typography.labelLarge.copy(fontSize = 11.sp),
-                        color = GrayDark
+                        color = Gray500
                     )
                 }
             }
@@ -661,9 +659,9 @@ fun ReminderButton(
     text: String = "Save",
     onClick: () -> Unit = {},
     enabled: Boolean = true,
-    backgroundColor: Color = Green,
-    borderColor: Color = Green,
-    textColor: Color = White
+    backgroundColor: Color = MaterialTheme.colorScheme.primary,
+    borderColor: Color = MaterialTheme.colorScheme.primary,
+    textColor: Color = MaterialTheme.colorScheme.onPrimary
 ) {
 
     val color by animateColorAsState(targetValue = if (enabled) backgroundColor else Gray500)
@@ -683,7 +681,7 @@ fun ReminderButton(
         Text(
             text = text,
             style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-            color = if (enabled) textColor else GrayLight
+            color = if (enabled) textColor else Gray300
         )
     }
 }

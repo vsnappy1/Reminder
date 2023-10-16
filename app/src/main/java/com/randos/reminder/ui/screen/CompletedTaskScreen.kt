@@ -16,6 +16,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -32,17 +33,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.compose.Gray500
+import com.example.compose.Red
 import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
 import com.randos.reminder.ui.component.BaseView
 import com.randos.reminder.ui.component.TaskCard
 import com.randos.reminder.ui.component.TimeFrameHeader
-import com.randos.reminder.ui.theme.Black
-import com.randos.reminder.ui.theme.Gray500
-import com.randos.reminder.ui.theme.Red
 import com.randos.reminder.ui.theme.Typography
-import com.randos.reminder.ui.theme.White
 import com.randos.reminder.ui.theme.large
 import com.randos.reminder.ui.theme.medium
 import com.randos.reminder.ui.theme.shapes
@@ -132,7 +131,7 @@ fun CompletedTaskScreen(
                 }
                 Divider(
                     thickness = 1.dp,
-                    color = White,
+                    color = MaterialTheme.colorScheme.background,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
                 LazyColumn(modifier = Modifier.padding(horizontal = medium)) {
@@ -197,7 +196,7 @@ private fun DialogView(
     Card(
         modifier = Modifier.padding(large),
         shape = shapes.large,
-        colors = CardDefaults.cardColors(containerColor = White, contentColor = Black)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground)
     ) {
         Column(modifier = Modifier.padding(large)) {
             Text(

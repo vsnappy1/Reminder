@@ -39,6 +39,7 @@ import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,6 +65,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.compose.Blue
+import com.example.compose.Gray200
+import com.example.compose.Gray300
+import com.example.compose.Gray500
 import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination
@@ -165,7 +170,7 @@ fun HomeScreen(
                 }
             }
 
-            if (homeUiState.doesSearchHasFocus) {
+            if (homeUiState.doesSearchHasFocus && homeUiState.search.isNotBlank()) {
                 SearchView(homeUiState, focusManager,
                     onShowCompletedTaskClick = { viewModel.setIsCompletedTasksVisible(!homeUiState.isFilteredCompletedTasksVisible) },
                     onDoneClick = { viewModel.updateTaskStatus(it) },
@@ -207,7 +212,10 @@ private fun DialogView(
     Card(
         modifier = Modifier.padding(large),
         shape = shapes.large,
-        colors = CardDefaults.cardColors(containerColor = White, contentColor = Black)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.onBackground
+        )
     ) {
         Column(
             modifier = Modifier
@@ -255,7 +263,7 @@ private fun DialogView(
                 Text(
                     text = stringResource(id = R.string.i_am_in),
                     style = Typography.bodyLarge,
-                    color = White,
+                    color = MaterialTheme.colorScheme.background,
                     modifier = Modifier
                         .noRippleClickable { onIamIn() }
                         .padding(horizontal = medium)
@@ -280,10 +288,10 @@ private fun SearchView(
     val alpha by animateFloatAsState(targetValue = if (homeUiState.search.isNotBlank()) 1f else 0.1f)
     val rotation by animateFloatAsState(
         targetValue = if (homeUiState.isFilteredCompletedTasksVisible) 180f else 0f,
-        animationSpec = tween(durationMillis = animDuration)
+        animationSpec = tween(durationMillis = animDuration), label = ""
     )
     Box(modifier = Modifier
-        .background(Gray200.copy(alpha = alpha))
+        .background(MaterialTheme.colorScheme.surface.copy(alpha = alpha))
         .fillMaxSize()
         .noRippleClickable(enabled = homeUiState.search.isBlank()) { focusManager.clearFocus() }) {
 
@@ -350,7 +358,7 @@ private fun ReminderTextField(
     Row(
         modifier = Modifier
             .padding(medium)
-            .background(color = White, shape = shapes.large)
+            .background(color = MaterialTheme.colorScheme.background, shape = shapes.large)
             .border(width = 1.dp, color = Gray300, shape = shapes.large)
             .fillMaxWidth()
             .padding(medium),
@@ -371,7 +379,7 @@ private fun ReminderTextField(
             }
             BasicTextField(
                 value = value, onValueChange = onValueChange, singleLine = true,
-                textStyle = Typography.labelLarge,
+                textStyle = Typography.labelLarge.copy(color = MaterialTheme.colorScheme.onBackground),
                 modifier = Modifier
                     .fillMaxWidth()
                     .onFocusChanged { onFocusChange(it.hasFocus) },
@@ -420,7 +428,10 @@ fun TimeFrameCard(
             .width(100.dp)
             .clip(shapes.large)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = Gray200, contentColor = Black)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
     ) {
         Column(modifier = Modifier.padding(medium), verticalArrangement = Arrangement.Center) {
             Box(modifier = Modifier.fillMaxWidth()) {

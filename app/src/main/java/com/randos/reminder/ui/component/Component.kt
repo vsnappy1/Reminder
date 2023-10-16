@@ -27,6 +27,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -40,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -50,6 +52,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.compose.Blue
+import com.example.compose.Gray300
+import com.example.compose.Gray500
+import com.example.compose.Red
 import com.randos.reminder.R
 import com.randos.reminder.enums.Priority
 import com.randos.reminder.enums.RepeatCycle
@@ -110,7 +116,7 @@ fun BaseView(
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .background(White)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Header(titleRes = titleRes)
             if (animationEnabled) {
@@ -152,12 +158,12 @@ fun BaseViewWithFAB(
                 modifier = Modifier
                     .padding(16.dp)
                     .align(Alignment.BottomEnd),
-                containerColor = White
+                containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Add,
                     contentDescription = stringResource(id = R.string.add),
-                    tint = Green,
+                    tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(25.dp)
                 )
             }
@@ -198,7 +204,7 @@ fun FadeAnimatedVisibility(
 fun Header(modifier: Modifier = Modifier, titleRes: Int) {
     Row(
         modifier = modifier
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .fillMaxWidth()
             .padding(all = medium),
         verticalAlignment = Alignment.CenterVertically
@@ -223,7 +229,7 @@ fun TimeFrameHeader(titleRes: Int, modifier: Modifier = Modifier) {
             text = stringResource(id = titleRes),
             modifier = Modifier.align(Alignment.CenterStart),
             fontWeight = FontWeight.Bold,
-            color = Green,
+            color = MaterialTheme.colorScheme.primary,
             style = Typography.headlineSmall.copy(fontSize = 18.sp)
         )
     }
@@ -255,7 +261,7 @@ fun TaskCard(
     ) {
         val cardBackground by animateColorAsState(
             targetValue = if (indexed) Gray300 else Transparent,
-            animationSpec = tween(durationMillis = 1000)
+            animationSpec = tween(durationMillis = 1000), label = ""
         )
         Box(
 //            shape = shapes.large,
@@ -287,7 +293,7 @@ fun TaskCard(
                             Text(
                                 text = it,
                                 style = Typography.titleMedium,
-                                color = GrayDark
+                                color = Gray500
                             )
                         }
                     }
@@ -298,7 +304,7 @@ fun TaskCard(
                         Text(
                             text = "Completed: ${it.format(LocalContext.current)}",
                             style = Typography.titleMedium,
-                            color = GrayDark
+                            color = Gray500
                         )
                     }
                     Box(
@@ -316,7 +322,7 @@ fun TaskCard(
 
 @Preview
 @Composable
-fun previewTaskCard() {
+fun PreviewTaskCard() {
     TaskCard(
         visible = true,
         task = TaskUiState(id = 1, title = "Title", notes = "These are the notes")
@@ -331,13 +337,13 @@ private fun DateTimeRepeat(
     isRepeatVisible: Boolean
 ) {
     Row {
-        val color = if (task.isDue) Red else GrayDark
+        val color = if (task.isDue) Red else Gray500
         if (isDateVisible) {
             task.date?.let {
                 Text(
                     text = it.format(),
                     style = Typography.titleMedium,
-                    color = if (task.done) GrayDark else color
+                    color = if (task.done) Gray500 else color
                 )
             }
         }
@@ -348,7 +354,7 @@ private fun DateTimeRepeat(
                 Text(
                     text = "${if (shouldAddComma) ", " else ""}${it.format(LocalContext.current)}",
                     style = Typography.titleMedium,
-                    color = if (task.done) GrayDark else color
+                    color = if (task.done) Gray500 else color
                 )
             }
         }
@@ -360,7 +366,7 @@ private fun DateTimeRepeat(
                 Text(
                     text = "${if (shouldAddComma) ", " else ""}${task.repeat.value}",
                     style = Typography.titleMedium,
-                    color = if (task.done) GrayDark else color
+                    color = if (task.done) Gray500 else color
                 )
             }
         }
@@ -373,7 +379,7 @@ private fun TitleAndPriority(task: TaskUiState) {
         Text(
             text = task.title,
             style = Typography.titleLarge,
-            color = if (task.done) GrayDark else Black
+            color = if (task.done) Gray500 else MaterialTheme.colorScheme.onBackground
         )
 
         if (task.priority != Priority.NONE) {
@@ -384,17 +390,17 @@ private fun TitleAndPriority(task: TaskUiState) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val color =
-                    if (task.priority == Priority.HIGH) Red else if (task.priority == Priority.MEDIUM) Green else Blue
+                    if (task.priority == Priority.HIGH) Red else if (task.priority == Priority.MEDIUM) MaterialTheme.colorScheme.secondary else Blue
 
                 Text(
                     text = task.priority.value,
                     style = Typography.bodyMedium,
-                    color = if (task.done) GrayDark else color
+                    color = if (task.done) Gray500 else color
                 )
                 Icon(
                     imageVector = Icons.Rounded.PriorityHigh,
                     contentDescription = stringResource(id = R.string.priority),
-                    tint = if (task.done) GrayDark else color,
+                    tint = if (task.done) Gray500 else color,
                     modifier = Modifier.size(14.dp)
                 )
             }
@@ -415,15 +421,15 @@ private fun ReminderRadioButton(
             .size(20.dp)
             .clip(CircleShape)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = if (selected) Green else White),
-        border = BorderStroke(1.dp, Green),
+        colors = CardDefaults.cardColors(containerColor = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.background),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondaryContainer),
     ) {
         if (selected) {
             Icon(
                 imageVector = Icons.Rounded.Done,
                 contentDescription = stringResource(id = R.string.done),
                 modifier = Modifier.padding(1.dp),
-                tint = White
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
     }

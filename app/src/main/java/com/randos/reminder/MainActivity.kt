@@ -17,9 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.navigation.compose.rememberNavController
+import com.example.compose.ReminderTheme
 import com.randos.reminder.navigation.NavGraph
 import com.randos.reminder.notification.NotificationManager
-import com.randos.reminder.ui.theme.ReminderTheme
 import com.randos.reminder.ui.viewmodel.BaseViewModel
 import com.randos.reminder.utils.isNotificationPermissionGranted
 import com.randos.reminder.widget.ReminderAppWidgetProvider
@@ -27,8 +27,6 @@ import com.randos.reminder.widget.dataStore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
