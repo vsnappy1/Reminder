@@ -54,6 +54,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -213,8 +215,8 @@ private fun DialogView(
         modifier = Modifier.padding(large),
         shape = shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background,
-            contentColor = MaterialTheme.colorScheme.onBackground
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     ) {
         Column(
@@ -384,6 +386,8 @@ private fun ReminderTextField(
                     .fillMaxWidth()
                     .onFocusChanged { onFocusChange(it.hasFocus) },
                 keyboardActions = KeyboardActions { focusManager.clearFocus() },
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground)
+
             )
         }
         FadeAnimatedVisibility(
