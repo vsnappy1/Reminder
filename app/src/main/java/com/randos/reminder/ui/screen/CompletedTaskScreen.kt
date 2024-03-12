@@ -33,8 +33,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.compose.Gray500
-import com.example.compose.Red
+import com.randos.reminder.ui.theme.Gray500
+import com.randos.reminder.ui.theme.Red
 import com.randos.reminder.R
 import com.randos.reminder.enums.ReminderScreen
 import com.randos.reminder.navigation.NavigationDestination

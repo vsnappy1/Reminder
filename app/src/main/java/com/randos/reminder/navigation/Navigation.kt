@@ -52,7 +52,7 @@ fun NavGraph(
             deepLinks = listOf(navDeepLink { uriPattern = "reminder://today/{taskId}" })
         ) {
             TodayTaskScreen(
-                onAddTaskClick = { navController.navigate(TaskAddDestination.route) },
+                onAddTaskClick = { navController.navigate("${TaskAddDestination.route}/${true}") },
                 onItemClick = { navController.navigate("${TaskEditDestination.route}/${it}") }
             )
         }
@@ -80,8 +80,25 @@ fun NavGraph(
         }
 
         composable(
+            route = TaskAddDestination.routeWithArgs,
+            arguments = listOf(navArgument(TaskAddDestination.isTodayArg) {
+                defaultValue = false
+                type = NavType.BoolType
+            })
+        ) {
+            AddTaskScreen(
+                onAdd = { navController.popBackStack() },
+                onCancel = { navController.popBackStack() },
+            )
+        }
+
+        composable(
             route = TaskAddDestination.route,
-            deepLinks = listOf(navDeepLink { uriPattern = "reminder://add" })
+            deepLinks = listOf(navDeepLink { uriPattern = "reminder://add" }),
+            arguments = listOf(navArgument(TaskAddDestination.isTodayArg) {
+                defaultValue = false
+                type = NavType.BoolType
+            })
         ) {
             AddTaskScreen(
                 onAdd = { navController.popBackStack() },

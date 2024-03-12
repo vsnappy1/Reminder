@@ -1,4 +1,4 @@
-package com.example.compose
+package com.randos.reminder.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
@@ -80,3 +80,4 @@ val Gray900 = Color(0xFF212121)
 
 val Blue = Color(0xFF19A7CE)
 val Red = Color(0xFFDF2E38)
+val Green = Color(0xFF74E291)

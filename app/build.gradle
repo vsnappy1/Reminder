@@ -113,6 +113,8 @@ dependencies {
 
     // Data Store
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
 }
 
 // Allow references to generated code

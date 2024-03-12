@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.navigation.compose.rememberNavController
-import com.example.compose.ReminderTheme
+import com.randos.reminder.ui.theme.ReminderTheme
 import com.randos.reminder.navigation.NavGraph
 import com.randos.reminder.notification.NotificationManager
 import com.randos.reminder.ui.viewmodel.BaseViewModel

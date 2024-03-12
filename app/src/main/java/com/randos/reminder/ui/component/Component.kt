@@ -5,7 +5,7 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
@@ -14,8 +14,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActionScope
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowDropDown
@@ -23,14 +25,13 @@ import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material.icons.rounded.PriorityHigh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,10 +53,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.compose.Blue
-import com.example.compose.Gray300
-import com.example.compose.Gray500
-import com.example.compose.Red
+import com.randos.reminder.ui.theme.Blue
+import com.randos.reminder.ui.theme.Gray300
+import com.randos.reminder.ui.theme.Gray500
+import com.randos.reminder.ui.theme.Green
+import com.randos.reminder.ui.theme.Red
 import com.randos.reminder.R
 import com.randos.reminder.enums.Priority
 import com.randos.reminder.enums.RepeatCycle
@@ -65,7 +67,6 @@ import com.randos.reminder.ui.viewmodel.DELAY
 import com.randos.reminder.utils.format
 import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransparentBackgroundTextField(
     modifier: Modifier = Modifier,
@@ -74,32 +75,44 @@ fun TransparentBackgroundTextField(
     placeHolderId: Int,
     isSingleLine: Boolean = false,
     textStyle: TextStyle = Typography.titleLarge,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    imeAction: ImeAction = ImeAction.Default,
+    onNext: KeyboardActionScope.() -> Unit = {},
+    onDone: KeyboardActionScope.() -> Unit = {},
 ) {
-    TextField(
+    BasicTextField(
         value = value,
         onValueChange = onValueChange,
         enabled = enabled,
         modifier = modifier
             .fillMaxWidth()
             .shadow(elevation = 0.dp),
-        placeholder = {
-            Text(
-                text = stringResource(id = placeHolderId),
-                style = textStyle
-            )
-        },
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Transparent,
-            unfocusedIndicatorColor = Transparent,
-            focusedIndicatorColor = Transparent
-        ),
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences, // Capitalize first character of each sentence
-            imeAction = ImeAction.Default
+            imeAction = imeAction
         ),
+        keyboardActions = KeyboardActions(onNext = onNext, onDone = onDone),
         singleLine = isSingleLine,
         textStyle = textStyle
+    )
+    { textField ->
+        if (value.isEmpty()) {
+            Text(
+                text = stringResource(id = placeHolderId),
+                style = textStyle.copy(color = Gray500)
+            )
+        }
+        textField()
+    }
+}
+
+@Preview
+@Composable
+fun PreviewTransparentBackgroundTextField() {
+    TransparentBackgroundTextField(
+        value = "",
+        onValueChange = {},
+        placeHolderId = R.string.add
     )
 }
 
@@ -116,13 +129,15 @@ fun BaseView(
         Column(
             modifier = modifier
                 .fillMaxSize()
+                .padding(all = medium)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Header(titleRes = titleRes)
+            Divider(modifier = Modifier.padding(horizontal = 16.dp))
             if (animationEnabled) {
                 AnimatedVisibility(
                     visible = isContentVisible,
-                    enter = expandHorizontally()
+                    enter = expandVertically()
                 ) {
                     contentColumn()
                 }
@@ -421,8 +436,8 @@ private fun ReminderRadioButton(
             .size(20.dp)
             .clip(CircleShape)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.background),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondaryContainer),
+        colors = CardDefaults.cardColors(containerColor = if (selected) Green else MaterialTheme.colorScheme.background),
+        border = BorderStroke(1.5.dp, Green),
     ) {
         if (selected) {
             Icon(

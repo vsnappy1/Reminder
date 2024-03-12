@@ -58,14 +58,14 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.compose.Gray200
-import com.example.compose.Gray300
-import com.example.compose.Gray500
-import com.example.compose.Red
+import com.randos.reminder.ui.theme.Gray300
+import com.randos.reminder.ui.theme.Gray500
+import com.randos.reminder.ui.theme.Red
 import com.randos.reminder.R
 import com.randos.reminder.enums.Priority
 import com.randos.reminder.enums.ReminderScreen
@@ -93,6 +93,8 @@ import java.time.LocalTime
 object TaskAddDestination : NavigationDestination {
     override val route: String = ReminderScreen.ADD_TASK_SCREEN.name
     override val titleRes: Int = R.string.new_reminder
+    const val isTodayArg = "isToday"
+    val routeWithArgs = "${route}/{$isTodayArg}"
 }
 
 // TODO write test cases
@@ -164,6 +166,7 @@ fun ActionButton(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun InputTitleAndNotesCard(
     uiState: TaskUiState,
@@ -180,16 +183,23 @@ fun InputTitleAndNotesCard(
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            val focusRequester = remember { FocusRequester() }
+            val keyboardController = LocalSoftwareKeyboardController.current
+            val focusManager = LocalFocusManager.current
             TransparentBackgroundTextField(
-                modifier = Modifier.focusRequester(titleTextFieldFocus),
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .focusRequester(titleTextFieldFocus),
                 value = uiState.title,
                 placeHolderId = R.string.title,
                 enabled = !uiState.done,
                 isSingleLine = true,
                 onValueChange = {
                     onUpdate(uiState.copy(title = it))
-                }
+                },
+                imeAction = ImeAction.Next,
+                onNext = {focusRequester.requestFocus()}
             )
             Divider()
             TransparentBackgroundTextField(
@@ -197,7 +207,14 @@ fun InputTitleAndNotesCard(
                 onValueChange = { onUpdate(uiState.copy(notes = it)) },
                 placeHolderId = R.string.notes,
                 enabled = !uiState.done,
-                modifier = Modifier.height(100.dp)
+                modifier = Modifier
+                    .focusRequester(focusRequester)
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .height(100.dp),
+                imeAction = ImeAction.Done,
+                onDone = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()}
             )
         }
     }
